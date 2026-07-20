@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReNew You Health & Wellness | Coming Soon</title>
+    <!-- Include Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Link External CSS Stylesheet -->
+    <link rel="stylesheet" href="assets/css/style.css">
+
+</head>
+<body>
+
+    <div class="container">
+        <!-- Logo Element -->
+        <div class="logo-container">
+            <img src="images/logo.png" alt="RenewYou Logo">
+        </div>
+        
+        <!-- Live Countdown UI -->
+        <div class="countdown-container">
+            <div class="countdown-box">
+                <span class="countdown-number" id="days">00</span>
+                <span class="countdown-label">Days</span>
+            </div>
+            <div class="countdown-box">
+                <span class="countdown-number" id="hours">00</span>
+                <span class="countdown-label">Hours</span>
+            </div>
+            <div class="countdown-box">
+                <span class="countdown-number" id="minutes">00</span>
+                <span class="countdown-label">Mins</span>
+            </div>
+            <div class="countdown-box">
+                <span class="countdown-number" id="seconds">00</span>
+                <span class="countdown-label">Secs</span>
+            </div>
+        </div>
+        
+        <p>We are crafting a brand new digital experience dedicated to your well-being. Our website is currently under construction, but transformation is just around the corner.</p>
+        
+        <!-- Email Lead Capture Form -->
+        <div class="form-container">
+            <form id="signupForm">
+                <div class="form-group">
+                    <input type="email" id="emailInput" placeholder="Enter your email address" required aria-label="Email address">
+                    <button type="submit" id="submitBtn">Notify Me</button>
+                </div>
+            </form>
+            <div id="formMessage" class="message"></div>
+        </div>
+
+        <!-- Social Navigation Links -->
+        <div class="social-links">
+            <a href="#" class="social-link">Instagram</a>
+            <a href="#" class="social-link">Facebook</a>
+            <a href="#" class="social-link">Contact</a>
+        </div>
+    </div>
+
+    <!-- Link External JavaScript Functionality -->
+    <script src="assets/js/app.js"></script>
+</body>
+</html>
