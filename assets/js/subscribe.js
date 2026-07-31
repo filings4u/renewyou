@@ -1,10 +1,23 @@
-/** * ReNew You Health & Wellness - Email Subscription List Capture Controller * Location: assets/js/subscribe.js */ 
+/** 
+ * ReNew You Health & Wellness - Email Subscription List Capture Controller 
+ * Location: assets/js/subscribe.js 
+ */ 
+
+// 1. Dynamically load the Supabase Browser SDK Client via CDN (No Node.js needed)
+if (typeof supabase === 'undefined') {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+    document.head.appendChild(script);
+}
+
 document.addEventListener('DOMContentLoaded', () => { 
     renderSubscribeModule(); 
     setupNewsletterForm(); 
 }); 
 
-/** * Renders a modern healthcare email subscription capture banner on a single row */ 
+/** 
+ * Renders a modern healthcare email subscription capture banner on a single row 
+ */ 
 function renderSubscribeModule() { 
     const target = document.getElementById('subscribe-target'); 
     if (!target) return; 
@@ -17,60 +30,15 @@ function renderSubscribeModule() {
             <style>
                 /* Mobile Architecture Match for Subscription Module */
                 @media (max-width: 768px) {
-                    /* Condense inner container padding */
-                    .subscribe-inner-box {
-                        padding: 35px 20px !important;
-                        gap: 30px !important;
-                    }
-                    
-                    /* Balanced Text Area Adjustments */
-                    .subscribe-text-block {
-                        min-width: 100% !important;
-                        text-align: center !important;
-                    }
-                    .subscribe-text-block h2 {
-                        font-size: 1.65rem !important;
-                        margin-bottom: 10px !important;
-                    }
-                    .subscribe-text-block p {
-                        font-size: 0.95rem !important;
-                        line-height: 1.5 !important;
-                    }
-                    
-                    /* Form Container Adjustments */
-                    .subscribe-form-block {
-                        min-width: 100% !important;
-                    }
-                    
-                    /* Flatten pill container into stacked fields for ease of input */
-                    .subscribe-form-block .form-group {
-                        flex-direction: column !important;
-                        background-color: transparent !important;
-                        border: none !important;
-                        box-shadow: none !important;
-                        padding: 0 !important;
-                        gap: 12px !important;
-                    }
-                    
-                    /* Separate input style layout */
-                    .subscribe-form-block input {
-                        width: 100% !important;
-                        background-color: var(--bg-white) !important;
-                        border: 1px solid rgba(138, 52, 159, 0.15) !important;
-                        border-radius: 50px !important;
-                        padding: 14px 20px !important;
-                        text-align: center !important;
-                    }
-                    
-                    /* Separate action button style layout */
-                    .subscribe-form-block button {
-                        width: 100% !important;
-                        padding: 14px 20px !important;
-                    }
-                    
-                    #newsletterMessage {
-                        font-size: 0.88rem !important;
-                    }
+                    .subscribe-inner-box { padding: 35px 20px !important; gap: 30px !important; }
+                    .subscribe-text-block { min-width: 100% !important; text-align: center !important; }
+                    .subscribe-text-block h2 { font-size: 1.65rem !important; margin-bottom: 10px !important; }
+                    .subscribe-text-block p { font-size: 0.95rem !important; line-height: 1.5 !important; }
+                    .subscribe-form-block { min-width: 100% !important; }
+                    .subscribe-form-block .form-group { flex-direction: column !important; background-color: transparent !important; border: none !important; box-shadow: none !important; padding: 0 !important; gap: 12px !important; }
+                    .subscribe-form-block input { width: 100% !important; background-color: var(--bg-white) !important; border: 1px solid rgba(138, 52, 159, 0.15) !important; border-radius: 50px !important; padding: 14px 20px !important; text-align: center !important; }
+                    .subscribe-form-block button { width: 100% !important; padding: 14px 20px !important; }
+                    #newsletterMessage { font-size: 0.88rem !important; }
                 }
             </style>
             <div style="max-width: 1450px; margin: 0 auto;"> 
@@ -102,7 +70,10 @@ function renderSubscribeModule() {
         </div> 
     `; 
 } 
-/** * Handles newsletter frontend form validation and database insertion mapping */ 
+
+/** 
+ * Handles newsletter frontend form validation and database insertion mapping using SDK
+ */ 
 function setupNewsletterForm() { 
     const form = document.getElementById('homeNewsletterForm'); 
     const msgBox = document.getElementById('newsletterMessage'); 
@@ -121,42 +92,44 @@ function setupNewsletterForm() {
         submitBtn.disabled = true; 
         submitBtn.innerText = "Connecting..."; 
         
-        // Define credentials accurately within block 
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxyYmltcmxic2tqd2V5bnhsZ2FzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1MjQ0NTYsImV4cCI6MjA5NDEwMDQ1Nn0.I8fQ6ZjA9oaTqJCF-7Z7vUboXC8zv2cogBv4PC_1ihU'; 
-        const API_ENDPOINT = 'https://lrbimrlbskjweynxlgas.supabase.co'; 
+        // Credentials parsed from initial request
+        const SUPABASE_URL = 'https://lrbimrlbskjweynxlgas.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxyYmltcmxic2tqd2V5bnhsZ2FzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1MjQ0NTYsImV4cCI6MjA5NDEwMDQ1Nn0.I8fQ6ZjA9oaTqJCF-7Z7vUboXC8zv2cogBv4PC_1ihU'; 
+
+        // Wait brief moment if script CDN is still finishing initializing
+        if (typeof supabase === 'undefined') {
+            await new Promise(resolve => setTimeout(resolve, 500));
+        }
+
         try { 
-            const payload = { email: emailValue }; 
-            const response = await fetch(API_ENDPOINT, { 
-                method: 'POST', 
-                headers: { 
-                    'Content-Type': 'application/json', 
-                    'Prefer': 'return=minimal', 
-                    'apikey': SUPABASE_KEY, 
-                    'Authorization': `Bearer ${SUPABASE_KEY}` 
-                }, 
-                body: JSON.stringify(payload) 
-            }); 
+            // Initialize connection engine client
+            const _supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+            // Execute insert mapping using the exact case-sensitive table name string
+            const { error } = await _supabaseClient
+                .from('Renew You Health Leads')
+                .insert([{ email: emailValue }]);
             
-            // Reveal notification element 
+            // Reveal notification box
             msgBox.style.display = "block"; 
-            if (response.ok) { 
+            
+            if (error) {
+                // Catch unique constraint violation error (code 23505)
+                if (error.code === '23505') {
+                    msgBox.style.backgroundColor = "rgba(138, 52, 159, 0.06)"; 
+                    msgBox.style.color = "var(--purple-accent)"; 
+                    msgBox.style.border = "1px solid rgba(138, 52, 159, 0.15)"; 
+                    msgBox.innerText = "This email address is already subscribed to our network."; 
+                } else {
+                    throw error;
+                }
+            } else { 
                 // Success State 
                 msgBox.style.backgroundColor = "rgba(79, 148, 12, 0.08)"; 
                 msgBox.style.color = "var(--green-secondary)"; 
                 msgBox.style.border = "1px solid rgba(79, 148, 12, 0.15)"; 
                 msgBox.innerText = "✓ Welcome! You have been successfully added to our clinical wellness network."; 
                 form.reset(); 
-            } else { 
-                // Parse potential error codes sent back by PostgREST 
-                const errorData = await response.json(); 
-                if (errorData.code === "23505" || (errorData.message && errorData.message.includes("unique"))) { 
-                    msgBox.style.backgroundColor = "rgba(138, 52, 159, 0.06)"; 
-                    msgBox.style.color = "var(--purple-accent)"; 
-                    msgBox.style.border = "1px solid rgba(138, 52, 159, 0.15)"; 
-                    msgBox.innerText = "This email address is already subscribed to our network."; 
-                } else { 
-                    throw new Error("Database insertion failure."); 
-                } 
             } 
         } catch (error) { 
             // General Network/Server Fallback Error State 
