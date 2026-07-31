@@ -4,59 +4,52 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#3E0D5F">
-    <title>ReNew You Health & Wellness | Coming Soon</title>
-    <!-- Include Supabase Client -->
+    <title>ReNew You Health & Wellness | Home</title>
+    <!-- Include Supabase Client Dependency -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- Link External CSS Stylesheet -->
+    <!-- External Theme Tokens and Base Layout Stylesheet -->
     <link rel="stylesheet" href="assets/css/style.css">
+     <!-- NEW: Mobile Layout Override Stylesheet Link Injection -->
+    <link rel="stylesheet" href="assets/css/mobile.css">
     <link rel="icon" type="image/png" href="images/fav.png">
-
 </head>
 <body>
 
-    <div class="container">
-        <!-- Logo Element -->
-        <div class="logo-container">
-            <img src="images/logo.png" alt="RenewYou Logo">
-        </div>
-        
-        <!-- Live Countdown UI -->
-        <div class="countdown-container">
-            <div class="countdown-box">
-                <span class="countdown-number" id="days">00</span>
-                <span class="countdown-label">Days</span>
-            </div>
-            <div class="countdown-box">
-                <span class="countdown-number" id="hours">00</span>
-                <span class="countdown-label">Hours</span>
-            </div>
-            <div class="countdown-box">
-                <span class="countdown-number" id="minutes">00</span>
-                <span class="countdown-label">Mins</span>
-            </div>
-            <div class="countdown-box">
-                <span class="countdown-number" id="seconds">00</span>
-                <span class="countdown-label">Secs</span>
-            </div>
-        </div>
-        
-        <p>We are crafting a brand new digital experience dedicated to your well-being. Our website is currently under construction, but transformation is just around the corner.</p>
-        
-        <!-- Email Lead Capture Form -->
-        <div class="form-container">
-            <form id="signupForm">
-                <div class="form-group">
-                    <input type="email" id="emailInput" placeholder="Enter your email address" required aria-label="Email address">
-                    <button type="submit" id="submitBtn">Notify Me</button>
-                </div>
-            </form>
-            <div id="formMessage" class="message"></div>
-        </div>
+    <!-- Dynamic Header Component Slot Target -->
+    <div id="navigation-target"></div>
 
+    <!-- Dynamic Side-by-Side Hero Component Target -->
+    <div id="hero-target"></div>
 
-    </div>
+<!-- Core Pillar 01 Target Container (White background) -->
+<div id="pillars-target"></div>
 
-    <!-- Link External JavaScript Functionality -->
-    <script src="assets/js/app.js"></script>
+<!-- Core Pillar 02 Target Container (Off-white background) -->
+<div id="pillar-two-target"></div>
+
+<!-- Core Pillar 03 Target Container (White background) -->
+<div id="pillar-three-target"></div>
+
+<!-- NEW: Core Pillar 04 Target Container (Off-white background) -->
+<div id="pillar-four-target"></div>
+
+<!-- NEW: Email News List Capture Module Target -->
+<div id="subscribe-target"></div>
+
+    <!-- Dynamic Footer Component Slot Target -->
+    <div id="footer-target"></div>
+
+    <!-- Layout Scripts Execution Flow -->
+    <script src="assets/js/navigation.js"></script>
+    <script src="assets/js/hero.js"></script>
+    <script src="assets/js/footer.js"></script>
+    <script src="assets/js/metrics.js"></script>
+    <script src="assets/js/services-preview.js"></script>
+    <script src="assets/js/pillars-target.js"></script>
+    <script src="assets/js/pillar-two.js"></script>
+    <script src="assets/js/pillar-three.js"></script>
+    <script src="assets/js/pillar-four.js"></script>
+    <script src="assets/js/subscribe.js"></script>
+
 </body>
 </html>

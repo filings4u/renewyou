@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#3E0D5F">
+    <title>Our Services | ReNew You Health & Wellness</title>
+    <!-- Include Supabase Client Dependency -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- External Theme Tokens and Base Layout Stylesheet -->
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="icon" type="image/png" href="images/fav.png">
+</head>
+<body>
+
+    <!-- Dynamic Header Component Slot Target -->
+    <div id="navigation-target"></div>
+
+     <!-- NEW Dynamic Side-by-Side Hero Component Target -->
+    <div id="hero-target"></div>
+
+    <main>
+        <!-- Services Section Header Introduction -->
+        <section style="text-align: center; padding: 60px 20px 20px 20px;">
+            <span style="background-color: rgba(79, 148, 12, 0.1); color: var(--green-primary); padding: 6px 15px; border-radius: 20px; font-weight: 700; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">Clinical & Lifestyle Offerings</span>
+            <h1 style="font-size: 2.5rem; margin: 15px 0 20px 0; color: var(--purple-primary);">Care designed around your needs.</h1>
+            <p style="font-size: 1.15rem; color: #555; max-width: 700px; margin: 0 auto; line-height: 1.6;">
+                Explore our comprehensive health management packages. We mix patient-first values with convenient scheduling options to optimize your long-term health outcome.
+            </p>
+        </section>
+
+        <!-- Dynamic Medical Services Catalog Target Grid -->
+        <section style="padding: 20px 20px 60px 20px;">
+            <div id="services-grid-target" class="grid-3"></div>
+        </section>
+
+        <!-- Quick Summary Action Callout Section -->
+        <div class="section-bg-alt">
+            <section style="text-align: center; padding: 50px 20px;">
+                <h2 style="color: var(--purple-primary); margin-bottom: 15px;">Ready to renew your health?</h2>
+                <p style="color: #555; max-width: 600px; margin: 0 auto 25px auto;">Contact us today to review specialized custom packages, book introductory diagnostic sessions, or map tailored wellness metrics with our clinical specialists.</p>
+                <a href="contact.html" style="text-decoration: none;"><button>Contact Us Now</button></a>
+            </section>
+        </div>
+    </main>
+
+    <!-- Dynamic Footer Component Slot Target -->
+    <div id="footer-target"></div>
+
+    <!-- Layout Scripts Execution Flow -->
+    <script src="assets/js/navigation.js"></script>
+        <script src="assets/js/hero.js"></script> 
+    <script src="assets/js/footer.js"></script>
+    <!-- Page Functional Event Logic Engine -->
+    <script src="assets/js/services.js"></script>
+</body>
+</html>

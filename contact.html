@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#3E0D5F">
+    <title>Contact Us | ReNew You Health & Wellness</title>
+    <!-- Include Supabase Client Dependency -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- External Theme Tokens and Base Layout Stylesheet -->
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="icon" type="image/png" href="images/fav.png">
+</head>
+<body>
+
+    <!-- Dynamic Header Component Slot Target -->
+    <div id="navigation-target"></div>
+
+    <main>
+        <!-- Contact Page Main Title Area -->
+        <section style="text-align: center; padding: 60px 20px 20px 20px;">
+            <span style="background-color: rgba(79, 148, 12, 0.1); color: var(--green-primary); padding: 6px 15px; border-radius: 20px; font-weight: 700; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">Get In Touch</span>
+            <h1 style="font-size: 2.5rem; margin: 15px 0 20px 0; color: var(--purple-primary);">Reach out to ReNew You Health & Wellness.</h1>
+            <p style="font-size: 1.15rem; color: #555; max-width: 600px; margin: 0 auto; line-height: 1.6;">
+                Have questions or want to secure your session? Send us an inquiry below, visit our clinic location, or pick up the phone to talk to our administrative staff.
+            </p>
+        </section>
+
+        <!-- Two Column Contact Matrix and Form Grid Layout -->
+        <section style="padding: 20px 20px 60px 20px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 40px; align-items: start;">
+                
+                <!-- Left Hand Details Column -->
+                <div class="card" style="padding: 30px; text-align: left;">
+                    <h2 style="color: var(--purple-primary); margin-bottom: 20px; font-size: 1.6rem;">Clinic Details</h2>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <h4 style="color: var(--green-secondary); font-size: 1rem; margin-bottom: 5px;">📍 Address</h4>
+                        <p style="margin: 0; color: #555; line-height: 1.5;">500 Ashland Ave., Suite 101<br>Chicago Heights, IL 60411</p>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <h4 style="color: var(--green-secondary); font-size: 1rem; margin-bottom: 5px;">📞 Phone Line</h4>
+                        <p style="margin: 0; color: #555;"><a href="tel:7083292155" style="color: inherit; text-decoration: none;">708-329-2155</a></p>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <h4 style="color: var(--green-secondary); font-size: 1rem; margin-bottom: 5px;">✉️ Email Inbox</h4>
+                        <p style="margin: 0; color: #555;"><a href="mailto:info@renewyouhealthwellness.com" style="color: inherit; text-decoration: none;">info@renewyouhealthwellness.com</a></p>
+                    </div>
+
+                    <div>
+                        <h4 style="color: var(--green-secondary); font-size: 1rem; margin-bottom: 5px;">🌐 Official URL</h4>
+                        <p style="margin: 0; color: #555;"><a href="http://renewyouhealthwellness.com" target="_blank" style="color: var(--purple-accent); text-decoration: none; font-weight: 600;">://renewyouhealthwellness.com</a></p>
+                    </div>
+                </div>
+
+                <!-- Right Hand Operational Form Column -->
+                <div class="card" style="padding: 30px;">
+                    <h2 style="color: var(--purple-primary); margin-bottom: 20px; font-size: 1.6rem; text-align: left;">Send a Message</h2>
+                    
+                    <form id="clinicContactForm" style="display: flex; flex-direction: column; gap: 15px; text-align: left;">
+                        <div style="display: flex; flex-direction: column; gap: 5px;">
+                            <label for="contactName" style="font-weight: 600; font-size: 0.9rem; color: var(--purple-primary);">Your Full Name</label>
+                            <input type="text" id="contactName" placeholder="John Doe" required style="padding: 12px 15px; border: 2px solid rgba(138, 52, 159, 0.2); border-radius: 8px; font-size: 1rem; outline: none; width: 100%;">
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 5px;">
+                            <label for="contactPhone" style="font-weight: 600; font-size: 0.9rem; color: var(--purple-primary);">Phone Number</label>
+                            <input type="tel" id="contactPhone" placeholder="708-555-0199" required style="padding: 12px 15px; border: 2px solid rgba(138, 52, 159, 0.2); border-radius: 8px; font-size: 1rem; outline: none; width: 100%;">
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 5px;">
+                            <label for="contactEmail" style="font-weight: 600; font-size: 0.9rem; color: var(--purple-primary);">Email Address</label>
+                            <input type="email" id="contactEmail" placeholder="yourname@email.com" required style="padding: 12px 15px; border: 2px solid rgba(138, 52, 159, 0.2); border-radius: 8px; font-size: 1rem; outline: none; width: 100%;">
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 5px;">
+                            <label for="contactMessage" style="font-weight: 600; font-size: 0.9rem; color: var(--purple-primary);">Message Details / Inquiry</label>
+                            <textarea id="contactMessage" rows="5" placeholder="How can our clinical specialists support your wellness journey?" required style="padding: 12px 15px; border: 2px solid rgba(138, 52, 159, 0.2); border-radius: 8px; font-size: 1rem; outline: none; font-family: inherit; resize: vertical; width: 100%;"></textarea>
+                        </div>
+
+                        <!-- Legal Use and Privacy Disclaimers -->
+                        <p style="font-size: 0.8rem; color: #666; margin: 5px 0; line-height: 1.4; text-align: left;">
+                            🔒 <em>By submitting, you agree to be contacted regarding your request. Do not submit urgent medical information or clinical operational emergencies through this structural inquiry form.</em>
+                        </p>
+
+                        <button type="submit" id="contactSubmitBtn" style="border-radius: 8px; width: 100%; margin-top: 5px;">Send Message</button>
+                    </form>
+                    
+                    <div id="contactFormMessage" class="message"></div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Embedded Maps Component Section Wrap -->
+        <div class="section-bg-alt" style="padding: 40px 20px;">
+            <div style="max-width: 1200px; margin: 0 auto;">
+                <h3 style="text-align: left; color: var(--purple-primary); margin-bottom: 20px; font-size: 1.4rem;">Our Location</h3>
+                <!-- Dynamic Iframe Placement Target Target Holder -->
+                <div id="map-iframe-target"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Dynamic Footer Component Slot Target -->
+    <div id="footer-target"></div>
+
+    <!-- Layout Scripts Execution Flow -->
+    <script src="assets/js/navigation.js"></script>
+    <script src="assets/js/footer.js"></script>
+    <!-- Page Functional Event Logic Engine -->
+    <script src="assets/js/contact.js"></script>
+</body>
+</html>

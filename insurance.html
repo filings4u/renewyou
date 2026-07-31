@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#3E0D5F">
+    <title>Accepted Insurance | ReNew You Health & Wellness</title>
+    <!-- Include Supabase Client Dependency -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- External Theme Tokens and Base Layout Stylesheet -->
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="icon" type="image/png" href="images/fav.png">
+</head>
+<body>
+
+    <!-- Dynamic Header Component Slot Target -->
+    <div id="navigation-target"></div>
+ <!-- NEW Dynamic Side-by-Side Hero Component Target -->
+    <div id="hero-target"></div>
+    
+    <main>
+        <!-- Page Introduction Header Section -->
+        <section style="text-align: center; padding: 60px 20px 20px 20px;">
+            <span style="background-color: rgba(79, 148, 12, 0.1); color: var(--green-primary); padding: 6px 15px; border-radius: 20px; font-weight: 700; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">Coverage & Billing</span>
+            <h1 style="font-size: 2.5rem; margin: 15px 0 20px 0; color: var(--purple-primary);">Insurance Networks We Accept</h1>
+            <p style="font-size: 1.15rem; color: #555; max-width: 700px; margin: 0 auto; line-height: 1.6;">
+                We are committed to making exceptional healthcare affordable and highly accessible. Our administrative team works directly with major insurance providers to maximize your benefits and minimize your out-of-pocket costs.
+            </p>
+        </section>
+
+        <!-- Dynamic JavaScript Target Container Slot for Insurance Logos -->
+        <section style="padding: 20px 20px 40px 20px; max-width: 1000px; margin: 0 auto;">
+            <div id="insurance-logos-target"></div>
+        </section>
+
+        <!-- Verification Guideline Instructions Block -->
+        <div class="section-bg-alt">
+            <section style="max-width: 800px; text-align: center; padding: 60px 20px;">
+                <h2>Verifying Your Benefits</h2>
+                <p style="color: #555; margin-bottom: 30px;">Coverage limits vary significantly depending on your specific plan or employer policy group tier. We recommend taking these simple steps prior to your scheduled clinic appointment:</p>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; text-align: left; margin-bottom: 35px;">
+                    <div class="card" style="padding: 20px; background-color: var(--bg-white);">
+                        <h4 style="color: var(--purple-primary); margin-bottom: 8px;">1. Call Member Services</h4>
+                        <p style="font-size: 0.9rem; margin: 0; color: #666; line-height: 1.5;">Dial the toll-free phone number printed on the back of your physical insurance ID card.</p>
+                    </div>
+                    <div class="card" style="padding: 20px; background-color: var(--bg-white);">
+                        <h4 style="color: var(--purple-primary); margin-bottom: 8px;">2. Ask About Our Clinic</h4>
+                        <p style="font-size: 0.9rem; margin: 0; color: #666; line-height: 1.5;">Confirm that ReNew You Health & Wellness is listed as an in-network provider for your plan.</p>
+                    </div>
+                    <div class="card" style="padding: 20px; background-color: var(--bg-white);">
+                        <h4 style="color: var(--purple-primary); margin-bottom: 8px;">3. Check Co-Pay Rates</h4>
+                        <p style="font-size: 0.9rem; margin: 0; color: #666; line-height: 1.5;">Verify your precise diagnostic or primary care co-payment responsibilities beforehand.</p>
+                    </div>
+                </div>
+
+                <div style="background-color: var(--bg-white); padding: 25px; border-radius: 12px; border: 1px solid rgba(138, 52, 159, 0.1); display: inline-block; width: 100%; box-sizing: border-box;">
+                    <h4 style="color: var(--purple-accent); margin-bottom: 10px; font-size: 1.1rem;">Don't see your network listed?</h4>
+                    <p style="font-size: 0.95rem; color: #555; margin: 0 0 15px 0;">We consistently establish contracts with local and regional regional insurance frameworks. Affordable self-pay alternatives are also available at opening.</p>
+                    <a href="contact.html" style="text-decoration: none;"><button style="padding: 10px 25px; font-size: 0.95rem;">Ask About Your Plan</button></a>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Dynamic Footer Component Slot Target -->
+    <div id="footer-target"></div>
+
+    <!-- Layout Scripts Execution Flow -->
+    <script src="assets/js/navigation.js"></script>
+        <script src="assets/js/hero.js"></script> 
+    <script src="assets/js/footer.js"></script>
+    <!-- Page Functional Event Logic Engine -->
+    <script src="assets/js/insurance.js"></script>
+</body>
+</html>
