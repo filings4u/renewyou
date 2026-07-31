@@ -30,7 +30,7 @@ function renderInsuranceHero() {
             <!-- Right Column: Visual Frame Area -->
             <div class="ins-hero-img-block" style="flex: 1; min-width: 320px; display: flex; justify-content: center; align-items: center; box-sizing: border-box;">
                 <div class="ins-hero-img-card" style="width: 100%; max-width: 550px; height: 440px; border-radius: 28px; overflow: hidden; box-shadow: 0 12px 35px rgba(62,13,95,0.06); border: 1px solid rgba(138,52,159,0.08); box-sizing: border-box;">
-                    <img src="images/hero-insurance.jpg" alt="Health coverage insurance documents and cards on consultation table" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+                    <img src="images/hero-insurance.png" alt="Health coverage insurance documents and cards on consultation table" style="width: 100%; height: 100%; object-fit: cover; display: block;">
                 </div>
             </div>
 
