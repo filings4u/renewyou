@@ -41,7 +41,7 @@ function renderMetricsPanel() {
     const metricsHtml = metricsData.map(metric => `
         <div class="metric-card" style="flex: 1; min-width: 280px; background: var(--bg-white); padding: 30px; border-radius: 20px; border: 1px solid rgba(138, 52, 159, 0.08); box-shadow: 0 10px 30px rgba(62, 13, 95, 0.02); display: flex; gap: 20px; align-items: flex-start; box-sizing: border-box;">
             <!-- Icon Container -->
-            <div style="font-size: 1.8rem; background: rgba(138, 52, 159, 0.05); padding: 12px; border-radius: 14px; line-height: 1; display: flex; align-items: center; justify-content: center;">
+            <div style="font-size: 1.8rem; background: #; padding: 12px; border-radius: 14px; line-height: 1; display: flex; align-items: center; justify-content: center;">
                 ${metric.icon}
             </div>
             <!-- Text Content -->

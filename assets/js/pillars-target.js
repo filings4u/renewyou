@@ -18,7 +18,7 @@ function renderCorePillars() {
         <div style="width: 100%; display: flex; flex-direction: column; background-color: #F9F9F8;">
             
             <!-- SECTION HEADER BANNER -->
-            <div style="background-color: #F9F9F8; padding: 120px 20px 60px 20px; text-align: center; width: 100%; box-sizing: border-box;">
+            <div style="background-color: #ffffff; padding: 120px 20px 60px 20px; text-align: center; width: 100%; box-sizing: border-box;">
                 <div style="max-width: 1450px; margin: 0 auto;">
                     <span style="color: var(--green-secondary); font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px; display: inline-block; background-color: rgba(79, 148, 12, 0.06); padding: 6px 16px; border-radius: 20px; margin-bottom: 20px;">
                         The ReNew You Difference

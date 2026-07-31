@@ -109,18 +109,7 @@
             margin-bottom: 15px;
         }
 
-        @media (max-width: 576px) {
-            .form-group {
-                flex-direction: column;
-            }
-            .countdown-number {
-                font-size: 1.5rem;
-            }
-            .countdown-box {
-                min-width: 65px;
-                padding: 10px;
-            }
-        }
+
 
         input[type="email"] {
             flex: 1;
@@ -349,13 +338,3 @@ footer {
     font-size: 0.85rem; 
     color: rgba(255,255,255,0.6); 
 } 
-
-/* Responsive Overrides */ 
-@media (max-width: 768px) { 
-    .menu-toggle { 
-        display: flex; 
-    } 
-    .nav-menu { 
-        display: none; /* We will use JS to toggle a responsive mobile menu class later */ 
-    } 
-}
