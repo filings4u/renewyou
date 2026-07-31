@@ -16,15 +16,24 @@ function renderNavigation() {
 
     target.innerHTML = `
         <!-- Quick Contact Utility Strip --> 
-        <div style="background-color: var(--purple-accent); color: var(--bg-white); padding: 10px 20px; font-size: 0.9rem; font-family: system-ui, -apple-system, sans-serif; box-sizing: border-box; width: 100%;"> 
-            <div style="max-width: 1450px; margin: 0 auto; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; box-sizing: border-box;"> 
-                <span style="display: flex; align-items: center; gap: 6px;">📍 500 Ashland Ave., Suite 101, Chicago Heights, IL 60411</span> 
-                <div style="display: flex; flex-wrap: wrap; gap: 15px;"> 
-                    <span style="display: flex; align-items: center; gap: 6px;">📞 708-329-2155</span> 
-                    <span style="display: flex; align-items: center; gap: 6px;">✉️ info@renewyouhealthwellness.com</span> 
-                </div> 
-            </div> 
-        </div>
+  <div class="global-top-bar" style="background-color: var(--purple-accent); color: var(--bg-white); padding: 10px 20px; font-size: 0.9rem; font-family: system-ui, -apple-system, sans-serif; box-sizing: border-box; width: 100%;"> 
+    <style>
+        /* Mobile responsive rule to remove the top bar */
+        @media (max-width: 768px) {
+            .global-top-bar {
+                display: none !important;
+            }
+        }
+    </style>
+    <div style="max-width: 1450px; margin: 0 auto; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; box-sizing: border-box;"> 
+        <span style="display: flex; align-items: center; gap: 6px;">📍 500 Ashland Ave., Suite 101, Chicago Heights, IL 60411</span> 
+        <div style="display: flex; flex-wrap: wrap; gap: 15px;"> 
+            <span style="display: flex; align-items: center; gap: 6px;">📞 708-329-2155</span> 
+            <span style="display: flex; align-items: center; gap: 6px;">✉️ info@renewyouhealthwellness.com</span> 
+        </div> 
+    </div> 
+</div>
+
 
         <header style="background-color: var(--bg-white); box-shadow: 0 2px 10px rgba(62, 13, 95, 0.05); position: sticky; top: 0; z-index: 1000; width: 100%; box-sizing: border-box;">
             <div class="nav-container" style="max-width: 1450px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; position: relative; box-sizing: border-box;">
@@ -82,6 +91,7 @@ function renderNavigation() {
                 #navMenu li { width: 100% !important; text-align: left !important; }
                 #navMenu .btn-nav { display: block !important; text-align: center !important; margin-top: 5px !important; }
                 #mobileMenuBtn:hover { background-color: rgba(138, 52, 159, 0.05) !important; border-color: var(--purple-accent) !important; }
+                
             }
         </style>
     `;

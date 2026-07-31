@@ -265,3 +265,12 @@ section {
 }
 
 
+/* Mobile Layout Tightening & 2x2 Grid Adaptation */
+@media (max-width: 768px) {
+    /* Hide the top bar contact banner completely on mobile viewports */
+    .top-bar, #top-header, .top-header-banner { 
+        display: none !important; 
+    }
+    
+    /* ... your existing mobile footer styles continue here ... */
+}
