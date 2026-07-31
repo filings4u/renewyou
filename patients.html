@@ -1,60 +1,52 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#3E0D5F">
-    <title>Patient Information | ReNew You Health & Wellness</title>
-    <!-- Include Supabase Client Dependency -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- External Theme Tokens and Base Layout Stylesheet -->
-    <link rel="stylesheet" href="assets/css/style.css">
-    <link rel="icon" type="image/png" href="images/fav.png">
-</head>
-<body>
-
-    <!-- Dynamic Header Component Slot Target -->
-    <div id="navigation-target"></div>
-
-     <!-- NEW Dynamic Side-by-Side Hero Component Target -->
-    <div id="hero-target"></div>
+<!DOCTYPE html> 
+<html lang="en"> 
+<head> 
+    <meta charset="UTF-8"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <meta name="theme-color" content="#3E0D5F"> 
+    <title>Patient Information | ReNew You Health & Wellness</title> 
+    <!-- Include Supabase Client Dependency --> 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script> 
+    <!-- External Theme Tokens and Base Layout Stylesheet --> 
+    <link rel="stylesheet" href="assets/css/style.css"> 
+    <link rel="icon" type="image/png" href="images/fav.png"> 
+</head> 
+<body> 
+    <!-- Dynamic Header Component Slot Target --> 
+    <div id="navigation-target"></div> 
     
+    <!-- NEW Dynamic Side-by-Side Hero Component Target --> 
+    <div id="patients-hero-target"></div> 
+    
+    <main style="background-color: #F9F9F8;"> 
+        <!-- Dynamic JavaScript Target Container Slot for Pre-Visit Checklist --> 
+        <section style="padding: 40px 20px; text-align: center; box-sizing: border-box;"> 
+            <div id="patient-checklist-target"></div> 
+        </section> 
 
-    <main>
-        <!-- Page Introduction Header Section -->
-        <section style="text-align: center; padding: 60px 20px 20px 20px;">
-            <span style="background-color: rgba(62, 13, 95, 0.05); color: var(--purple-primary); padding: 6px 15px; border-radius: 20px; font-weight: 700; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">Patient Checklist</span>
-            <h1 style="font-size: 2.5rem; margin: 15px 0 20px 0; color: var(--purple-primary);">Before Your Visit</h1>
-            <p style="font-size: 1.15rem; color: #555; max-width: 700px; margin: 0 auto; line-height: 1.6;">
-                We want to make your clinical check-in smooth and worry-free. Please check the preparation list below before visiting our team.
-            </p>
-        </section>
+        <!-- Payment Options & Financial Structure Section Wrapper --> 
+        <div style="background-color: #ffffff; border-top: 1px solid rgba(138, 52, 159, 0.05);"> 
+            <section style="text-align: center; padding: 80px 20px; max-width: 1450px; margin: 0 auto; box-sizing: border-box;"> 
+                <h2 style="color: var(--purple-primary); font-size: 2rem; font-weight: 800; margin: 0 0 12px 0; letter-spacing: -0.3px;">Billing & Payments</h2> 
+                <p style="color: #555; font-size: 1.05rem; max-width: 600px; margin: 0 auto 40px auto; line-height: 1.6;">
+                    We believe in open pricing and affordable primary healthcare alternatives for our community.
+                </p> 
+                <!-- Dynamic JavaScript Target Container Slot for Payment Framework Cards --> 
+                <div id="patient-payment-target" style="max-width: 800px; margin: 0 auto;"></div> 
+            </section> 
+        </div> 
+    </main> 
 
-        <!-- Dynamic JavaScript Target Container Slot for Pre-Visit Checklist -->
-        <section style="padding: 20px 20px 40px 20px; text-align: center;">
-            <div id="patient-checklist-target"></div>
-        </section>
+    <!-- Dynamic Footer Component Slot Target --> 
+    <div id="footer-target"></div> 
 
-        <!-- Payment Options & Financial Structure Section Wrapper -->
-        <div class="section-bg-alt">
-            <section style="text-align: center; padding: 60px 20px;">
-                <h2>Billing & Payments</h2>
-                <p style="color: #555; max-width: 600px; margin: 0 auto 10px auto;">We believe in open pricing and affordable primary healthcare alternatives for our community.</p>
-                
-                <!-- Dynamic JavaScript Target Container Slot for Payment Framework Cards -->
-                <div id="patient-payment-target" style="max-width: 800px; margin: 0 auto;"></div>
-            </section>
-        </div>
-    </main>
-
-    <!-- Dynamic Footer Component Slot Target -->
-    <div id="footer-target"></div>
-
-    <!-- Layout Scripts Execution Flow -->
-    <script src="assets/js/navigation.js"></script>
-        <script src="assets/js/hero.js"></script> 
-    <script src="assets/js/footer.js"></script>
-    <!-- Page Functional Event Logic Engine -->
-    <script src="assets/js/patients.js"></script>
-</body>
+    <!-- Layout Scripts Execution Flow --> 
+    <script src="assets/js/navigation.js"></script> 
+    <script src="assets/js/hero.js"></script> 
+    <!-- Patients Page Dedicated Hero Controller -->
+    <script src="assets/js/patients-hero.js"></script> 
+    <!-- Page Functional Event Logic Engine --> 
+    <script src="assets/js/patients.js"></script> 
+    <script src="assets/js/footer.js"></script> 
+</body> 
 </html>
