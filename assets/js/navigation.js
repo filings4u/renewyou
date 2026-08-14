@@ -60,7 +60,7 @@ function renderNavigation() {
 
                         <!-- Professional DOT Dropdown Element with Continuous Hover Zone -->
                     <li class="nav-item-dropdown" style="position: relative; display: inline-block; padding-bottom: 15px; margin-bottom: -15px;">
-                        <a href="#" class="nav-link" style="color: var(--purple-primary); text-decoration: none; font-weight: 600; font-size: 1rem; transition: color 0.3s ease; display: flex; align-items: center; gap: 4px;">
+                        <a href="" class="nav-link" style="color: var(--purple-primary); text-decoration: none; font-weight: 600; font-size: 1rem; transition: color 0.3s ease; display: flex; align-items: center; gap: 4px;">
                             DOT Compliance
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
                         </a>
@@ -69,8 +69,9 @@ function renderNavigation() {
                                 <li><a href="dot-drug-tests.html" style="color: #333; padding: 12px 20px; text-decoration: none; display: block; font-size: 0.95rem; font-weight: 500; transition: all 0.2s ease;">Overview & Services</a></li>
                                 <li><a href="dot-drivers.html" style="color: #333; padding: 12px 20px; text-decoration: none; display: block; font-size: 0.95rem; font-weight: 500; transition: all 0.2s ease;">Commercial Drivers</a></li>
                                 <li><a href="dot-corporate.html" style="color: #333; padding: 12px 20px; text-decoration: none; display: block; font-size: 0.95rem; font-weight: 500; transition: all 0.2s ease;">Corporate Programs</a></li>
+                                <li><a href="dot-employers.html" style="color: #333; padding: 12px 20px; text-decoration: none; display: block; font-size: 0.95rem; font-weight: 500; transition: all 0.2s ease;">Employer Programs</a></li>
                                 <li style="border-top: 1px solid rgba(138, 52, 159, 0.06); margin-top: 5px; padding-top: 5px;">
-                                    <a href="dot-appointment.html" style="color: var(--purple-accent); padding: 12px 20px; text-decoration: none; display: block; font-size: 0.95rem; font-weight: 700; transition: all 0.2s ease;">Schedule DOT Test →</a>
+                                <a href="dot-appointment.html" style="color: var(--purple-accent); padding: 12px 20px; text-decoration: none; display: block; font-size: 0.95rem; font-weight: 700; transition: all 0.2s ease;">Schedule DOT Test →</a>
                                 </li>
                             </ul>
                         </div>

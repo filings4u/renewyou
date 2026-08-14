@@ -1,10 +1,26 @@
 /**
- * DOT Drug Testing - Hero Component
+ * DOT Drug Testing - Dynamic URL-Based Hero Component (Mobile Typography Scale)
  * Location: assets/js/dot-hero.js
  */
 document.addEventListener('DOMContentLoaded', () => {
     const target = document.getElementById('dot-hero-target');
     if (!target) return;
+
+    const path = window.location.pathname.toLowerCase();
+    
+    let badgeText = "49 CFR Part 40 Compliant";
+    let titleText = "Certified DOT Drug & Alcohol Testing";
+    let subtitleText = "Fast, fully legal, and audit-ready occupational health testing keeping your fleet compliant and your workplace safe.";
+
+    if (path.includes('driver')) {
+        badgeText = "Walk-In Drivers & Owner Operators";
+        titleText = "CDL Compliance & Medical Testing";
+        subtitleText = "Comprehensive compliance testing. Full-service diagnostics performed by certified collectors to satisfy federal workplace criteria.";
+    } else if (path.includes('corporate') || path.includes('employer')) {
+        badgeText = "Consortium & Fleet Management";
+        titleText = "Corporate Compliance Testing Solutions";
+        subtitleText = "Streamlined fleet management. Full-service diagnostic programs structured to insulate operations during DOT audits.";
+    }
 
     target.innerHTML = `
         <style>
@@ -40,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .dot-badge {
                 color: var(--purple-accent);
                 font-weight: 700;
-                font-size: 0.85rem;
+                font-size: clamp(0.75rem, 2vw, 0.85rem); /* Dynamic badge size */
                 text-transform: uppercase;
                 letter-spacing: 2px;
                 display: inline-block;
@@ -50,16 +66,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 margin-bottom: 20px;
             }
             .dot-hero-title {
-                font-size: 3.2rem;
+                font-size: clamp(1.8rem, 5vw, 3.2rem); /* Automatically shrinks text on mobile */
                 color: var(--purple-primary);
                 font-weight: 800;
-                line-height: 1.15;
+                line-height: 1.2;
                 margin: 0 0 20px 0;
                 letter-spacing: -0.8px;
             }
             .dot-hero-subtitle {
                 color: #444;
-                font-size: 1.15rem;
+                font-size: clamp(0.95rem, 2.5vw, 1.15rem); /* Scales down paragraph cleanly */
                 line-height: 1.6;
                 margin: 0 0 35px 0;
                 max-width: 650px;
@@ -72,8 +88,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             @media (max-width: 992px) {
                 .dot-hero-container {
-                    flex-direction: column;
-                    gap: 40px;
+                    flex-direction: column-reverse;
+                    gap: 30px;
                 }
                 .dot-hero-content {
                     text-align: center;
@@ -84,35 +100,34 @@ document.addEventListener('DOMContentLoaded', () => {
                     width: 100%;
                 }
                 .dot-hero-image {
-                    max-width: 420px;
+                    max-width: 320px; /* Scaled down slightly to fit smaller screen contexts */
                 }
                 .dot-hero-cta-group {
                     justify-content: center;
                 }
-                .dot-hero-title {
-                    font-size: 2.5rem;
-                }
             }
             @media (max-width: 768px) {
-                .dot-hero-title {
-                    font-size: 2.1rem;
-                }
                 .dot-hero-section {
-                    padding: 50px 15px;
+                    padding: 40px 15px;
                 }
                 .dot-hero-image {
-                    max-width: 100%;
+                    max-width: 85%;
+                }
+                .dot-hero-cta-group a {
+                    width: 100%; /* Makes action buttons full-width for easy tapping */
+                    text-align: center;
+                    box-sizing: border-box;
                 }
             }
         </style>
         <div class="dot-hero-section">
             <div class="dot-hero-container">
                 <div class="dot-hero-content">
-                    <span class="dot-badge">49 CFR Part 40 Compliant</span>
-                    <h1 class="dot-hero-title">Certified DOT Drug & Alcohol Testing</h1>
-                    <p class="dot-hero-subtitle">Fast, fully legal, and audit-ready occupational health testing keeping your fleet compliant and your workplace safe.</p>
+                    <span class="dot-badge">${badgeText}</span>
+                    <h1 class="dot-hero-title">${titleText}</h1>
+                    <p class="dot-hero-subtitle">${subtitleText}</p>
                     <div class="dot-hero-cta-group">
-                        <a href="dot-corporate.html" style="background: var(--purple-primary); color: #fff; padding: 14px 28px; border-radius: 12px; font-weight: 700; text-decoration: none; font-size: 0.95rem;">Employer Programs</a>
+                        <a href="dot-employers.html" style="background: var(--purple-primary); color: #fff; padding: 14px 28px; border-radius: 12px; font-weight: 700; text-decoration: none; font-size: 0.95rem;">Employer Programs</a>
                         <a href="dot-appointment.html" style="background: #fff; color: var(--purple-primary); padding: 14px 28px; border-radius: 12px; font-weight: 700; text-decoration: none; font-size: 0.95rem; border: 1px solid rgba(138, 52, 159, 0.15);">Driver Walk-Ins</a>
                     </div>
                 </div>
