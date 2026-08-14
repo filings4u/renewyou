@@ -1,13 +1,16 @@
 /**
- * ReNew You Health & Wellness - Contact Form & Map Controller
+ * ReNew You Health & Wellness - Contact Form & Map Controller (Supabase Connected)
  * Location: assets/js/contact.js
  */
-
 document.addEventListener('DOMContentLoaded', () => {
     prefillSubjectFromUrl();
     initContactForm();
     initGoogleMap();
 });
+
+// Configure your active Supabase function routing tokens here
+const SUPABASE_PROJECT_URL = "https://lrbimrlbskjweynxlgas.supabase.co";
+const CONTACT_FUNCTION_ENDPOINT = `${SUPABASE_PROJECT_URL}/functions/v1/submit-contact-inquiry`;
 
 /**
  * Automatically prefills the message box if a patient clicks "Request Info" on a specific service
@@ -16,52 +19,55 @@ function prefillSubjectFromUrl() {
     const params = new URLSearchParams(window.location.search);
     const subject = params.get('subject');
     const messageTextarea = document.getElementById('contactMessage');
-
     if (subject && messageTextarea) {
         messageTextarea.value = `Hello, I would like to request more information regarding your ${decodeURIComponent(subject)} services.`;
     }
 }
-
 /**
- * Handles validation, locking, and processing for the custom clinic inquiry form
+ * Handles validation, locking, and asynchronous delivery to your secure Supabase endpoint
  */
 function initContactForm() {
     const form = document.getElementById('clinicContactForm');
     const submitBtn = document.getElementById('contactSubmitBtn');
     const messageDiv = document.getElementById('contactFormMessage');
+    if (!form || !submitBtn || !messageDiv) return;
 
-    if (!form) return;
-
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
-
-        // Lock form during submission pipeline processing
+        
+        // Lock inputs to prevent multi-click mutation submission loops
         submitBtn.disabled = true;
-        messageDiv.className = 'message';
-        messageDiv.style.display = 'none';
+        messageDiv.innerText = "Transmitting inquiry payload safely to secure clinic servers...";
+        messageDiv.style.color = 'var(--purple-accent)';
+        messageDiv.style.display = 'block';
 
-        // Read field metrics securely
-        const name = document.getElementById('contactName').value.trim();
-        const phone = document.getElementById('contactPhone').value.trim();
-        const email = document.getElementById('contactEmail').value.trim();
-        const message = document.getElementById('contactMessage').value.trim();
+        // Collect fields dynamically matching your edge receiver map rules
+        const payload = {
+            name: document.getElementById('contactName').value.trim(),
+            phone: document.getElementById('contactPhone').value.trim(),
+            email: document.getElementById('contactEmail').value.trim(),
+            message: document.getElementById('contactMessage').value.trim()
+        };
 
-        // Pipeline placeholder for your custom Supabase setup hook
         try {
-            setTimeout(() => {
-                messageDiv.textContent = "Thank you! Your message has been sent successfully. We will reach out to you shortly.";
-                messageDiv.className = 'message success';
-                messageDiv.style.color = 'var(--green-primary)';
-                messageDiv.style.display = 'block';
+            const response = await fetch(CONTACT_FUNCTION_ENDPOINT, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
 
-                form.reset();
-                submitBtn.disabled = false;
-            }, 1000);
+            if (!response.ok) throw new Error('Secure network routing transaction failed.');
+
+            // Success feedback initialization
+            messageDiv.textContent = "Thank you! Your message has been sent successfully. We will reach out to you shortly.";
+            messageDiv.style.color = 'var(--green-primary)';
+            form.reset();
+
         } catch (error) {
+            // Anomaly fallback mitigation logic path
             messageDiv.textContent = "Unable to deliver message right now. Please call our clinic directly at 708-329-2155.";
-            messageDiv.className = 'message error';
             messageDiv.style.color = '#d32f2f';
-            messageDiv.style.display = 'block';
+        } finally {
             submitBtn.disabled = false;
         }
     });
@@ -74,7 +80,7 @@ function initGoogleMap() {
     const mapContainer = document.getElementById('map-iframe-target');
     if (!mapContainer) return;
 
-    // Direct clinical embed for 500 Ashland Ave, Chicago Heights, IL
+    // Direct clinical embed pointer for 500 Ashland Ave, Chicago Heights, IL
     mapContainer.innerHTML = `
         <iframe 
             src="https://google.com" 
