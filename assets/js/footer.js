@@ -141,6 +141,7 @@ function renderFooterModule() {
                     <div class="footer-bottom-links" style="display: flex; gap: 20px; justify-content: flex-end; align-items: center;"> 
                         <a href="privacy-policy.html" style="color: rgba(255,255,255,0.5); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='#F9F9F8'" onmouseout="this.style.color='rgba(255,255,255,0.5)'">Privacy Policy</a> 
                         <a href="terms-of-service.html" style="color: rgba(255,255,255,0.5); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='#F9F9F8'" onmouseout="this.style.color='rgba(255,255,255,0.5)'">Terms of Service</a> 
+                        <a href="admin-dashboard.html" style="color: rgba(255,255,255,0.5); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='#F9F9F8'" onmouseout="this.style.color='rgba(255,255,255,0.5)'">Admin Login</a> 
                     </div> 
                 </div> 
             </div> 
