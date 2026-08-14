@@ -96,7 +96,7 @@ function renderFooterModule() {
   <!-- FIX: Reduced top margin/gap by adjusting layout spacing --> 
   <div style="display: flex; flex-direction: column; gap: 10px; text-align: left; width: 100%; margin-top: 5px;"> 
     <h3 style="color: var(--green-light); margin: 0; font-size: 1.2rem; font-weight: 700; letter-spacing: -0.2px; line-height: 1.2;"> ReNew You </h3> 
-    <p style="color: rgba(255,255,255,0.75); font-size: 0.95rem; line-height: 1.7; margin: 0; max-width: 300px;"> Health & Wellness Clinic located in Chicago Heights, Illinois. Empowering every single patient to renew their health from the inside out. </p> 
+    <p style="color: rgba(255,255,255,0.75); font-size: 0.95rem; line-height: 1.7; margin: 0; max-width: 300px;"> Health & Wellness Clinic located in Chicago Heights, IL. Empowering every single patient to renew their health from the inside out. </p> 
   </div> 
 </div>
 
@@ -106,9 +106,9 @@ function renderFooterModule() {
                 <div class="footer-col" style="display: flex; flex-direction: column; gap: 20px; align-items: flex-start; justify-content: flex-start; padding-top: 0; margin-top: 0; text-align: left;"> 
                     <h3 style="color: var(--green-light); margin: 0; font-size: 1.2rem; font-weight: 700; letter-spacing: -0.2px; line-height: 1.2; min-height: 90px; display: flex; align-items: flex-end; padding-bottom: 4px; box-sizing: border-box;"> Contact Info </h3> 
                     <div style="display: flex; flex-direction: column; gap: 12px; color: rgba(255,255,255,0.85); font-size: 0.95rem; line-height: 1.5;"> 
-                        <p style="margin: 0; display: flex; align-items: flex-start; gap: 10px;"> <span>📍</span> 500 Ashland Ave., Suite 101<br>Chicago Heights, IL 60411 </p> 
-                        <p style="margin: 0; display: flex; align-items: center; gap: 10px;"> <span>📞</span> Phone: <a href="tel:7083292155" style="color: inherit; text-decoration: none; transition: color 0.2s;">708-329-2155</a> </p> 
-                        <p style="margin: 0; display: flex; align-items: center; gap: 10px;"> <span>✉️</span> <a href="mailto:info@renewyouhealthwellness.com" style="color: inherit; text-decoration: none; transition: color 0.2s; word-break: break-all;">Send Us an Email</a> </p> 
+                        <p style="margin: 0; display: flex; align-items: flex-start; gap: 10px;">  500 Ashland Ave., Suite 101<br>Chicago Heights, IL 60411 </p> 
+                        <p style="margin: 0; display: flex; align-items: center; gap: 10px;"> Phone: <a href="tel:7083292155" style="color: inherit; text-decoration: none; transition: color 0.2s;">708-329-2155</a> </p> 
+                        <p style="margin: 0; display: flex; align-items: center; gap: 10px;">  <a href="mailto:info@renewyouhealthwellness.com" style="color: inherit; text-decoration: none; transition: color 0.2s; word-break: break-all;">Send Us an Email</a> </p> 
                     </div> 
                 </div> 
                 <!-- Hours of Operation Column --> 
