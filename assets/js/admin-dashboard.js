@@ -1,10 +1,14 @@
 /**
- * ReNew You Health & Wellness - Protected Admin Registry Dashboard (7-Card Expansion with DOT Physicals)
+ * ReNew You Health & Wellness - Protected Admin Registry Dashboard (Supabase Auth System)
  * Location: assets/js/admin-dashboard.js
  */
 document.addEventListener('DOMContentLoaded', () => {
+    // SUPABASE CONFIGURATION - Using project client library framework
     const SUPABASE_PROJECT_URL = "https://lrbimrlbskjweynxlgas.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxyYmltcmxic2tqd2V5bnhsZ2FzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1MjQ0NTYsImV4cCI6MjA5NDEwMDQ1Nn0.I8fQ6ZjA9oaTqJCF-7Z7vUboXC8zv2cogBv4PC_1ihU"; 
+    
+    // Instantiates official client controller via global window variable context
+    const supabaseClientInstance = window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
 
     const target = document.getElementById('admin-dashboard-target');
     if (!target) return;
@@ -13,49 +17,87 @@ document.addEventListener('DOMContentLoaded', () => {
     let activeFilter = 'All';
     let searchQuery = '';
 
-    if (sessionStorage.getItem('clinic_admin_authenticated') === 'true') {
-        renderDashboardStructure();
-        fetchAppointments();
-    } else {
-        renderGatekeeperForm();
+    // AUTH GUARD: Query active session state directly from Supabase token storage ecosystem
+    checkAuthenticationGuard();
+
+    async function checkAuthenticationGuard() {
+        const { data: { session } } = await supabaseClientInstance.auth.getSession();
+        if (session) {
+            renderDashboardStructure();
+            fetchAppointments();
+        } else {
+            renderSecureLoginForm();
+        }
     }
 
     /**
-     * Renders a mobile-friendly secure clinical gatekeeper gateway
+     * Renders a secure, responsive administrative login interface
      */
-    function renderGatekeeperForm() {
-        target.innerHTML = `
-            <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 15px; box-sizing: border-box; background: #fafafa;">
-                <div style="background: #ffffff; border: 1px solid rgba(138, 52, 159, 0.1); border-radius: 20px; padding: clamp(20px, 5vw, 40px); width: 100%; max-width: 420px; box-shadow: 0 15px 40px rgba(62,13,95,0.04); box-sizing: border-box;">
-                    <div style="text-align: center; margin-bottom: 25px;">
-                        <h2 style="color: var(--purple-primary); margin: 0 0 8px 0; font-weight: 800; font-size: clamp(1.3rem, 4vw, 1.6rem);">Staff Verification</h2>
-                        <p style="color: #666; font-size: 0.9rem; margin: 0;">Enter clinic credentials to query patient screening records.</p>
-                    </div>
-                    <form id="gatekeeperForm">
-                        <div style="margin-bottom: 20px;">
-                            <label style="display: block; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 6px; color: #444;">Access Passcode</label>
-                            <input type="password" id="passcodeField" required style="width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 10px; font-size: 1rem; box-sizing: border-box;" placeholder="••••••••">
+function renderSecureLoginForm() {
+    target.innerHTML = `
+        <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 15px; box-sizing: border-box; background: #fafafa;">
+            <div style="background: #ffffff; border: 1px solid rgba(138, 52, 159, 0.1); border-radius: 20px; padding: clamp(20px, 5vw, 40px); width: 100%; max-width: 420px; box-shadow: 0 15px 40px rgba(62,13,95,0.04); box-sizing: border-box;">
+                
+                <!-- Centralized Corporate Branding -->
+                <div style="text-align: center; margin-bottom: 25px;">
+                    <div style="display: inline-block; margin-bottom: 15px;">
+                        <img src="images/logo2.png" 
+                             alt="ReNew You Health & Wellness Logo" 
+                             style="max-width: 160px; height: auto; display: block; object-fit: contain; margin: 0 auto;"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                        
+                        <!-- Professional Fallback Box if Image Fails to Load -->
+                        <div style="display: none; width: 54px; height: 54px; background: rgba(138,52,159,0.04); color: var(--purple-primary); border-radius: 14px; align-items: center; justify-content: center; font-size: 1.6rem; margin: 0 auto;">
+                            🏥
                         </div>
-                        <button type="submit" style="width: 100%; background: var(--purple-primary); color: #fff; padding: 14px; border: none; border-radius: 10px; font-weight: 700; font-size: 0.95rem; cursor: pointer; box-sizing: border-box;">Authenticate Access</button>
-                        <p id="gatekeeperError" style="color: #d90429; font-size: 0.85rem; font-weight: 600; text-align: center; margin: 15px 0 0 0; display: none;">Invalid internal passcode credential.</p>
-                    </form>
+                    </div>
+                    <h2 style="color: var(--purple-primary); margin: 0 0 8px 0; font-weight: 800; font-size: clamp(1.3rem, 4vw, 1.6rem);">Staff Console Sign-In</h2>
+                    <p style="color: #666; font-size: 0.9rem; margin: 0;">Authorized clinic personnel authentication gateway.</p>
                 </div>
-            </div>
-        `;
 
-        document.getElementById('gatekeeperForm').addEventListener('submit', (e) => {
+                <form id="clinicLoginForm">
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 6px; color: #444;">Clinic Email</label>
+                        <input type="email" id="loginEmail" required style="width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 10px; font-size: 1rem; box-sizing: border-box;" placeholder="admin@renewyou.com">
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 6px; color: #444;">Account Password</label>
+                        <input type="password" id="loginPassword" required style="width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 10px; font-size: 1rem; box-sizing: border-box;" placeholder="••••••••">
+                    </div>
+                    <button type="submit" id="loginSubmitBtn" style="width: 100%; background: var(--purple-primary); color: #fff; padding: 14px; border: none; border-radius: 10px; font-weight: 700; font-size: 0.95rem; cursor: pointer; box-sizing: border-box;">Sign In to Registry</button>
+                    <p id="loginErrorMsg" style="color: #d90429; font-size: 0.85rem; font-weight: 600; text-align: center; margin: 15px 0 0 0; display: none;"></p>
+                </form>
+            </div>
+        </div>
+    `;
+
+        const loginForm = document.getElementById('clinicLoginForm');
+        const submitBtn = document.getElementById('loginSubmitBtn');
+        const errorMsg = document.getElementById('loginErrorMsg');
+
+        loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (document.getElementById('passcodeField').value === 'RenewYouAdmin2026') { 
-                sessionStorage.setItem('clinic_admin_authenticated', 'true');
+            submitBtn.disabled = true;
+            errorMsg.style.display = 'none';
+
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            // Execute account authentication handshake directly through Supabase Auth endpoints
+            const { error } = await supabaseClientInstance.auth.signInWithPassword({ email, password });
+
+            if (error) {
+                errorMsg.innerText = error.message;
+                errorMsg.style.display = 'block';
+                submitBtn.disabled = false;
+            } else {
                 renderDashboardStructure();
                 fetchAppointments();
-            } else {
-                document.getElementById('gatekeeperError').style.display = 'block';
             }
         });
     }
     /**
-     * Builds main dashboard data frame layout shell with expanded 7-card matrix
+     * Builds main dashboard data frame layout shell with mobile responsive classes
      */
     function renderDashboardStructure() {
         target.innerHTML = `
@@ -102,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     <div style="background: #fff; padding: 15px; border-radius: 14px; border: 1px solid rgba(138,52,159,0.06); box-shadow: 0 4px 15px rgba(0,0,0,0.01);">
                         <span style="font-size: 0.72rem; font-weight: 700; color: #666; text-transform: uppercase; display: block;">DOT Physical</span>
-                        <h3 id="statPhysical" style="margin: 5px 0 0 0; font-size: 1.5rem; color: var(--green-primary); font-weight: 800;">0</h3>
+                        <h3 id="statPhysical" style="margin: 5px 0 0 0; font-size: 1.5rem; color: var(--purple-accent); font-weight: 800;">0</h3>
                     </div>
                     <div style="background: #fff; padding: 15px; border-radius: 14px; border: 1px solid rgba(138,52,159,0.06); box-shadow: 0 4px 15px rgba(0,0,0,0.01);">
                         <span style="font-size: 0.72rem; font-weight: 700; color: #666; text-transform: uppercase; display: block;">Pre-Emp</span>
@@ -126,7 +168,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
 
-                <!-- Filter Control and Live Search Field Input -->
                 <div class="dash-control-card">
                     <div class="dash-tab-row" id="filterRow">
                         <button class="filter-tab active" data-filter="All">All Forms</button>
@@ -169,6 +210,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.getElementById('exportCsvBtn').addEventListener('click', () => {
             exportRegistryToCsv();
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            await supabaseClientInstance.auth.signOut();
+            window.location.href = 'index.html';
         });
     }
     /**
@@ -241,41 +287,38 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-// Replace the map loop inside populateDataGrid with this corrected block:
-outputContainer.innerHTML = filtered.map(app => {
-    let regulatoryBadgeColor = '#8a349b'; 
-    let readableLabel = app.testing_reason;
+        outputContainer.innerHTML = filtered.map(app => {
+            let regulatoryBadgeColor = '#8a349b'; 
+            let readableLabel = app.testing_reason;
 
-    if (app.testing_reason === 'Pre-Employment') regulatoryBadgeColor = '#4f940c';
-    if (app.testing_reason === 'Post-Accident') regulatoryBadgeColor = '#d90429';
-    if (app.testing_reason === 'Return-To-Duty') { regulatoryBadgeColor = '#0077b6'; readableLabel = 'Return to Duty'; }
-    if (app.testing_reason === 'Follow-Up') { regulatoryBadgeColor = '#f77f00'; readableLabel = 'Follow Up'; }
-    
-    // FIXED: Stripped out the broken variable template wrapper to apply your theme colors perfectly
-    if (app.testing_reason === 'DOT-Physical') { regulatoryBadgeColor = '#4f940c'; readableLabel = 'DOT Physical'; }
+            if (app.testing_reason === 'Pre-Employment') regulatoryBadgeColor = '#4f940c';
+            if (app.testing_reason === 'Post-Accident') regulatoryBadgeColor = '#d90429';
+            if (app.testing_reason === 'Return-To-Duty') { regulatoryBadgeColor = '#0077b6'; readableLabel = 'Return to Duty'; }
+            if (app.testing_reason === 'Follow-Up') { regulatoryBadgeColor = '#f77f00'; readableLabel = 'Follow Up'; }
+            if (app.testing_reason === 'DOT-Physical') { regulatoryBadgeColor = '#4f940c'; readableLabel = 'DOT Physical'; }
 
-    return `
-        <div style="background: #ffffff; border: 1px solid rgba(138, 52, 159, 0.05); border-radius: 14px; padding: clamp(15px, 4vw, 22px); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 15px; box-shadow: 0 4px 15px rgba(62,13,95,0.01); box-sizing: border-box; width: 100%;">
-            <div style="flex: 1; min-width: 240px;">
-                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap;">
-                    <h3 style="margin: 0; color: var(--purple-primary); font-size: clamp(1.1rem, 3vw, 1.25rem); font-weight: 800;">${app.client_name}</h3>
-                    <span style="font-size: 0.7rem; background: rgba(138,52,159,0.02); color: ${regulatoryBadgeColor}; padding: 3px 8px; border-radius: 20px; font-weight: 700; text-transform: uppercase; border: 1px solid ${regulatoryBadgeColor}25; white-space: nowrap;">${readableLabel}</span>
+            return `
+                <div style="background: #ffffff; border: 1px solid rgba(138, 52, 159, 0.05); border-radius: 14px; padding: clamp(15px, 4vw, 22px); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 15px; box-shadow: 0 4px 15px rgba(62,13,95,0.01); box-sizing: border-box; width: 100%;">
+                    <div style="flex: 1; min-width: 240px;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap;">
+                            <h3 style="margin: 0; color: var(--purple-primary); font-size: clamp(1.1rem, 3vw, 1.25rem); font-weight: 800;">${app.client_name}</h3>
+                            <span style="font-size: 0.7rem; background: rgba(138,52,159,0.02); color: ${regulatoryBadgeColor}; padding: 3px 8px; border-radius: 20px; font-weight: 700; text-transform: uppercase; border: 1px solid ${regulatoryBadgeColor}25; white-space: nowrap;">${readableLabel}</span>
+                        </div>
+                        <div style="font-size: 0.85rem; color: #555; display: flex; flex-direction: column; gap: 4px; margin: 0;">
+                            <span>🆔 <strong>CDL:</strong> ${app.cdl_number}</span>
+                            <span>📞 <strong>Phone:</strong> ${app.client_phone}</span>
+                            <span>✉️ <strong>Email:</strong> ${app.client_email}</span>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: left; min-width: 140px; background: #fafafa; padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.02); box-sizing: border-box; flex-shrink: 0;">
+                        <span style="font-size: 0.7rem; font-weight: 700; color: #777; text-transform: uppercase; display: block; margin-bottom: 2px;">Schedule</span>
+                        <strong style="color: var(--purple-primary); font-size: 0.95rem; display: block;">${app.booking_date}</strong>
+                        <span style="color: var(--purple-accent); font-size: 0.85rem; font-weight: 600;">⏱️ ${app.booking_time}</span>
+                    </div>
                 </div>
-                <div style="font-size: 0.85rem; color: #555; display: flex; flex-direction: column; gap: 4px; margin: 0;">
-                    <span>🆔 <strong>CDL:</strong> ${app.cdl_number}</span>
-                    <span>📞 <strong>Phone:</strong> ${app.client_phone}</span>
-                    <span>✉️ <strong>Email:</strong> ${app.client_email}</span>
-                </div>
-            </div>
-            
-            <div style="text-align: left; min-width: 140px; background: #fafafa; padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.02); box-sizing: border-box; flex-shrink: 0;">
-                <span style="font-size: 0.7rem; font-weight: 700; color: #777; text-transform: uppercase; display: block; margin-bottom: 2px;">Schedule</span>
-                <strong style="color: var(--purple-primary); font-size: 0.95rem; display: block;">${app.booking_date}</strong>
-                <span style="color: var(--purple-accent); font-size: 0.85rem; font-weight: 600;">⏱️ ${app.booking_time}</span>
-            </div>
-        </div>
-    `;
-}).join('');
+            `;
+        }).join('');
     }
 
     /**

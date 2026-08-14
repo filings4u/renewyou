@@ -52,7 +52,7 @@ function renderNavigation() {
                     <li><a href="index.html" class="nav-link" data-page="index" style="color: var(--purple-primary); text-decoration: none; font-weight: 600; font-size: 1rem; transition: color 0.3s ease;">Home</a></li>
                     <li><a href="about.html" class="nav-link" data-page="about" style="color: var(--purple-primary); text-decoration: none; font-weight: 600; font-size: 1rem; transition: color 0.3s ease;">About</a></li>
                     <li><a href="services.html" class="nav-link" data-page="services" style="color: var(--purple-primary); text-decoration: none; font-weight: 600; font-size: 1rem; transition: color 0.3s ease;">Services</a></li>
- <!-- BRAND NEW Injections & IVs Dropdown Zone -->
+                <!-- BRAND NEW Injections & IVs Dropdown Zone -->
                     <li class="nav-item-dropdown" style="position: relative; display: inline-block; padding-bottom: 15px; margin-bottom: -15px;">
                         <a href="#" class="nav-link" style="color: var(--purple-primary); text-decoration: none; font-weight: 600; font-size: 1rem; transition: color 0.3s ease; display: flex; align-items: center; gap: 4px;">
                             Injections & IVs
