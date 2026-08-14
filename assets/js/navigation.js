@@ -17,6 +17,7 @@ function renderNavigation() {
         <!-- Quick Contact Utility Strip -->
         <div class="global-top-bar" style="background-color: var(--purple-accent); color: var(--bg-white); padding: 10px 20px; font-size: 0.9rem; font-family: system-ui, -apple-system, sans-serif; box-sizing: border-box; width: 100%;">
             <style>
+                /* Mobile responsive rule to remove the top bar */
                 @media (max-width: 768px) {
                     .global-top-bar { display: none !important; }
                 }
@@ -51,8 +52,7 @@ function renderNavigation() {
                     <li><a href="index.html" class="nav-link" data-page="index" style="color: var(--purple-primary); text-decoration: none; font-weight: 600; font-size: 1rem; transition: color 0.3s ease;">Home</a></li>
                     <li><a href="about.html" class="nav-link" data-page="about" style="color: var(--purple-primary); text-decoration: none; font-weight: 600; font-size: 1rem; transition: color 0.3s ease;">About</a></li>
                     <li><a href="services.html" class="nav-link" data-page="services" style="color: var(--purple-primary); text-decoration: none; font-weight: 600; font-size: 1rem; transition: color 0.3s ease;">Services</a></li>
-                    
-                    <!-- BRAND NEW Injections & IVs Dropdown Zone -->
+ <!-- BRAND NEW Injections & IVs Dropdown Zone -->
                     <li class="nav-item-dropdown" style="position: relative; display: inline-block; padding-bottom: 15px; margin-bottom: -15px;">
                         <a href="#" class="nav-link" style="color: var(--purple-primary); text-decoration: none; font-weight: 600; font-size: 1rem; transition: color 0.3s ease; display: flex; align-items: center; gap: 4px;">
                             Injections & IVs
@@ -65,54 +65,67 @@ function renderNavigation() {
                             </ul>
                         </div>
                     </li>
+                    <li><a href="insurance.html" class="nav-link" data-page="insurance" style="color: var(--purple-primary); text-decoration: none; font-weight: 600; font-size: 1rem; transition: color 0.3s ease;">Insurance</a></li>
+                    <li><a href="patients.html" class="nav-link" data-page="patients" style="color: var(--purple-primary); text-decoration: none; font-weight: 600; font-size: 1rem; transition: color 0.3s ease;">Patients</a></li>
+                    <li><a href="payment-plans.html" class="nav-link" data-page="patients" style="color: var(--purple-primary); text-decoration: none; font-weight: 600; font-size: 1rem; transition: color 0.3s ease;">Payment Plans</a></li>
+                    <li><a href="contact.html" class="nav-link" data-page="contact" style="color: var(--purple-primary); text-decoration: none; font-weight: 600; font-size: 1rem; transition: color 0.3s ease;">Contact</a></li>
 
-                    <!-- Professional DOT Dropdown Element with Continuous Hover Zone -->
+                        <!-- Professional DOT Dropdown Element with Continuous Hover Zone -->
                     <li class="nav-item-dropdown" style="position: relative; display: inline-block; padding-bottom: 15px; margin-bottom: -15px;">
-                        <a href="#" class="nav-link" style="color: var(--purple-primary); text-decoration: none; font-weight: 600; font-size: 1rem; transition: color 0.3s ease; display: flex; align-items: center; gap: 4px;">
+                        <a href="" class="nav-link" style="color: var(--purple-primary); text-decoration: none; font-weight: 600; font-size: 1rem; transition: color 0.3s ease; display: flex; align-items: center; gap: 4px;">
                             DOT Compliance
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
                         </a>
                         <div class="dropdown-menu-wrapper" style="position: absolute; top: 100%; left: 0; padding-top: 10px; display: none; z-index: 1000;">
                             <ul class="dropdown-menu-list" style="background: #ffffff; min-width: 240px; box-shadow: 0 10px 30px rgba(62, 13, 95, 0.08); border-radius: 12px; padding: 10px 0; margin: 0; list-style: none; border: 1px solid rgba(138, 52, 159, 0.06);">
-                                <li><a href="dot-physicals.html" style="color: #333; padding: 12px 20px; text-decoration: none; display: block; font-size: 0.95rem; font-weight: 500; transition: all 0.2s ease;">DOT Physical Exams</a></li>
+                                <li><a href="dot-drug-tests.html" style="color: #333; padding: 12px 20px; text-decoration: none; display: block; font-size: 0.95rem; font-weight: 500; transition: all 0.2s ease;">Overview & Services</a></li>
                                 <li><a href="dot-drivers.html" style="color: #333; padding: 12px 20px; text-decoration: none; display: block; font-size: 0.95rem; font-weight: 500; transition: all 0.2s ease;">Commercial Drivers</a></li>
-                                <li><a href="dot-employers.html" style="color: #333; padding: 12px 20px; text-decoration: none; display: block; font-size: 0.95rem; font-weight: 500; transition: all 0.2s ease;">Corporate Programs</a></li>
+                                <li><a href="dot-corporate.html" style="color: #333; padding: 12px 20px; text-decoration: none; display: block; font-size: 0.95rem; font-weight: 500; transition: all 0.2s ease;">Corporate Programs</a></li>
+                                <li><a href="dot-employers.html" style="color: #333; padding: 12px 20px; text-decoration: none; display: block; font-size: 0.95rem; font-weight: 500; transition: all 0.2s ease;">Employer Programs</a></li>
+                                <li><a href="dot-physicals.html" style="color: #333; padding: 12px 20px; text-decoration: none; display: block; font-size: 0.95rem; font-weight: 500; transition: all 0.2s ease;">DOT Physicals</a></li>
+                                <li style="border-top: 1px solid rgba(138, 52, 159, 0.06); margin-top: 5px; padding-top: 5px;">
+                                <a href="dot-appointment.html" style="color: var(--purple-accent); padding: 12px 20px; text-decoration: none; display: block; font-size: 0.95rem; font-weight: 700; transition: all 0.2s ease;">Schedule DOT Test →</a>
+                                </li>
                             </ul>
                         </div>
                     </li>
-
-                    <li><a href="insurance.html" class="nav-link" data-page="insurance" style="color: var(--purple-primary); text-decoration: none; font-weight: 600; font-size: 1rem; transition: color 0.3s ease;">Insurance</a></li>
-                    <li><a href="patients.html" class="nav-link" data-page="patients" style="color: var(--purple-primary); text-decoration: none; font-weight: 600; font-size: 1rem; transition: color 0.3s ease;">Patients</a></li>
-                    <li><a href="payment-plans.html" class="nav-link" data-page="payment-plans" style="color: var(--purple-primary); text-decoration: none; font-weight: 600; font-size: 1rem; transition: color 0.3s ease;">Payment Plans</a></li>
-                    <li><a href="contact.html" class="nav-link" data-page="contact" style="color: var(--purple-primary); text-decoration: none; font-weight: 600; font-size: 1rem; transition: color 0.3s ease;">Contact</a></li>
-                    <li style="margin-left: 5px;"><a href="dot-appointment.html" class="btn-nav" style="background: linear-gradient(135deg, var(--green-secondary), var(--green-primary)); color: var(--bg-white); padding: 10px 22px; border-radius: 25px; text-decoration: none; font-weight: 600; font-size: 0.95rem; display: inline-block; transition: all 0.3s ease; box-shadow: 0 4px 10px rgba(79, 148, 12, 0.15);">Book Appointment</a></li>
+                    <li style="margin-left: 5px;"><a href="https://www.tebra.com/care/provider/angela-martin-1962195958" class="btn-nav" style="background: linear-gradient(135deg, var(--green-secondary), var(--green-primary)); color: var(--bg-white); padding: 10px 22px; border-radius: 25px; text-decoration: none; font-weight: 600; font-size: 0.95rem; display: inline-block; transition: all 0.3s ease; box-shadow: 0 4px 10px rgba(79, 148, 12, 0.15);">Book Appointment</a></li>
                 </ul>
 
+                
+
                 <style>
+                    /* Enhanced hover zones with zero dead structural air space gaps */
                     .nav-item-dropdown:hover .dropdown-menu-wrapper { display: block !important; }
                     .dropdown-menu-list li a:hover { background-color: rgba(138, 52, 159, 0.03); color: var(--purple-primary) !important; }
-                    
-                    @media (max-width: 991px) {
-                        #mobileMenuBtn { display: inline-flex !important; }
-                        #navMenu { display: none !important; flex-direction: column !important; align-items: stretch !important; position: absolute !important; top: 100%; right: 20px !important; width: 280px !important; background-color: var(--bg-white) !important; padding: 25px !important; border-radius: 16px !important; border: 1px solid rgba(138, 52, 159, 0.08) !important; box-shadow: 0 15px 40px rgba(62, 13, 95, 0.15) !important; z-index: 999 !important; gap: 16px !important; }
-                        #navMenu.show-mobile-dropdown { display: flex !important; }
-                        #navMenu li { width: 100% !important; text-align: left !important; }
-                        #navMenu .btn-nav { display: block !important; text-align: center !important; margin-top: 5px !important; }
-                        
-                        .nav-item-dropdown { padding-bottom: 0 !important; margin-bottom: 0 !important; }
-                        .nav-item-dropdown:hover .dropdown-menu-wrapper { position: relative !important; display: block !important; top: 0 !important; padding-top: 5px !important; }
-                        .dropdown-menu-list { box-shadow: none !important; border: none !important; background: rgba(138, 52, 159, 0.02) !important; padding: 5px 0 !important; }
-                        .dropdown-menu-list li a { padding: 8px 15px !important; }
-                    }
                 </style>
             </div>
         </header>
+        <!-- Inject Adaptive Responsive Layout Break Rules -->
+        <style>
+            @media (max-width: 991px) {
+                #mobileMenuBtn { display: inline-flex !important; }
+                #navMenu { display: none !important; flex-direction: column !important; align-items: stretch !important; position: absolute !important; top: 100%; right: 20px !important; width: 280px !important; background-color: var(--bg-white) !important; padding: 25px !important; border-radius: 16px !important; border: 1px solid rgba(138, 52, 159, 0.08) !important; box-shadow: 0 15px 40px rgba(62, 13, 95, 0.15) !important; z-index: 999 !important; gap: 16px !important; }
+                #navMenu.show-mobile-dropdown { display: flex !important; }
+                #navMenu li { width: 100% !important; text-align: left !important; }
+                #navMenu .btn-nav { display: block !important; text-align: center !important; margin-top: 5px !important; }
+                #mobileMenuBtn:hover { background-color: rgba(138, 52, 159, 0.05) !important; border-color: var(--purple-accent) !important; }
+                
+                /* Ensure dropdown displays gracefully inside the mobile drawer */
+                .nav-item-dropdown { padding-bottom: 0 !important; margin-bottom: 0 !important; }
+                .nav-item-dropdown:hover .dropdown-menu-wrapper { position: relative !important; display: block !important; top: 0 !important; padding-top: 5px !important; }
+                .dropdown-menu-list { box-shadow: none !important; border: none !important; background: rgba(138, 52, 159, 0.02) !important; padding: 5px 0 !important; }
+                .dropdown-menu-list li a { padding: 8px 15px !important; }
+            }
+        </style>
     `;
-    
     initMobileMenu();
     highlightActiveLink();
 }
 
+/**
+ * Toggles responsive right-hand floating dropdown menu display visibility rules
+ */
 function initMobileMenu() {
     const menuToggle = document.getElementById('mobileMenuBtn');
     const navMenu = document.getElementById('navMenu');
@@ -130,6 +143,9 @@ function initMobileMenu() {
     });
 }
 
+/**
+ * Automatically calculates and tags the active page item matching the URL path
+ */
 function highlightActiveLink() {
     const path = window.location.pathname;
     const page = path.split("/").pop().replace(".html", "") || "index";
