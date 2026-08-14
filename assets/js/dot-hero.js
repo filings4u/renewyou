@@ -112,8 +112,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     <h1 class="dot-hero-title">Certified DOT Drug & Alcohol Testing</h1>
                     <p class="dot-hero-subtitle">Fast, fully legal, and audit-ready occupational health testing keeping your fleet compliant and your workplace safe.</p>
                     <div class="dot-hero-cta-group">
-                        <a href="#employers" style="background: var(--purple-primary); color: #fff; padding: 14px 28px; border-radius: 12px; font-weight: 700; text-decoration: none; font-size: 0.95rem;">Employer Programs</a>
-                        <a href="#truckers" style="background: #fff; color: var(--purple-primary); padding: 14px 28px; border-radius: 12px; font-weight: 700; text-decoration: none; font-size: 0.95rem; border: 1px solid rgba(138, 52, 159, 0.15);">Driver Walk-Ins</a>
+                        <a href="dot-corporate.html" style="background: var(--purple-primary); color: #fff; padding: 14px 28px; border-radius: 12px; font-weight: 700; text-decoration: none; font-size: 0.95rem;">Employer Programs</a>
+                        <a href="dot-appointment.html" style="background: #fff; color: var(--purple-primary); padding: 14px 28px; border-radius: 12px; font-weight: 700; text-decoration: none; font-size: 0.95rem; border: 1px solid rgba(138, 52, 159, 0.15);">Driver Walk-Ins</a>
                     </div>
                 </div>
                 <div class="dot-hero-media">

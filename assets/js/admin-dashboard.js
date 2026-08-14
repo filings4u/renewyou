@@ -3,18 +3,18 @@
  * Location: assets/js/admin-dashboard.js
  */
 document.addEventListener('DOMContentLoaded', () => {
-    // SUPABASE ACCESS PARAMETERS - UPDATE TO MATCH YOUR PROJECT ASSIGNMENTS
+    // SUPABASE ACCESS PARAMETERS - Ensure you paste your exact Anon Key string over the placeholder
     const SUPABASE_PROJECT_URL = "https://lrbimrlbskjweynxlgas.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxyYmltcmxic2tqd2V5bnhsZ2FzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1MjQ0NTYsImV4cCI6MjA5NDEwMDQ1Nn0.I8fQ6ZjA9oaTqJCF-7Z7vUboXC8zv2cogBv4PC_1ihU"; 
 
     const target = document.getElementById('admin-dashboard-target');
     if (!target) return;
 
-    // Local state variables 
     let appointmentsData = [];
     let activeFilter = 'All';
+    let searchQuery = '';
 
-    // Verify session state inside SessionStorage to prevent lockouts on page refresh
+    // Verify session state inside SessionStorage to prevent locks on page refresh
     if (sessionStorage.getItem('clinic_admin_authenticated') === 'true') {
         renderDashboardStructure();
         fetchAppointments();
@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <label style="display: block; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 6px; color: #444;">Access Passcode</label>
                             <input type="password" id="passcodeField" required style="width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 10px; font-size: 1rem; box-sizing: border-box;" placeholder="••••••••">
                         </div>
-                        <button type="submit" style="width: 100%; background: var(--purple-primary); color: #fff; padding: 14px; border: none; border-radius: 10px; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: background 0.2s;">Authenticate Access</button>
+                        <button type="submit" style="width: 100%; background: var(--purple-primary); color: #fff; padding: 14px; border: none; border-radius: 10px; font-weight: 700; font-size: 0.95rem; cursor: pointer;">Authenticate Access</button>
                         <p id="gatekeeperError" style="color: #d90429; font-size: 0.85rem; font-weight: 600; text-align: center; margin: 15px 0 0 0; display: none;">Invalid internal passcode credential.</p>
                     </form>
                 </div>
@@ -47,10 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.getElementById('gatekeeperForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            const input = document.getElementById('passcodeField').value;
-            
-            // Set your desired dashboard access password string here
-            if (input === 'RenewYouAdmin2026') { 
+            if (document.getElementById('passcodeField').value === 'RenewYouAdmin2026') { 
                 sessionStorage.setItem('clinic_admin_authenticated', 'true');
                 renderDashboardStructure();
                 fetchAppointments();
@@ -60,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     /**
-     * Builds main dashboard data frame layout shell
+     * Builds main dashboard data frame layout shell with control centers
      */
     function renderDashboardStructure() {
         target.innerHTML = `
@@ -71,62 +68,94 @@ document.addEventListener('DOMContentLoaded', () => {
                         <h1 style="color: var(--purple-primary); margin: 0 0 5px 0; font-weight: 800; font-size: 2.2rem; letter-spacing: -0.5px;">DOT Screening Registry</h1>
                         <p style="color: #666; margin: 0; font-size: 1rem;">Active occupational testing queues and driver manifests.</p>
                     </div>
-                    <button id="logoutBtn" style="background: transparent; color: #666; border: 1px solid #ddd; padding: 10px 18px; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 0.9rem;">Sign Out</button>
+                    <div style="display: flex; gap: 12px;">
+                        <button id="exportCsvBtn" style="background: #ffffff; color: var(--green-primary); border: 1px solid var(--green-primary); padding: 10px 18px; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; gap: 6px;">📊 Export CSV</button>
+                        <button id="logoutBtn" style="background: transparent; color: #666; border: 1px solid #ddd; padding: 10px 18px; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 0.9rem;">Sign Out</button>
+                    </div>
                 </div>
 
-                <!-- Statistics Metrics Overview Matrix -->
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 40px;" id="metricsCounterMatrix">
-                    <div style="background: #fff; padding: 25px; border-radius: 16px; border: 1px solid rgba(138,52,159,0.06); box-shadow: 0 4px 15px rgba(0,0,0,0.01);">
+                <!-- 6-Card Expanded Metrics Counter Grid Matrix -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 40px;" id="metricsCounterMatrix">
+                    <div style="background: #fff; padding: 20px; border-radius: 16px; border: 1px solid rgba(138,52,159,0.06); box-shadow: 0 4px 15px rgba(0,0,0,0.01);">
                         <span style="font-size: 0.8rem; font-weight: 700; color: #666; text-transform: uppercase;">Total Registries</span>
-                        <h3 id="statTotal" style="margin: 10px 0 0 0; font-size: 2rem; color: var(--purple-primary); font-weight: 800;">0</h3>
+                        <h3 id="statTotal" style="margin: 8px 0 0 0; font-size: 1.8rem; color: var(--purple-primary); font-weight: 800;">0</h3>
                     </div>
-                    <div style="background: #fff; padding: 25px; border-radius: 16px; border: 1px solid rgba(138,52,159,0.06); box-shadow: 0 4px 15px rgba(0,0,0,0.01);">
+                    <div style="background: #fff; padding: 20px; border-radius: 16px; border: 1px solid rgba(138,52,159,0.06); box-shadow: 0 4px 15px rgba(0,0,0,0.01);">
                         <span style="font-size: 0.8rem; font-weight: 700; color: #666; text-transform: uppercase;">Pre-Employment</span>
-                        <h3 id="statPre" style="margin: 10px 0 0 0; font-size: 2rem; color: #4f940c; font-weight: 800;">0</h3>
+                        <h3 id="statPre" style="margin: 8px 0 0 0; font-size: 1.8rem; color: #4f940c; font-weight: 800;">0</h3>
                     </div>
-                    <div style="background: #fff; padding: 25px; border-radius: 16px; border: 1px solid rgba(138,52,159,0.06); box-shadow: 0 4px 15px rgba(0,0,0,0.01);">
+                    <div style="background: #fff; padding: 20px; border-radius: 16px; border: 1px solid rgba(138,52,159,0.06); box-shadow: 0 4px 15px rgba(0,0,0,0.01);">
                         <span style="font-size: 0.8rem; font-weight: 700; color: #666; text-transform: uppercase;">Random Pools</span>
-                        <h3 id="statRandom" style="margin: 10px 0 0 0; font-size: 2rem; color: var(--purple-accent); font-weight: 800;">0</h3>
+                        <h3 id="statRandom" style="margin: 8px 0 0 0; font-size: 1.8rem; color: var(--purple-accent); font-weight: 800;">0</h3>
                     </div>
-                    <div style="background: #fff; padding: 25px; border-radius: 16px; border: 1px solid rgba(138,52,159,0.06); box-shadow: 0 4px 15px rgba(0,0,0,0.01);">
-                        <span style="font-size: 0.8rem; font-weight: 700; color: #666; text-transform: uppercase;">Urgent Incidents</span>
-                        <h3 id="statUrgent" style="margin: 10px 0 0 0; font-size: 2rem; color: #d90429; font-weight: 800;">0</h3>
+                    <div style="background: #fff; padding: 20px; border-radius: 16px; border: 1px solid rgba(138,52,159,0.06); box-shadow: 0 4px 15px rgba(0,0,0,0.01);">
+                        <span style="font-size: 0.8rem; font-weight: 700; color: #666; text-transform: uppercase;">Post-Accident</span>
+                        <h3 id="statUrgent" style="margin: 8px 0 0 0; font-size: 1.8rem; color: #d90429; font-weight: 800;">0</h3>
+                    </div>
+                    <div style="background: #fff; padding: 20px; border-radius: 16px; border: 1px solid rgba(138,52,159,0.06); box-shadow: 0 4px 15px rgba(0,0,0,0.01);">
+                        <span style="font-size: 0.8rem; font-weight: 700; color: #666; text-transform: uppercase;">Return To Duty</span>
+                        <h3 id="statReturn" style="margin: 8px 0 0 0; font-size: 1.8rem; color: #0077b6; font-weight: 800;">0</h3>
+                    </div>
+                    <div style="background: #fff; padding: 20px; border-radius: 16px; border: 1px solid rgba(138,52,159,0.06); box-shadow: 0 4px 15px rgba(0,0,0,0.01);">
+                        <span style="font-size: 0.8rem; font-weight: 700; color: #666; text-transform: uppercase;">Follow Up</span>
+                        <h3 id="statFollow" style="margin: 8px 0 0 0; font-size: 1.8rem; color: #f77f00; font-weight: 800;">0</h3>
                     </div>
                 </div>
 
-                <!-- Navigation Sorter Filters -->
-                <div style="display: flex; gap: 10px; margin-bottom: 25px; flex-wrap: wrap;" id="filterRow">
-                    <button class="filter-tab active" data-filter="All" style="padding: 10px 20px; border: none; border-radius: 30px; font-weight: 600; cursor: pointer; font-size: 0.9rem; background: var(--purple-primary); color: #fff;">All Forms</button>
-                    <button class="filter-tab" data-filter="Pre-Employment" style="padding: 10px 20px; border: none; border-radius: 30px; font-weight: 600; cursor: pointer; font-size: 0.9rem; background: #eee; color: #333;">Pre-Employment</button>
-                    <button class="filter-tab" data-filter="Random-Pool" style="padding: 10px 20px; border: none; border-radius: 30px; font-weight: 600; cursor: pointer; font-size: 0.9rem; background: #eee; color: #333;">Random Pool</button>
-                    <button class="filter-tab" data-filter="Post-Accident" style="padding: 10px 20px; border: none; border-radius: 30px; font-weight: 600; cursor: pointer; font-size: 0.9rem; background: #eee; color: #333;">Post-Accident</button>
+                <!-- Filter Row and Search Field Controls Wrapper Box -->
+                <div style="background: #ffffff; border: 1px solid rgba(138, 52, 159, 0.06); padding: 20px; border-radius: 16px; margin-bottom: 25px; display: flex; flex-direction: column; gap: 20px;">
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;" id="filterRow">
+                        <button class="filter-tab active" data-filter="All" style="padding: 10px 18px; border: none; border-radius: 30px; font-weight: 600; cursor: pointer; font-size: 0.85rem; background: var(--purple-primary); color: #fff;">All Forms</button>
+                        <button class="filter-tab" data-filter="Pre-Employment" style="padding: 10px 18px; border: none; border-radius: 30px; font-weight: 600; cursor: pointer; font-size: 0.85rem; background: #eee; color: #333;">Pre-Employment</button>
+                        <button class="filter-tab" data-filter="Random-Pool" style="padding: 10px 18px; border: none; border-radius: 30px; font-weight: 600; cursor: pointer; font-size: 0.85rem; background: #eee; color: #333;">Random Pool</button>
+                        <button class="filter-tab" data-filter="Post-Accident" style="padding: 10px 18px; border: none; border-radius: 30px; font-weight: 600; cursor: pointer; font-size: 0.85rem; background: #eee; color: #333;">Post-Accident</button>
+                        <button class="filter-tab" data-filter="Return-To-Duty" style="padding: 10px 18px; border: none; border-radius: 30px; font-weight: 600; cursor: pointer; font-size: 0.85rem; background: #eee; color: #333;">Return To Duty</button>
+                        <button class="filter-tab" data-filter="Follow-Up" style="padding: 10px 18px; border: none; border-radius: 30px; font-weight: 600; cursor: pointer; font-size: 0.85rem; background: #eee; color: #333;">Follow Up</button>
+                    </div>
+                    
+                    <div style="position: relative; width: 100%;">
+                        <input type="text" id="dashboardSearch" style="width: 100%; padding: 14px 16px 14px 44px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.08); font-size: 1rem; box-sizing: border-box; background-color: #fafafa;" placeholder="Filter entries by driver name or commercial license string (CDL)...">
+                        <div style="position: absolute; left: 16px; top: 15px; color: #777;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Master Application Tracking Grid Output Box -->
+                <!-- Manifest Data Output Entry Target Box -->
                 <div id="dataListTarget" style="display: grid; grid-template-columns: 1fr; gap: 15px;">
                     <p style="color: #666; text-align: center; padding: 40px;">Querying database secure tables...</p>
                 </div>
             </div>
         `;
 
-        // Attach Logout Event Action
+        // Configure event hooks and listeners for this active DOM layer layout
         document.getElementById('logoutBtn').addEventListener('click', () => {
             sessionStorage.removeItem('clinic_admin_authenticated');
             window.location.reload();
         });
 
-        // Attach Filter Action Hooks
-        document.getElementById('filterRow').addEventListener('click', (e) => {
-            if (e.target.classList.contains('filter-tab')) {
-                document.querySelectorAll('.filter-tab').forEach(b => {
+        // FIXED ACTION TARGETING: Loop explicitly sets the click hook on specific button tags
+        const tabs = document.querySelectorAll('.filter-tab');
+        tabs.forEach(tabBtn => {
+            tabBtn.addEventListener('click', () => {
+                tabs.forEach(b => {
                     b.style.background = '#eee';
                     b.style.color = '#333';
                 });
-                e.target.style.background = 'var(--purple-primary)';
-                e.target.style.color = '#fff';
-                activeFilter = e.target.getAttribute('data-filter');
+                tabBtn.style.background = 'var(--purple-primary)';
+                tabBtn.style.color = '#fff';
+                activeFilter = tabBtn.getAttribute('data-filter');
                 populateDataGrid();
-            }
+            });
+        });
+
+        document.getElementById('dashboardSearch').addEventListener('input', (e) => {
+            searchQuery = e.target.value.toLowerCase().trim();
+            populateDataGrid();
+        });
+
+        document.getElementById('exportCsvBtn').addEventListener('click', () => {
+            exportRegistryToCsv();
         });
     }
     /**
@@ -151,50 +180,63 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (err) {
             const grid = document.getElementById('dataListTarget');
             if (grid) {
-                grid.innerHTML = `<p style="color:#d90429; font-weight:600; text-align:center; padding:30px; border:1px dashed #d90429; border-radius:12px; background:#fff5f6;">Error reading records: ${err.message}. Ensure your public table RLS policies grant read authorization, or verify your project endpoint strings.</p>`;
+                grid.innerHTML = `<p style="color:#d90429; font-weight:600; text-align:center; padding:30px; border:1px dashed #d90429; border-radius:12px; background:#fff5f6;">Error reading records: ${err.message}. Verify network table status configs.</p>`;
             }
         }
     }
 
     /**
-     * Calculates processing indicators matrix
+     * Calculates processing indicators matrix for all 6 categories
      */
     function calculateMetrics() {
         document.getElementById('statTotal').innerText = appointmentsData.length;
         document.getElementById('statPre').innerText = appointmentsData.filter(a => a.testing_reason === 'Pre-Employment').length;
         document.getElementById('statRandom').innerText = appointmentsData.filter(a => a.testing_reason === 'Random-Pool').length;
         document.getElementById('statUrgent').innerText = appointmentsData.filter(a => a.testing_reason === 'Post-Accident').length;
+        document.getElementById('statReturn').innerText = appointmentsData.filter(a => a.testing_reason === 'Return-To-Duty').length;
+        document.getElementById('statFollow').innerText = appointmentsData.filter(a => a.testing_reason === 'Follow-Up').length;
     }
-
     /**
-     * Filters, structures, and outputs data arrays to screen viewport components
+     * Filters, searches, and outputs data arrays to screen viewport components
      */
     function populateDataGrid() {
         const outputContainer = document.getElementById('dataListTarget');
         if (!outputContainer) return;
 
-        const filtered = appointmentsData.filter(app => {
-            if (activeFilter === 'All') return true;
-            return app.testing_reason === activeFilter;
-        });
+     // Replace the .filter() line inside populateDataGrid with this:
+const filtered = appointmentsData.filter(app => {
+    const dbReason = (app.testing_reason || '').toLowerCase().replace(/[\s_-]/g, '');
+    const currentTab = activeFilter.toLowerCase().replace(/[\s_-]/g, '');
+    
+    const matchesTab = (activeFilter === 'All' || dbReason === currentTab);
+    const matchesSearch = (
+        (app.client_name || '').toLowerCase().includes(searchQuery) || 
+        (app.cdl_number || '').toLowerCase().includes(searchQuery)
+    );
+    return matchesTab && matchesSearch;
+});
+
 
         if (filtered.length === 0) {
-            outputContainer.innerHTML = `<p style="background:#fff; border:1px solid rgba(0,0,0,0.04); text-align:center; padding:50px; color:#666; border-radius:16px; font-weight:500;">No screening appointments match this filter criteria block.</p>`;
+            outputContainer.innerHTML = `<div style="background:#fff; border:1px solid rgba(0,0,0,0.04); text-align:center; padding:50px; color:#666; border-radius:16px; font-weight:500;">No screening appointments match your filter criteria or search terms.</div>`;
             return;
         }
 
         outputContainer.innerHTML = filtered.map(app => {
-            // Calculate a color tag matched cleanly to specific severity rules 
-            let regulatoryBadgeColor = '#8a349b';
+            let regulatoryBadgeColor = '#8a349b'; 
+            let readableLabel = app.testing_reason;
+
             if (app.testing_reason === 'Pre-Employment') regulatoryBadgeColor = '#4f940c';
             if (app.testing_reason === 'Post-Accident') regulatoryBadgeColor = '#d90429';
+            if (app.testing_reason === 'Return-To-Duty') { regulatoryBadgeColor = '#0077b6'; readableLabel = 'Return to Duty'; }
+            if (app.testing_reason === 'Follow-Up') { regulatoryBadgeColor = '#f77f00'; readableLabel = 'Follow Up'; }
 
             return `
-                <div style="background: #ffffff; border: 1px solid rgba(138, 52, 159, 0.05); border-radius: 16px; padding: 25px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 20px; box-shadow: 0 4px 15px rgba(62,13,95,0.01); box-sizing: border-box;">
+                <div class="appointment-row-card" style="background: #ffffff; border: 1px solid rgba(138, 52, 159, 0.05); border-radius: 16px; padding: 25px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 20px; box-shadow: 0 4px 15px rgba(62,13,95,0.01); box-sizing: border-box;">
                     <div style="flex: 1; min-width: 250px;">
-                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px; flex-wrap: wrap;">
                             <h3 style="margin: 0; color: var(--purple-primary); font-size: 1.25rem; font-weight: 800;">${app.client_name}</h3>
-                            <span style="font-size: 0.75rem; background: rgba(138,52,159,0.04); color: ${regulatoryBadgeColor}; padding: 4px 10px; border-radius: 20px; font-weight: 700; text-transform: uppercase; border: 1px solid rgba(138,52,159,0.06);">${app.testing_reason}</span>
+                            <span style="font-size: 0.75rem; background: rgba(138,52,159,0.02); color: ${regulatoryBadgeColor}; padding: 4px 10px; border-radius: 20px; font-weight: 700; text-transform: uppercase; border: 1px solid ${regulatoryBadgeColor}33; white-space: nowrap;">${readableLabel}</span>
                         </div>
                         <div style="font-size: 0.9rem; color: #555; display: flex; flex-wrap: wrap; gap: 15px; margin: 0;">
                             <span>🆔 <strong>CDL:</strong> ${app.cdl_number}</span>
@@ -211,5 +253,42 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `;
         }).join('');
+    }
+
+    /**
+     * Parses the current data array and downloads an audit-ready CSV sheet file
+     */
+    function exportRegistryToCsv() {
+        if (appointmentsData.length === 0) {
+            alert("No appointment entries available to export.");
+            return;
+        }
+
+        const headers = ["Driver Name", "CDL String", "Email Context", "Phone Number", "DOT Category", "Target Date", "Target Window"];
+        const csvRows = [headers.join(",")];
+
+        appointmentsData.forEach(app => {
+            const rowData = [
+                `"${(app.client_name || '').replace(/"/g, '""')}"`,
+                `"${(app.cdl_number || '').replace(/"/g, '""')}"`,
+                `"${(app.client_email || '').replace(/"/g, '""')}"`,
+                `"${(app.client_phone || '').replace(/"/g, '""')}"`,
+                `"${(app.testing_reason || '').replace(/"/g, '""')}"`,
+                `"${app.booking_date || ''}"`,
+                `"${app.booking_time || ''}"`
+            ];
+            csvRows.push(rowData.join(","));
+        });
+
+        const csvContent = "data:text/csv;charset=utf-8," + csvRows.join("\n");
+        const encodedUri = encodeURI(csvContent);
+        const downloadLink = document.createElement("a");
+        
+        downloadLink.setAttribute("href", encodedUri);
+        downloadLink.setAttribute("download", `DOT_Screening_Registry_${new Date().toISOString().split('T')[0]}.csv`);
+        document.body.appendChild(downloadLink);
+        
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
     }
 });
