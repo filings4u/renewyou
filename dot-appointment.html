@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule DOT Compliance Test</title>
+   <!-- Include Supabase Client Dependency -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- External Theme Tokens and Base Layout Stylesheet -->
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="icon" type="image/png" href="images/fav.png">
+    
+    <style>
+        :root { --purple-primary: #3e0d5f; --purple-accent: #8a349b; --green-primary: #4f940c; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #fcfbfe; margin: 0; padding: 0; }
+        .booking-card { background: #fff; border-radius: 24px; border: 1px solid rgba(138, 52, 159, 0.06); box-shadow: 0 15px 45px rgba(62,13,95,0.02); }
+        .form-control { width: 100%; padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.08); font-size: 1rem; box-sizing: border-box; transition: all 0.2s; }
+        .form-control:focus { outline: none; border-color: var(--purple-accent); box-shadow: 0 0 0 3px rgba(138,52,159,0.05); }
+        .time-slot-btn { padding: 12px; border: 1px solid rgba(138, 52, 159, 0.1); border-radius: 10px; background: #fff; cursor: pointer; text-align: center; font-weight: 600; font-size: 0.9rem; transition: all 0.2s; }
+        .time-slot-btn.selected { background: var(--purple-primary); color: #fff; border-color: var(--purple-primary); }
+    </style>
+</head>
+<body>
+
+    <!-- Dynamic Header Component Slot Target -->
+    <div id="navigation-target"></div>
+
+    <!-- Dynamic Side-by-Side Hero Component Target -->
+    <div id="hero-target"></div>
+
+     <div id="dot-appointment-target"></div>
+
+
+
+
+<!-- NEW: Email News List Capture Module Target -->
+<div id="subscribe-target"></div>
+
+<!-- Dynamic Footer Component Slot Target -->
+<div id="footer-target"></div>
+
+
+<!-- Layout Scripts Execution Flow -->
+<script src="assets/js/navigation.js"></script>
+<script src="assets/js/hero.js"></script>
+<script src="assets/js/dot-appointment.js"></script>
+<script src="assets/js/subscribe.js"></script>
+<script src="assets/js/footer.js"></script>
+
+
+</body>
+</html>
