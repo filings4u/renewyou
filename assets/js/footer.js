@@ -91,14 +91,19 @@ function renderFooterModule() {
           
 <!-- Brand Column with Perfected 10px Rounded Logo Box --> 
 <div class="footer-col" style="display: flex; flex-direction: column; gap: 10px; align-items: flex-start; justify-content: flex-start; padding-top: 0; margin-top: 0; text-align: left;"> 
-  <img src="images/logof.png" alt="ReNew You Health & Wellness Logo" style="max-width: 150px; height: 65px; object-fit: contain; display: block;  filter: drop-shadow(0px 2px 5px rgba(0, 0, 0, 0.2));"> 
-  
-  <!-- FIX: Reduced top margin/gap by adjusting layout spacing --> 
-  <div style="display: flex; flex-direction: column; gap: 10px; text-align: left; width: 100%; margin-top: 5px;"> 
-    <h3 style="color: var(--green-light); margin: 0; font-size: 1.2rem; font-weight: 700; letter-spacing: -0.2px; line-height: 1.2;"> ReNew You </h3> 
-    <p style="color: rgba(255,255,255,0.75); font-size: 0.95rem; line-height: 1.7; margin: 0; max-width: 300px;"> Health & Wellness Clinic located in Chicago Heights, IL. Empowering every single patient to renew their health from the inside out. </p> 
-  </div> 
+    
+    <!-- Link wrapper added around the logo image asset -->
+    <a href="index.html" style="display: block; transition: opacity 0.2s ease-in-out;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+        <img src="images/logof.png" alt="ReNew You Health & Wellness Logo" style="max-width: 150px; height: 65px; object-fit: contain; display: block; filter: drop-shadow(0px 2px 5px rgba(0, 0, 0, 0.2)); cursor: pointer;">
+    </a>
+
+    <!-- FIX: Reduced top margin/gap by adjusting layout spacing --> 
+    <div style="display: flex; flex-direction: column; gap: 10px; text-align: left; width: 100%; margin-top: 5px;"> 
+        <h3 style="color: var(--green-light); margin: 0; font-size: 1.2rem; font-weight: 700; letter-spacing: -0.2px; line-height: 1.2;"> ReNew You </h3> 
+        <p style="color: rgba(255,255,255,0.75); font-size: 0.95rem; line-height: 1.7; margin: 0; max-width: 300px;"> Health & Wellness Clinic located in Chicago Heights, IL. Empowering every single patient to renew their health from the inside out. </p> 
+    </div> 
 </div>
+
 
 
 

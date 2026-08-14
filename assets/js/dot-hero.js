@@ -1,5 +1,5 @@
 /**
- * DOT Drug Testing - Dynamic URL-Based Hero Component (Mobile Typography Scale)
+ * DOT Drug Testing - Dynamic URL-Based Hero Component (Multi-Page Scale)
  * Location: assets/js/dot-hero.js
  */
 document.addEventListener('DOMContentLoaded', () => {
@@ -8,11 +8,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const path = window.location.pathname.toLowerCase();
     
+    // Default baseline hero configurations (Overview Services Page)
     let badgeText = "49 CFR Part 40 Compliant";
     let titleText = "Certified DOT Drug & Alcohol Testing";
     let subtitleText = "Fast, fully legal, and audit-ready occupational health testing keeping your fleet compliant and your workplace safe.";
 
-    if (path.includes('driver')) {
+    // URL Routing Evaluation Condition Blocks
+    if (path.includes('physical')) {
+        badgeText = "FMCSA Certified Medical Examiner";
+        titleText = "DOT Physicals & Commercial Cards";
+        subtitleText = "Certified driver health examinations. Full-service fitness diagnostics to satisfy federal safety criteria and secure your medical card.";
+    } else if (path.includes('driver')) {
         badgeText = "Walk-In Drivers & Owner Operators";
         titleText = "CDL Compliance & Medical Testing";
         subtitleText = "Comprehensive compliance testing. Full-service diagnostics performed by certified collectors to satisfy federal workplace criteria.";
@@ -36,27 +42,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 align-items: center;
                 gap: 50px;
             }
-            .dot-hero-content {
-                flex: 1.2;
-                text-align: left;
-            }
-            .dot-hero-media {
-                flex: 1;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-            }
-            .dot-hero-image {
-                width: 100%;
-                max-width: 500px;
-                height: auto;
-                border-radius: 24px;
-                object-fit: cover;
-            }
+            .dot-hero-content { flex: 1.2; text-align: left; }
+            .dot-hero-media { flex: 1; display: flex; justify-content: center; align-items: center; }
+            .dot-hero-image { width: 100%; max-width: 500px; height: auto; border-radius: 24px; object-fit: cover; }
             .dot-badge {
                 color: var(--purple-accent);
                 font-weight: 700;
-                font-size: clamp(0.75rem, 2vw, 0.85rem); /* Dynamic badge size */
+                font-size: clamp(0.75rem, 2vw, 0.85rem);
                 text-transform: uppercase;
                 letter-spacing: 2px;
                 display: inline-block;
@@ -66,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 margin-bottom: 20px;
             }
             .dot-hero-title {
-                font-size: clamp(1.8rem, 5vw, 3.2rem); /* Automatically shrinks text on mobile */
+                font-size: clamp(1.8rem, 5vw, 3.2rem);
                 color: var(--purple-primary);
                 font-weight: 800;
                 line-height: 1.2;
@@ -75,49 +67,23 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             .dot-hero-subtitle {
                 color: #444;
-                font-size: clamp(0.95rem, 2.5vw, 1.15rem); /* Scales down paragraph cleanly */
+                font-size: clamp(0.95rem, 2.5vw, 1.15rem);
                 line-height: 1.6;
                 margin: 0 0 35px 0;
                 max-width: 650px;
             }
-            .dot-hero-cta-group {
-                display: flex;
-                gap: 15px;
-                justify-content: flex-start;
-                flex-wrap: wrap;
-            }
+            .dot-hero-cta-group { display: flex; gap: 15px; justify-content: flex-start; flex-wrap: wrap; }
             @media (max-width: 992px) {
-                .dot-hero-container {
-                    flex-direction: column-reverse;
-                    gap: 30px;
-                }
-                .dot-hero-content {
-                    text-align: center;
-                    flex: unset;
-                }
-                .dot-hero-media {
-                    flex: unset;
-                    width: 100%;
-                }
-                .dot-hero-image {
-                    max-width: 320px; /* Scaled down slightly to fit smaller screen contexts */
-                }
-                .dot-hero-cta-group {
-                    justify-content: center;
-                }
+                .dot-hero-container { flex-direction: column-reverse; gap: 30px; }
+                .dot-hero-content { text-align: center; flex: unset; }
+                .dot-hero-media { flex: unset; width: 100%; }
+                .dot-hero-image { max-width: 320px; }
+                .dot-hero-cta-group { justify-content: center; }
             }
             @media (max-width: 768px) {
-                .dot-hero-section {
-                    padding: 40px 15px;
-                }
-                .dot-hero-image {
-                    max-width: 85%;
-                }
-                .dot-hero-cta-group a {
-                    width: 100%; /* Makes action buttons full-width for easy tapping */
-                    text-align: center;
-                    box-sizing: border-box;
-                }
+                .dot-hero-section { padding: 40px 15px; }
+                .dot-hero-image { max-width: 85%; }
+                .dot-hero-cta-group a { width: 100%; text-align: center; box-sizing: border-box; }
             }
         </style>
         <div class="dot-hero-section">

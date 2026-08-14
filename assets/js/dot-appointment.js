@@ -130,6 +130,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             <option value="Reasonable-Suspicion">Reasonable Suspicion Testing Path</option>
                             <option value="Follow-Up">Follow Up</option>
                             <option value="Return-to-Duty">Return to Duty</option>
+                            <option value="DOT-Physical">FMCSA Certified DOT Physical Examination</option>
+
                         </select>
                     </div>
 

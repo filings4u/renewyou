@@ -1,5 +1,5 @@
 /**
- * ReNew You Health & Wellness - Protected Admin Registry Dashboard (Mobile Optimized)
+ * ReNew You Health & Wellness - Protected Admin Registry Dashboard (7-Card Expansion with DOT Physicals)
  * Location: assets/js/admin-dashboard.js
  */
 document.addEventListener('DOMContentLoaded', () => {
@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     /**
-     * Builds main dashboard data frame layout shell with mobile responsive classes
+     * Builds main dashboard data frame layout shell with expanded 7-card matrix
      */
     function renderDashboardStructure() {
         target.innerHTML = `
@@ -63,11 +63,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 .dash-outer-wrap { max-width: 1400px; margin: 0 auto; padding: 40px 20px; box-sizing: border-box; }
                 .dash-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 35px; flex-wrap: wrap; gap: 20px; }
                 .dash-title-block h1 { color: var(--purple-primary); margin: 0 0 5px 0; font-weight: 800; font-size: clamp(1.6rem, 4vw, 2.2rem); letter-spacing: -0.5px; }
-                .dash-metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 35px; }
+                .dash-metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; margin-bottom: 35px; }
                 .dash-control-card { background: #ffffff; border: 1px solid rgba(138, 52, 159, 0.06); padding: 20px; border-radius: 16px; margin-bottom: 25px; display: flex; flex-direction: column; gap: 15px; }
                 .dash-tab-row { display: flex; gap: 8px; flex-wrap: wrap; }
                 .filter-tab { padding: 8px 16px; border: none; border-radius: 30px; font-weight: 600; cursor: pointer; font-size: 0.85rem; background: #eee; color: #333; transition: all 0.2s ease; white-space: nowrap; }
                 .filter-tab.active { background: var(--purple-primary) !important; color: #fff !important; }
+                @media (max-width: 992px) {
+                    .dash-metrics-grid { grid-template-columns: repeat(3, 1fr); gap: 12px; }
+                }
                 @media (max-width: 768px) {
                     .dash-outer-wrap { padding: 20px 12px; }
                     .dash-header-row { flex-direction: column; align-items: stretch; text-align: center; gap: 15px; margin-bottom: 25px; }
@@ -91,38 +94,43 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
 
-                <!-- 6-Card Expanded Metrics Counter Grid Matrix -->
+                <!-- 7-Card Expanded Metrics Counter Grid Matrix -->
                 <div class="dash-metrics-grid" id="metricsCounterMatrix">
                     <div style="background: #fff; padding: 15px; border-radius: 14px; border: 1px solid rgba(138,52,159,0.06); box-shadow: 0 4px 15px rgba(0,0,0,0.01);">
-                        <span style="font-size: 0.75rem; font-weight: 700; color: #666; text-transform: uppercase; display: block;">Total Forms</span>
-                        <h3 id="statTotal" style="margin: 5px 0 0 0; font-size: 1.6rem; color: var(--purple-primary); font-weight: 800;">0</h3>
+                        <span style="font-size: 0.72rem; font-weight: 700; color: #666; text-transform: uppercase; display: block;">Total Forms</span>
+                        <h3 id="statTotal" style="margin: 5px 0 0 0; font-size: 1.5rem; color: var(--purple-primary); font-weight: 800;">0</h3>
                     </div>
                     <div style="background: #fff; padding: 15px; border-radius: 14px; border: 1px solid rgba(138,52,159,0.06); box-shadow: 0 4px 15px rgba(0,0,0,0.01);">
-                        <span style="font-size: 0.75rem; font-weight: 700; color: #666; text-transform: uppercase; display: block;">Pre-Emp</span>
-                        <h3 id="statPre" style="margin: 5px 0 0 0; font-size: 1.6rem; color: #4f940c; font-weight: 800;">0</h3>
+                        <span style="font-size: 0.72rem; font-weight: 700; color: #666; text-transform: uppercase; display: block;">DOT Physical</span>
+                        <h3 id="statPhysical" style="margin: 5px 0 0 0; font-size: 1.5rem; color: var(--green-primary); font-weight: 800;">0</h3>
                     </div>
                     <div style="background: #fff; padding: 15px; border-radius: 14px; border: 1px solid rgba(138,52,159,0.06); box-shadow: 0 4px 15px rgba(0,0,0,0.01);">
-                        <span style="font-size: 0.75rem; font-weight: 700; color: #666; text-transform: uppercase; display: block;">Random</span>
-                        <h3 id="statRandom" style="margin: 5px 0 0 0; font-size: 1.6rem; color: var(--purple-accent); font-weight: 800;">0</h3>
+                        <span style="font-size: 0.72rem; font-weight: 700; color: #666; text-transform: uppercase; display: block;">Pre-Emp</span>
+                        <h3 id="statPre" style="margin: 5px 0 0 0; font-size: 1.5rem; color: #4f940c; font-weight: 800;">0</h3>
                     </div>
                     <div style="background: #fff; padding: 15px; border-radius: 14px; border: 1px solid rgba(138,52,159,0.06); box-shadow: 0 4px 15px rgba(0,0,0,0.01);">
-                        <span style="font-size: 0.75rem; font-weight: 700; color: #666; text-transform: uppercase; display: block;">Accident</span>
-                        <h3 id="statUrgent" style="margin: 5px 0 0 0; font-size: 1.6rem; color: #d90429; font-weight: 800;">0</h3>
+                        <span style="font-size: 0.72rem; font-weight: 700; color: #666; text-transform: uppercase; display: block;">Random</span>
+                        <h3 id="statRandom" style="margin: 5px 0 0 0; font-size: 1.5rem; color: var(--purple-accent); font-weight: 800;">0</h3>
                     </div>
                     <div style="background: #fff; padding: 15px; border-radius: 14px; border: 1px solid rgba(138,52,159,0.06); box-shadow: 0 4px 15px rgba(0,0,0,0.01);">
-                        <span style="font-size: 0.75rem; font-weight: 700; color: #666; text-transform: uppercase; display: block;">Return Duty</span>
-                        <h3 id="statReturn" style="margin: 5px 0 0 0; font-size: 1.6rem; color: #0077b6; font-weight: 800;">0</h3>
+                        <span style="font-size: 0.72rem; font-weight: 700; color: #666; text-transform: uppercase; display: block;">Accident</span>
+                        <h3 id="statUrgent" style="margin: 5px 0 0 0; font-size: 1.5rem; color: #d90429; font-weight: 800;">0</h3>
                     </div>
                     <div style="background: #fff; padding: 15px; border-radius: 14px; border: 1px solid rgba(138,52,159,0.06); box-shadow: 0 4px 15px rgba(0,0,0,0.01);">
-                        <span style="font-size: 0.75rem; font-weight: 700; color: #666; text-transform: uppercase; display: block;">Follow Up</span>
-                        <h3 id="statFollow" style="margin: 5px 0 0 0; font-size: 1.6rem; color: #f77f00; font-weight: 800;">0</h3>
+                        <span style="font-size: 0.72rem; font-weight: 700; color: #666; text-transform: uppercase; display: block;">Return Duty</span>
+                        <h3 id="statReturn" style="margin: 5px 0 0 0; font-size: 1.5rem; color: #0077b6; font-weight: 800;">0</h3>
+                    </div>
+                    <div style="background: #fff; padding: 15px; border-radius: 14px; border: 1px solid rgba(138,52,159,0.06); box-shadow: 0 4px 15px rgba(0,0,0,0.01);">
+                        <span style="font-size: 0.72rem; font-weight: 700; color: #666; text-transform: uppercase; display: block;">Follow Up</span>
+                        <h3 id="statFollow" style="margin: 5px 0 0 0; font-size: 1.5rem; color: #f77f00; font-weight: 800;">0</h3>
                     </div>
                 </div>
 
-                <!-- Filter Row Controls and Text Search Inputs -->
+                <!-- Filter Control and Live Search Field Input -->
                 <div class="dash-control-card">
                     <div class="dash-tab-row" id="filterRow">
                         <button class="filter-tab active" data-filter="All">All Forms</button>
+                        <button class="filter-tab" data-filter="DOT-Physical">DOT Physical</button>
                         <button class="filter-tab" data-filter="Pre-Employment">Pre-Employment</button>
                         <button class="filter-tab" data-filter="Random-Pool">Random Pool</button>
                         <button class="filter-tab" data-filter="Post-Accident">Post-Accident</button>
@@ -144,7 +152,6 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         `;
 
-        // Configure event hooks and listeners
         const tabs = document.querySelectorAll('.filter-tab');
         tabs.forEach(tabBtn => {
             tabBtn.addEventListener('click', () => {
@@ -192,10 +199,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Calculates processing indicators matrix for all 6 categories
+     * Calculates processing indicators matrix for all 7 categories
      */
     function calculateMetrics() {
-        // Normalize strings by removing spaces/hyphens to guarantee match accuracy
         const getCount = (reason) => appointmentsData.filter(a => {
             const dbVal = (a.testing_reason || '').toLowerCase().replace(/[\s_-]/g, '');
             const targetVal = reason.toLowerCase().replace(/[\s_-]/g, '');
@@ -203,12 +209,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }).length;
 
         document.getElementById('statTotal').innerText = appointmentsData.length;
+        document.getElementById('statPhysical').innerText = getCount('DOT-Physical');
         document.getElementById('statPre').innerText = getCount('Pre-Employment');
         document.getElementById('statRandom').innerText = getCount('Random-Pool');
         document.getElementById('statUrgent').innerText = getCount('Post-Accident');
         document.getElementById('statReturn').innerText = getCount('Return-To-Duty');
         document.getElementById('statFollow').innerText = getCount('Follow-Up');
     }
+
     /**
      * Filters, searches, and outputs data arrays to screen viewport components
      */
@@ -216,7 +224,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const outputContainer = document.getElementById('dataListTarget');
         if (!outputContainer) return;
 
-        // Apply tab filtering and real-time input search query comparisons safely
         const filtered = appointmentsData.filter(app => {
             const dbReason = (app.testing_reason || '').toLowerCase().replace(/[\s_-]/g, '');
             const currentTab = activeFilter.toLowerCase().replace(/[\s_-]/g, '');
@@ -238,11 +245,11 @@ document.addEventListener('DOMContentLoaded', () => {
             let regulatoryBadgeColor = '#8a349b'; 
             let readableLabel = app.testing_reason;
 
-            // Map keys cleanly to modern theme colors
             if (app.testing_reason === 'Pre-Employment') regulatoryBadgeColor = '#4f940c';
             if (app.testing_reason === 'Post-Accident') regulatoryBadgeColor = '#d90429';
             if (app.testing_reason === 'Return-To-Duty') { regulatoryBadgeColor = '#0077b6'; readableLabel = 'Return to Duty'; }
             if (app.testing_reason === 'Follow-Up') { regulatoryBadgeColor = '#f77f00'; readableLabel = 'Follow Up'; }
+            if (app.testing_reason === 'DOT-Physical') { regulatoryBadgeColor = '#var(--green-primary)'; readableLabel = 'DOT Physical'; }
 
             return `
                 <div style="background: #ffffff; border: 1px solid rgba(138, 52, 159, 0.05); border-radius: 14px; padding: clamp(15px, 4vw, 22px); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 15px; box-shadow: 0 4px 15px rgba(62,13,95,0.01); box-sizing: border-box; width: 100%;">
