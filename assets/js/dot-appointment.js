@@ -49,6 +49,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             <option value="Random-Pool">Random Pool Selection Quota</option>
                             <option value="Post-Accident">Time-Critical Post-Accident Verification</option>
                             <option value="Reasonable-Suspicion">Reasonable Suspicion Testing Path</option>
+                            <option value="Follow-Up">Follow Up</option>
+                            <option value="Return-to-Duty">Return to Duty</option>
                         </select>
                     </div>
 
