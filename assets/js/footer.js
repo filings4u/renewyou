@@ -38,6 +38,7 @@ function renderFooterModule() {
                         gap: 0px !important;
                         padding: 0px !important;
                         margin: 0px !important;
+                       
                     }
                     
                     /* Push the second column (Contact Info) down to match the logo spacing */
@@ -86,17 +87,20 @@ function renderFooterModule() {
 
             <!-- Global 1450px Structural Container Grid --> 
             <div class="footer-container" style="max-width: 1450px; margin: 0 auto; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 50px; box-sizing: border-box;"> 
-                <!-- Brand Column with Perfected 10px Rounded Logo Box --> 
-                <div class="footer-col" style="display: flex; flex-direction: column; gap: 20px; align-items: flex-start; justify-content: flex-start; padding-top: 0; margin-top: 0; text-align: left;"> 
-                    <!-- LOGO IS PERFECTLY CENTERED EXCLUSIVELY INSIDE THIS CONTAINER --> 
-                    <div style="width: 90px; height: 90px; background-color: #F9F9F8; border-radius: 10px; display: flex; align-items: center; justify-content: center; padding: 6px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); box-sizing: border-box; overflow: hidden; margin-left: 0;"> 
-                        <img src="images/logo2.png" alt="ReNew You Health & Wellness Logo" style="max-width: 100%; max-height: 100%; object-fit: contain; display: block; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; margin: 0 auto;"> 
-                    </div> 
-                    <div style="display: flex; flex-direction: column; gap: 10px; text-align: left; width: 100%;"> 
-                        <h3 style="color: var(--green-light); margin: 0; font-size: 1.2rem; font-weight: 700; letter-spacing: -0.2px; line-height: 1.2;"> ReNew You </h3> 
-                        <p style="color: rgba(255,255,255,0.75); font-size: 0.95rem; line-height: 1.7; margin: 0; max-width: 300px;"> Health & Wellness Clinic located in Chicago Heights, Illinois. Empowering every single patient to renew their health from the inside out. </p> 
-                    </div> 
-                </div> 
+          
+          
+<!-- Brand Column with Perfected 10px Rounded Logo Box --> 
+<div class="footer-col" style="display: flex; flex-direction: column; gap: 10px; align-items: flex-start; justify-content: flex-start; padding-top: 0; margin-top: 0; text-align: left;"> 
+  <img src="images/logof.png" alt="ReNew You Health & Wellness Logo" style="max-width: 150px; height: 65px; object-fit: contain; display: block;  filter: drop-shadow(0px 2px 5px rgba(0, 0, 0, 0.2));"> 
+  
+  <!-- FIX: Reduced top margin/gap by adjusting layout spacing --> 
+  <div style="display: flex; flex-direction: column; gap: 10px; text-align: left; width: 100%; margin-top: 5px;"> 
+    <h3 style="color: var(--green-light); margin: 0; font-size: 1.2rem; font-weight: 700; letter-spacing: -0.2px; line-height: 1.2;"> ReNew You </h3> 
+    <p style="color: rgba(255,255,255,0.75); font-size: 0.95rem; line-height: 1.7; margin: 0; max-width: 300px;"> Health & Wellness Clinic located in Chicago Heights, Illinois. Empowering every single patient to renew their health from the inside out. </p> 
+  </div> 
+</div>
+
+
 
                 <!-- Contact Information Column --> 
                 <div class="footer-col" style="display: flex; flex-direction: column; gap: 20px; align-items: flex-start; justify-content: flex-start; padding-top: 0; margin-top: 0; text-align: left;"> 
