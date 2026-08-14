@@ -241,38 +241,41 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        outputContainer.innerHTML = filtered.map(app => {
-            let regulatoryBadgeColor = '#8a349b'; 
-            let readableLabel = app.testing_reason;
+// Replace the map loop inside populateDataGrid with this corrected block:
+outputContainer.innerHTML = filtered.map(app => {
+    let regulatoryBadgeColor = '#8a349b'; 
+    let readableLabel = app.testing_reason;
 
-            if (app.testing_reason === 'Pre-Employment') regulatoryBadgeColor = '#4f940c';
-            if (app.testing_reason === 'Post-Accident') regulatoryBadgeColor = '#d90429';
-            if (app.testing_reason === 'Return-To-Duty') { regulatoryBadgeColor = '#0077b6'; readableLabel = 'Return to Duty'; }
-            if (app.testing_reason === 'Follow-Up') { regulatoryBadgeColor = '#f77f00'; readableLabel = 'Follow Up'; }
-            if (app.testing_reason === 'DOT-Physical') { regulatoryBadgeColor = '#var(--green-primary)'; readableLabel = 'DOT Physical'; }
+    if (app.testing_reason === 'Pre-Employment') regulatoryBadgeColor = '#4f940c';
+    if (app.testing_reason === 'Post-Accident') regulatoryBadgeColor = '#d90429';
+    if (app.testing_reason === 'Return-To-Duty') { regulatoryBadgeColor = '#0077b6'; readableLabel = 'Return to Duty'; }
+    if (app.testing_reason === 'Follow-Up') { regulatoryBadgeColor = '#f77f00'; readableLabel = 'Follow Up'; }
+    
+    // FIXED: Stripped out the broken variable template wrapper to apply your theme colors perfectly
+    if (app.testing_reason === 'DOT-Physical') { regulatoryBadgeColor = '#4f940c'; readableLabel = 'DOT Physical'; }
 
-            return `
-                <div style="background: #ffffff; border: 1px solid rgba(138, 52, 159, 0.05); border-radius: 14px; padding: clamp(15px, 4vw, 22px); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 15px; box-shadow: 0 4px 15px rgba(62,13,95,0.01); box-sizing: border-box; width: 100%;">
-                    <div style="flex: 1; min-width: 240px;">
-                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap;">
-                            <h3 style="margin: 0; color: var(--purple-primary); font-size: clamp(1.1rem, 3vw, 1.25rem); font-weight: 800;">${app.client_name}</h3>
-                            <span style="font-size: 0.7rem; background: rgba(138,52,159,0.02); color: ${regulatoryBadgeColor}; padding: 3px 8px; border-radius: 20px; font-weight: 700; text-transform: uppercase; border: 1px solid ${regulatoryBadgeColor}25; white-space: nowrap;">${readableLabel}</span>
-                        </div>
-                        <div style="font-size: 0.85rem; color: #555; display: flex; flex-direction: column; gap: 4px; margin: 0;">
-                            <span>🆔 <strong>CDL:</strong> ${app.cdl_number}</span>
-                            <span>📞 <strong>Phone:</strong> ${app.client_phone}</span>
-                            <span>✉️ <strong>Email:</strong> ${app.client_email}</span>
-                        </div>
-                    </div>
-                    
-                    <div style="text-align: left; min-width: 140px; background: #fafafa; padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.02); box-sizing: border-box; flex-shrink: 0;">
-                        <span style="font-size: 0.7rem; font-weight: 700; color: #777; text-transform: uppercase; display: block; margin-bottom: 2px;">Schedule</span>
-                        <strong style="color: var(--purple-primary); font-size: 0.95rem; display: block;">${app.booking_date}</strong>
-                        <span style="color: var(--purple-accent); font-size: 0.85rem; font-weight: 600;">⏱️ ${app.booking_time}</span>
-                    </div>
+    return `
+        <div style="background: #ffffff; border: 1px solid rgba(138, 52, 159, 0.05); border-radius: 14px; padding: clamp(15px, 4vw, 22px); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 15px; box-shadow: 0 4px 15px rgba(62,13,95,0.01); box-sizing: border-box; width: 100%;">
+            <div style="flex: 1; min-width: 240px;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap;">
+                    <h3 style="margin: 0; color: var(--purple-primary); font-size: clamp(1.1rem, 3vw, 1.25rem); font-weight: 800;">${app.client_name}</h3>
+                    <span style="font-size: 0.7rem; background: rgba(138,52,159,0.02); color: ${regulatoryBadgeColor}; padding: 3px 8px; border-radius: 20px; font-weight: 700; text-transform: uppercase; border: 1px solid ${regulatoryBadgeColor}25; white-space: nowrap;">${readableLabel}</span>
                 </div>
-            `;
-        }).join('');
+                <div style="font-size: 0.85rem; color: #555; display: flex; flex-direction: column; gap: 4px; margin: 0;">
+                    <span>🆔 <strong>CDL:</strong> ${app.cdl_number}</span>
+                    <span>📞 <strong>Phone:</strong> ${app.client_phone}</span>
+                    <span>✉️ <strong>Email:</strong> ${app.client_email}</span>
+                </div>
+            </div>
+            
+            <div style="text-align: left; min-width: 140px; background: #fafafa; padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.02); box-sizing: border-box; flex-shrink: 0;">
+                <span style="font-size: 0.7rem; font-weight: 700; color: #777; text-transform: uppercase; display: block; margin-bottom: 2px;">Schedule</span>
+                <strong style="color: var(--purple-primary); font-size: 0.95rem; display: block;">${app.booking_date}</strong>
+                <span style="color: var(--purple-accent); font-size: 0.85rem; font-weight: 600;">⏱️ ${app.booking_time}</span>
+            </div>
+        </div>
+    `;
+}).join('');
     }
 
     /**
