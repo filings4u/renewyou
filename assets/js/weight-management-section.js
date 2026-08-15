@@ -328,7 +328,8 @@ function renderWeightManagementContent() {
       <p style="max-width: 650px; font-size: 16px; color: var(--muted); line-height: 1.65; margin: 0 0 32px 0; font-weight: 400;">
         Ready to start your customized, provider-supervised health transformation? Secure an initial diagnostic evaluation with our medical team today. Walk-ins are parsed fluidly based on active provider availability blocks.
       </p>
-      <button class="iv-action-footer-btn" onclick="window.location.href='contact.html'">
+<!-- New zero-redirect popup trigger line -->
+<button class="iv-action-footer-btn" onclick="if(typeof openBookingModal === 'function'){ openBookingModal(); } else { window.location.href='contact.html'; }">
         Schedule Initial Visit
       </button>
     </div>

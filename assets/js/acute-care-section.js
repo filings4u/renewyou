@@ -308,7 +308,8 @@ function renderAcuteCareContent() {
       <p style="max-width: 650px; font-size: 16px; color: var(--muted); line-height: 1.65; margin: 0 0 32px 0; font-weight: 400;">
         Struggling with a sudden illness or a minor health flare-up? Secure an in-office or telemedicine session with our medical team today. Walk-ins are welcome based on provider availability.
       </p>
-      <button class="iv-action-footer-btn" style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none; background: var(--purple-accent, #8A349B); color: var(--white, #fff); font-size: 14px; font-weight: 700; padding: 14px 32px; border-radius: 30px; border: none; cursor: pointer; box-shadow: 0 6px 20px rgba(138, 52, 159, 0.15);" onclick="window.location.href='contact.html'">
+<!-- New zero-redirect popup trigger line -->
+<button class="iv-action-footer-btn" onclick="if(typeof openBookingModal === 'function'){ openBookingModal(); } else { window.location.href='contact.html'; }">
         Book Your Acute Visit
       </button>
     </div>

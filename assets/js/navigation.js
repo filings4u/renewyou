@@ -71,13 +71,60 @@ function renderNavigation() {
                                 <li><a href="dot-corporate.html" style="color: #333; padding: 12px 20px; text-decoration: none; display: block; font-size: 0.95rem; font-weight: 500; transition: all 0.2s ease;">Corporate Programs</a></li>
                                 <li><a href="dot-employers.html" style="color: #333; padding: 12px 20px; text-decoration: none; display: block; font-size: 0.95rem; font-weight: 500; transition: all 0.2s ease;">Employer Programs</a></li>
                                 <li><a href="dot-physicals.html" style="color: #333; padding: 12px 20px; text-decoration: none; display: block; font-size: 0.95rem; font-weight: 500; transition: all 0.2s ease;">DOT Physicals</a></li>
-                                <li style="border-top: 1px solid rgba(138, 52, 159, 0.06); margin-top: 5px; padding-top: 5px;">
-                                <a href="dot-appointment.html" style="color: var(--purple-accent); padding: 12px 20px; text-decoration: none; display: block; font-size: 0.95rem; font-weight: 700; transition: all 0.2s ease;">Schedule DOT Test →</a>
                                 </li>
                             </ul>
                         </div>
                     </li>
-                    <li style="margin-left: 5px;"><a href="https://www.tebra.com/care/provider/angela-martin-1962195958" class="btn-nav" style="background: linear-gradient(135deg, var(--green-secondary), var(--green-primary)); color: var(--bg-white); padding: 10px 22px; border-radius: 25px; text-decoration: none; font-weight: 600; font-size: 0.95rem; display: inline-block; transition: all 0.3s ease; box-shadow: 0 4px 10px rgba(79, 148, 12, 0.15);">Book Appointment</a></li>
+
+
+<!-- Reconfigured Navigation Menu Item List Element with Dropdown -->
+<li style="margin-left: 5px; position: relative; display: inline-block;" id="navDropdownContainer">
+  
+  <!-- Main Trigger Button -->
+  <button onclick="toggleNavDropdown(event)" class="btn-nav" style="background: linear-gradient(135deg, var(--green-secondary), var(--green-primary)); color: var(--bg-white); padding: 10px 22px; border-radius: 25px; font-weight: 600; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 8px; transition: all 0.3s ease; box-shadow: 0 4px 10px rgba(79, 148, 12, 0.15); border: none; cursor: pointer; font-family: inherit;">
+    Book Services <span style="font-size: 0.75rem; transform: rotate(0deg); transition: transform 0.2s;" id="dropdownChevron">▼</span>
+  </button>
+
+  <!-- Floating Dropdown Option List Menu Container -->
+  <div id="navBookingDropdown" style="display: none; position: absolute; top: 100%; right: 0; margin-top: 8px; background: #ffffff; min-width: 200px; border-radius: 12px; border: 1px solid rgba(138, 52, 159, 0.08); box-shadow: 0 10px 30px rgba(62, 13, 95, 0.08); overflow: hidden; z-index: 999999; box-sizing: border-box;">
+    <a href="#" onclick="triggerModalBooking(event)" style="display: block; padding: 12px 20px; font-size: 0.95rem; font-weight: 600; color: var(--purple-primary, #3E0D5F); text-decoration: none; transition: background 0.2s; text-align: left;">
+      Book Appointment
+    </a>
+    <a href="dot-appointment.html" style="display: block; padding: 12px 20px; font-size: 0.95rem; font-weight: 600; color: var(--purple-primary, #3E0D5F); text-decoration: none; border-top: 1px solid #dfe5ec; transition: background 0.2s; text-align: left;">
+      Book Drug Test
+    </a>
+  </div>
+
+  <style>
+    /* Premium Hover States for Menu Options Layout */
+    #navBookingDropdown a:hover {
+      background-color: rgba(138, 52, 159, 0.04) !important;
+      color: var(--purple-accent, #8A349B) !important;
+    }
+  </style>
+</li>
+
+
+<!-- Unified Full-Screen Overlay Modal Container -->
+<div id="bookingModalOverlay" style="display: none; position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.6); z-index: 99999; backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
+  
+  <div style="background-color: #ffffff; width: 100%; max-width: 1000px; height: 85vh; border-radius: 20px; overflow: hidden; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.3); display: flex; flex-direction: column;">
+    
+    <!-- Modal Control Header Bar Component -->
+    <div style="width: 100%; background: #ffffff; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; border-bottom: 1px solid #dfe5ec;">
+      <h3 style="margin: 0; color: var(--purple-primary); font-size: 1.2rem; font-weight: 800;">Secure Scheduling Gateway</h3>
+      <button onclick="closeBookingModal()" style="background: rgba(138, 52, 159, 0.05); color: var(--purple-primary); border: none; font-size: 1.4rem; line-height: 1; font-weight: bold; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s;">
+        &times;
+      </button>
+    </div>
+
+    <!-- Interactive Iframe Content Viewer Engine -->
+    <div style="flex: 1; width: 100%; height: 100%; -webkit-overflow-scrolling: touch; overflow-y: auto; background: #ffffff;">
+      <iframe id="bookingModalIframe" src="" style="width: 100%; height: 100%; border: none; display: block;" title="Tebra Patient Booking Schedule Portal"></iframe>
+    </div>
+
+  </div>
+</div>
                 </ul>
 
                 
@@ -142,3 +189,87 @@ function highlightActiveLink() {
         activeLink.style.color = "var(--purple-accent)";
     }
 }
+
+/**
+ * Triggers the deployment layout block and attaches the verified secure patient portal link
+ */
+function openBookingModal() {
+  const overlay = document.getElementById('bookingModalOverlay');
+  const iframe = document.getElementById('bookingModalIframe');
+  
+  if (overlay && iframe) {
+    iframe.src = "https://www.tebra.com/care/provider/angela-martin-1962195958";
+    overlay.style.display = 'flex';
+    document.body.style.overflow = 'hidden'; // Prevents parent background viewport scrolling
+  }
+}
+
+/**
+ * Strips active sources and drops display rules down to prevent hidden background media playback loops
+ */
+function closeBookingModal() {
+  const overlay = document.getElementById('bookingModalOverlay');
+  const iframe = document.getElementById('bookingModalIframe');
+  
+  if (overlay && iframe) {
+    overlay.style.display = 'none';
+    iframe.src = ""; // Clears allocation states completely
+    document.body.style.overflow = 'auto'; // Restores routine document scroll paths
+  }
+}
+
+// Binds background modal masking dropouts cleanly on direct outer clicks
+document.addEventListener('DOMContentLoaded', () => {
+  const overlay = document.getElementById('bookingModalOverlay');
+  if (overlay) {
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) closeBookingModal();
+    });
+  }
+});
+
+/**
+ * Toggles visibility rules for the menu tracking drop interface
+ */
+function toggleNavDropdown(event) {
+  event.stopPropagation(); // Prevents instant global document document body click close loops
+  const menu = document.getElementById('navBookingDropdown');
+  const chevron = document.getElementById('dropdownChevron');
+  
+  if (menu && chevron) {
+    const isHidden = menu.style.display === 'none' || menu.style.display === '';
+    menu.style.display = isHidden ? 'block' : 'none';
+    chevron.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
+  }
+}
+
+/**
+ * Intercepts links safely to load the pop up layout target context directly
+ */
+function triggerModalBooking(event) {
+  event.preventDefault();
+  closeNavDropdown();
+  if (typeof openBookingModal === 'function') {
+    openBookingModal();
+  }
+}
+
+/**
+ * Hard reset dropdown structural classes down to original closed base configurations
+ */
+function closeNavDropdown() {
+  const menu = document.getElementById('navBookingDropdown');
+  const chevron = document.getElementById('dropdownChevron');
+  if (menu && chevron) {
+    menu.style.display = 'none';
+    chevron.style.transform = 'rotate(0deg)';
+  }
+}
+
+// Binds clean window click captures to drop visibility states if clicking outside the menu element box area
+document.addEventListener('click', (e) => {
+  const container = document.getElementById('navDropdownContainer');
+  if (container && !container.contains(e.target)) {
+    closeNavDropdown();
+  }
+});

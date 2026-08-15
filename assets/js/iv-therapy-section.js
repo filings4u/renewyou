@@ -334,7 +334,8 @@ function renderIvTherapyContent() {
           <p style="max-width: 650px; font-size: 16px; color: var(--muted); line-height: 1.65; margin: 0 0 32px 0; font-weight: 400;">
             Ready to add IV hydration and nutrient support to your wellness routine? Schedule your appointment today. Walk-ins welcome based on provider availability.
           </p>
-          <button class="iv-action-footer-btn" onclick="window.location.href='contact.html'">
+<!-- New zero-redirect popup trigger line -->
+<button class="iv-action-footer-btn" onclick="if(typeof openBookingModal === 'function'){ openBookingModal(); } else { window.location.href='contact.html'; }">
             Book Your Drip Visit
           </button>
         </div>
