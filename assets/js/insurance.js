@@ -28,11 +28,7 @@ function renderInsuranceCatalog() {
             text: "Accepting traditional Medicare and various Medicare Advantage plans for comprehensive senior and preventative care.", 
             svg: icons.medicare 
         },
-        { 
-            name: "Medicaid", 
-            text: "Supporting select state-managed Medicaid infrastructure and integrated care programs for essential adult health services.", 
-            svg: icons.medicaid 
-        },
+    
         { 
             name: "Tricare Military", 
             text: "Proudly honoring network benefits for active duty service members, military retirees, and their eligible dependents.", 
@@ -48,11 +44,7 @@ function renderInsuranceCatalog() {
             text: "Provides a vast network of employer-sponsored, individual, and managed care medical policy plans.", 
             svg: icons.uhc 
         },
-        { 
-            name: "Humana", 
-            text: "Robust primary coverage options with an emphasis on routine prevention and chronic health management.", 
-            svg: icons.humana 
-        },
+   
         { 
             name: "Cigna", 
             text: "Known for extensive regional networks and specialized wellness coordination programs.", 

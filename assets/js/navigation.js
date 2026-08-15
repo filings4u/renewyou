@@ -15,7 +15,7 @@ function renderNavigation() {
 
     target.innerHTML = `
         <!-- Quick Contact Utility Strip -->
-        <div class="global-top-bar" style="background-color: var(--purple-accent); color: var(--bg-white); padding: 10px 20px; font-size: 0.9rem; font-family: system-ui, -apple-system, sans-serif; box-sizing: border-box; width: 100%;">
+        <div class="global-top-bar" style="background-color: var(--purple-primary, #3E0D5F); color: var(--bg-white); padding: 10px 20px; font-size: 0.9rem; font-family: system-ui, -apple-system, sans-serif; box-sizing: border-box; width: 100%;">
             <style>
                 /* Mobile responsive rule to remove the top bar */
                 @media (max-width: 768px) {
@@ -52,19 +52,7 @@ function renderNavigation() {
                     <li><a href="index.html" class="nav-link" data-page="index" style="color: var(--purple-primary); text-decoration: none; font-weight: 600; font-size: 1rem; transition: color 0.3s ease;">Home</a></li>
                     <li><a href="about.html" class="nav-link" data-page="about" style="color: var(--purple-primary); text-decoration: none; font-weight: 600; font-size: 1rem; transition: color 0.3s ease;">About</a></li>
                     <li><a href="services.html" class="nav-link" data-page="services" style="color: var(--purple-primary); text-decoration: none; font-weight: 600; font-size: 1rem; transition: color 0.3s ease;">Services</a></li>
-                <!-- BRAND NEW Injections & IVs Dropdown Zone -->
-                    <li class="nav-item-dropdown" style="position: relative; display: inline-block; padding-bottom: 15px; margin-bottom: -15px;">
-                        <a href="#" class="nav-link" style="color: var(--purple-primary); text-decoration: none; font-weight: 600; font-size: 1rem; transition: color 0.3s ease; display: flex; align-items: center; gap: 4px;">
-                            Injections & IVs
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-                        </a>
-                        <div class="dropdown-menu-wrapper" style="position: absolute; top: 100%; left: 0; padding-top: 10px; display: none; z-index: 1000;">
-                            <ul class="dropdown-menu-list" style="background: #ffffff; min-width: 240px; box-shadow: 0 10px 30px rgba(62, 13, 95, 0.08); border-radius: 12px; padding: 10px 0; margin: 0; list-style: none; border: 1px solid rgba(138, 52, 159, 0.06);">
-                                <li><a href="iv-therapy.html" style="color: #333; padding: 12px 20px; text-decoration: none; display: block; font-size: 0.95rem; font-weight: 500; transition: all 0.2s ease;">IV Therapy Infusions</a></li>
-                                <li><a href="wellness-injections.html" style="color: #333; padding: 12px 20px; text-decoration: none; display: block; font-size: 0.95rem; font-weight: 500; transition: all 0.2s ease;">Wellness Injections</a></li>
-                            </ul>
-                        </div>
-                    </li>
+
                     <li><a href="insurance.html" class="nav-link" data-page="insurance" style="color: var(--purple-primary); text-decoration: none; font-weight: 600; font-size: 1rem; transition: color 0.3s ease;">Insurance</a></li>
                     <li><a href="patients.html" class="nav-link" data-page="patients" style="color: var(--purple-primary); text-decoration: none; font-weight: 600; font-size: 1rem; transition: color 0.3s ease;">Patients</a></li>
                     <li><a href="payment-plans.html" class="nav-link" data-page="patients" style="color: var(--purple-primary); text-decoration: none; font-weight: 600; font-size: 1rem; transition: color 0.3s ease;">Payment Plans</a></li>
