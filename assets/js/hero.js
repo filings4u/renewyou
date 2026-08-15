@@ -45,8 +45,8 @@ function renderDynamicHero() {
     about: {
       badge: "Get To Know Us",
       headline: "Quality care with a personal touch.",
-      subheadline: "ReNew You Health & Wellness is a nurse practitioner-led clinic focused on helping patients feel heard, supported, and confident in their care.",
-      image: "images/hero-about.jpg",
+      subheadline: "ReNew You Health & Wellness is a nurse practitioner-led clinic focused on helping patients feel heard, supported, and confident in their care. Our goal is to provide accessible services that support your health, wellness, prevention, and lifestyle goals. Whether you need help with weight management, routine screenings, acute illness visits, physicals, testing, or wellness injections, our team is here to provide professional care in a welcoming environment.",
+      image: "images/about-hero.png",
       alt: "Our welcoming clinical environment",
       showButtons: false
     },
