@@ -238,6 +238,117 @@ function createRenewYouOfferPopup(
     object-fit:contain;
 
 }
+
+/* ====================================================
+   SUCCESS STATE — COMPACT MOBILE LAYOUT
+==================================================== */
+
+.renew-you-offer-modal.success-state
+.renew-you-offer-footer {
+
+    display:none;
+
+}
+
+
+.renew-you-offer-modal.success-state
+.renew-you-offer-content {
+
+    padding:
+        18px 20px 20px;
+
+}
+
+
+.renew-you-offer-modal.success-state
+.renew-you-offer-success {
+
+    padding:
+        4px 0 0;
+
+}
+
+
+.renew-you-offer-modal.success-state
+.renew-you-offer-success-icon {
+
+    width:52px;
+
+    height:52px;
+
+    margin:
+        0 auto 10px;
+
+    font-size:25px;
+
+}
+
+
+.renew-you-offer-modal.success-state
+.renew-you-offer-success h3 {
+
+    margin:
+        0 0 6px;
+
+    font-size:1.25rem;
+
+}
+
+
+.renew-you-offer-modal.success-state
+.renew-you-offer-success p {
+
+    margin:
+        0 auto 5px;
+
+    font-size:.8rem;
+
+    line-height:1.4;
+
+}
+
+
+.renew-you-offer-modal.success-state
+.renew-you-offer-success-small {
+
+    font-size:.68rem !important;
+
+}
+
+
+.renew-you-offer-modal.success-state
+.renew-you-offer-done {
+
+    display:block;
+
+    width:100%;
+
+    min-height:44px;
+
+    margin:
+        12px 0 0;
+
+    padding:
+        10px 20px;
+
+    border:0;
+
+    border-radius:9px;
+
+    background:
+        #8a349b;
+
+    color:#ffffff;
+
+    font-size:.75rem;
+
+    font-weight:800;
+
+    letter-spacing:.04em;
+
+    cursor:pointer;
+
+}
     </style>
 
                     <h2
@@ -1431,6 +1542,69 @@ function createRenewYouOfferPopup(
 }
             }
 
+            @media (max-width:600px) {
+
+    .renew-you-offer-modal.success-state {
+
+        max-height:
+            calc(100vh - 20px);
+
+    }
+
+
+    .renew-you-offer-modal.success-state
+    .renew-you-offer-content {
+
+        padding:
+            15px 18px 18px;
+
+    }
+
+
+    .renew-you-offer-modal.success-state
+    .renew-you-offer-success-icon {
+
+        width:48px;
+
+        height:48px;
+
+        margin-bottom:8px;
+
+        font-size:23px;
+
+    }
+
+
+    .renew-you-offer-modal.success-state
+    .renew-you-offer-success h3 {
+
+        font-size:1.18rem;
+
+        margin-bottom:5px;
+
+    }
+
+
+    .renew-you-offer-modal.success-state
+    .renew-you-offer-success p {
+
+        font-size:.75rem;
+
+        line-height:1.35;
+
+    }
+
+
+    .renew-you-offer-modal.success-state
+    .renew-you-offer-done {
+
+        min-height:42px;
+
+        margin-top:10px;
+
+    }
+
+}
         </style>
     `;
 
@@ -1535,6 +1709,32 @@ function bindRenewYouOfferEvents() {
         );
 
     }
+
+    if (success) {
+
+    success.hidden =
+        false;
+
+}
+
+
+/*
+ * Switch the modal into its compact
+ * success-state layout.
+ */
+const modal =
+    document.querySelector(
+        '.renew-you-offer-modal'
+    );
+
+
+if (modal) {
+
+    modal.classList.add(
+        'success-state'
+    );
+
+}
 
 }
 
