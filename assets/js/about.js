@@ -144,7 +144,13 @@ function renderAboutPageContent() {
   <h3 style="color: var(--purple-primary, #3E0D5F); font-size: 1.8rem; font-weight: 800; margin: 0 0 6px 0; letter-spacing: -0.5px;">LaToya Newman, MBA, CPA, BFA</h3>
   <h4 style="color: var(--green-secondary, #2bb673); font-weight: 700; font-size: 1.05rem; margin: 0 0 20px 0; text-transform: uppercase; letter-spacing: 0.5px;">Operations, Finance & Strategic Growth Director</h4>
   <p style="font-size: 15px; line-height: 1.65; color: #4A4A4A; margin: 0;">
-    LaToya Newman oversees operational efficiencies, financial health, and community partnerships, ensuring an exceptional, unified patient experience and a welcoming professional clinic environment. By aligning patient-first healthcare values with systemic administrative development plans, she coordinates sustainable business models that enhance clinic infrastructure, secure critical regulatory compliance milestones, and manage flexible billing resources for incoming regional clients. As part of her expanded corporate and clinical stewardship role, she manages all drug and alcohol testing services, including DOT, Post-Accident, Onsite, and Offsite testing protocols. Her specialized oversight ensures seamless compliance tracking loop systems for commercial transportation accounts, urgent workplace testing situations, on-site industrial safety deployments, and external third-party laboratory network integrations.
+    LaToya Newman is the Co-Owner and Director of Operations at ReNew You Health & Wellness. With a strong background in business management, finance, accounting, and entrepreneurship, she helps oversee the practice’s operations, financial management, and continued growth.
+
+Working alongside Angela Martin, APRN, FNP-C, LaToya is committed to creating a professional, welcoming, and patient centered healthcare experience.
+
+LaToya also brings healthcare experience as a Medical Assistant and Certified DOT Drug & Alcohol Collector, allowing her to support patient services and contribute to the continued growth of ReNew You Health & Wellness.
+
+By combining her business and financial expertise with hands-on healthcare experience, LaToya helps strengthen both the operational and patient-service sides of the practice while supporting its mission to provide quality, compassionate care to the community.
   </p>
 </div>
 
