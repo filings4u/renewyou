@@ -53,6 +53,566 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /* =========================================================
+   BRANDED ADMIN MODAL
+========================================================= */
+
+function ensureAdminModal() {
+
+    if (document.getElementById('adminBrandedModal')) {
+        return;
+    }
+
+    const modal = document.createElement('div');
+
+    modal.id = 'adminBrandedModal';
+
+    modal.innerHTML = `
+        <div class="admin-modal-overlay" id="adminModalOverlay">
+
+            <div
+                class="admin-modal-card"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="adminModalTitle"
+            >
+
+            <button
+    type="button"
+    class="admin-modal-close"
+    id="adminModalClose"
+    aria-label="Close"
+>
+    <span aria-hidden="true">&times;</span>
+</button>
+
+<style>
+/* =========================================================
+   ADMIN BRANDED MODAL - CLOSE BUTTON
+========================================================= */
+
+.admin-modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+
+    width: 42px;
+    height: 42px;
+
+    padding: 0;
+    margin: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid rgba(80, 20, 110, 0.12);
+    border-radius: 50%;
+
+    background: #ffffff;
+    color: #4f235f;
+
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 28px;
+    font-weight: 400;
+    line-height: 1;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 4px 14px rgba(62, 13, 95, 0.12);
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.admin-modal-close span {
+    display: block;
+
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    line-height: 1;
+
+    transform: translateY(-1px);
+}
+
+.admin-modal-close:hover {
+    background: #f7f1fa;
+    color: var(--purple-primary, #4f176d);
+
+    transform: scale(1.05);
+
+    box-shadow:
+        0 6px 18px rgba(62, 13, 95, 0.18);
+}
+
+.admin-modal-close:active {
+    transform: scale(0.96);
+}
+
+.admin-modal-close:focus-visible {
+    outline: 3px solid rgba(138, 52, 159, 0.25);
+    outline-offset: 3px;
+}
+    </style>
+
+                <div
+                    class="admin-modal-icon"
+                    id="adminModalIcon"
+                >
+                    ✓
+                </div>
+
+                <div class="admin-modal-content">
+
+                    <h3 id="adminModalTitle">
+                        Notice
+                    </h3>
+
+                    <p id="adminModalMessage"></p>
+
+                </div>
+
+                <button
+                    type="button"
+                    class="admin-modal-button"
+                    id="adminModalOk"
+                >
+                    OK
+                </button>
+
+            </div>
+
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    const style = document.createElement('style');
+
+    style.id = 'adminBrandedModalStyles';
+
+    style.textContent = `
+
+        .admin-modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 999999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+
+            background:
+                rgba(37, 12, 52, 0.48);
+
+            backdrop-filter:
+                blur(5px);
+
+            -webkit-backdrop-filter:
+                blur(5px);
+
+            opacity: 0;
+            visibility: hidden;
+
+            transition:
+                opacity 0.22s ease,
+                visibility 0.22s ease;
+        }
+
+        .admin-modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .admin-modal-card {
+            position: relative;
+            width: min(440px, 100%);
+            box-sizing: border-box;
+
+            background: #ffffff;
+
+            border-radius: 22px;
+
+            padding: 32px 30px 28px;
+
+            text-align: center;
+
+            box-shadow:
+                0 25px 70px
+                rgba(62, 13, 95, 0.22);
+
+            border:
+                1px solid
+                rgba(138, 52, 159, 0.08);
+
+            transform:
+                translateY(12px)
+                scale(0.97);
+
+            transition:
+                transform 0.22s ease;
+        }
+
+        .admin-modal-overlay.active
+        .admin-modal-card {
+            transform:
+                translateY(0)
+                scale(1);
+        }
+
+        .admin-modal-close {
+            position: absolute;
+            top: 12px;
+            right: 14px;
+
+            width: 34px;
+            height: 34px;
+
+            border: none;
+            border-radius: 50%;
+
+            background: transparent;
+
+            color: #888;
+
+            font-size: 26px;
+            line-height: 1;
+
+            cursor: pointer;
+
+            transition:
+                background 0.2s ease,
+                color 0.2s ease;
+        }
+
+        .admin-modal-close:hover {
+            background:
+                rgba(138, 52, 159, 0.07);
+
+            color:
+                var(--purple-primary, #8a349b);
+        }
+
+        .admin-modal-icon {
+            width: 58px;
+            height: 58px;
+
+            margin: 0 auto 18px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 50%;
+
+            background:
+                rgba(79, 148, 12, 0.10);
+
+            color:
+                #4f940c;
+
+            font-size: 27px;
+            font-weight: 800;
+        }
+
+        .admin-modal-card.error
+        .admin-modal-icon {
+            background:
+                rgba(217, 4, 41, 0.09);
+
+            color:
+                #d90429;
+        }
+
+        .admin-modal-card.warning
+        .admin-modal-icon {
+            background:
+                rgba(247, 127, 0, 0.10);
+
+            color:
+                #f77f00;
+        }
+
+        .admin-modal-card.info
+        .admin-modal-icon {
+            background:
+                rgba(138, 52, 159, 0.09);
+
+            color:
+                var(--purple-primary, #8a349b);
+        }
+
+        .admin-modal-content h3 {
+            margin: 0 0 9px;
+
+            color:
+                var(--purple-primary, #8a349b);
+
+            font-size: 1.2rem;
+            font-weight: 800;
+        }
+
+        .admin-modal-content p {
+            margin: 0;
+
+            color: #666;
+
+            font-size: 0.9rem;
+            line-height: 1.6;
+
+            white-space: pre-line;
+        }
+
+        .admin-modal-button {
+            width: 100%;
+
+            margin-top: 24px;
+
+            padding: 13px 18px;
+
+            border: none;
+            border-radius: 10px;
+
+            background:
+                var(--purple-primary, #8a349b);
+
+            color: #ffffff;
+
+            font-size: 0.9rem;
+            font-weight: 800;
+
+            cursor: pointer;
+
+            transition:
+                opacity 0.2s ease,
+                transform 0.15s ease;
+        }
+
+        .admin-modal-button:hover {
+            opacity: 0.93;
+        }
+
+        .admin-modal-button:active {
+            transform: scale(0.98);
+        }
+
+        @media (max-width: 480px) {
+
+            .admin-modal-card {
+                padding:
+                    30px 22px 22px;
+
+                border-radius: 18px;
+            }
+
+            .admin-modal-icon {
+                width: 52px;
+                height: 52px;
+                font-size: 24px;
+            }
+
+            .admin-modal-content h3 {
+                font-size: 1.1rem;
+            }
+
+            .admin-modal-content p {
+                font-size: 0.86rem;
+            }
+        }
+
+    `;
+
+    document.head.appendChild(style);
+
+    const closeModal = () => {
+
+        const overlay =
+            document.getElementById(
+                'adminModalOverlay'
+            );
+
+        if (overlay) {
+            overlay.classList.remove('active');
+        }
+
+        document.body.style.overflow = '';
+    };
+
+    document
+        .getElementById('adminModalClose')
+        .addEventListener(
+            'click',
+            closeModal
+        );
+
+    document
+        .getElementById('adminModalOk')
+        .addEventListener(
+            'click',
+            closeModal
+        );
+
+    document
+        .getElementById('adminModalOverlay')
+        .addEventListener(
+            'click',
+            function (event) {
+
+                if (
+                    event.target ===
+                    event.currentTarget
+                ) {
+                    closeModal();
+                }
+            }
+        );
+
+    document.addEventListener(
+        'keydown',
+        function (event) {
+
+            if (
+                event.key === 'Escape'
+            ) {
+
+                const overlay =
+                    document.getElementById(
+                        'adminModalOverlay'
+                    );
+
+                if (
+                    overlay &&
+                    overlay.classList.contains(
+                        'active'
+                    )
+                ) {
+                    closeModal();
+                }
+            }
+        }
+    );
+}
+
+
+function showAdminModal(
+    message,
+    type = 'info',
+    title = null
+) {
+
+    ensureAdminModal();
+
+    const overlay =
+        document.getElementById(
+            'adminModalOverlay'
+        );
+
+    const card =
+        overlay.querySelector(
+            '.admin-modal-card'
+        );
+
+    const icon =
+        document.getElementById(
+            'adminModalIcon'
+        );
+
+    const modalTitle =
+        document.getElementById(
+            'adminModalTitle'
+        );
+
+    const modalMessage =
+        document.getElementById(
+            'adminModalMessage'
+        );
+
+    card.classList.remove(
+        'success',
+        'error',
+        'warning',
+        'info'
+    );
+
+    card.classList.add(
+        type
+    );
+
+    if (!title) {
+
+        if (type === 'success') {
+            title = 'Success';
+        }
+
+        else if (type === 'error') {
+            title = 'Something went wrong';
+        }
+
+        else if (type === 'warning') {
+            title = 'Please Note';
+        }
+
+        else {
+            title = 'Scheduling Notice';
+        }
+    }
+
+    if (type === 'success') {
+        icon.textContent = '✓';
+    }
+
+    else if (type === 'error') {
+        icon.textContent = '!';
+    }
+
+    else if (type === 'warning') {
+        icon.textContent = '!';
+    }
+
+    else {
+        icon.textContent = 'i';
+    }
+
+    modalTitle.textContent =
+        title;
+
+    modalMessage.textContent =
+        message;
+
+    overlay.classList.add(
+        'active'
+    );
+
+    document.body.style.overflow =
+        'hidden';
+
+    setTimeout(
+        function () {
+
+            const button =
+                document.getElementById(
+                    'adminModalOk'
+                );
+
+            if (button) {
+                button.focus();
+            }
+
+        },
+        50
+    );
+}
+
+    /* =========================================================
        APPLICATION STATE
     ========================================================= */
 
@@ -1632,9 +2192,11 @@ function isPastAppointmentSlot(
             ![15, 30, 45, 60].includes(value)
         ) {
 
-            alert(
-                'Please select a valid appointment interval.'
-            );
+       showAdminModal(
+    'Please select a valid appointment interval.',
+    'warning',
+    'Invalid Interval'
+);
 
             return;
         }
@@ -1666,9 +2228,11 @@ function isPastAppointmentSlot(
 
         if (error) {
 
-            alert(
-                `Error saving schedule interval: ${error.message}`
-            );
+       showAdminModal(
+    `Error saving schedule interval:\n\n${error.message}`,
+    'error',
+    'Unable to Save Schedule'
+);
 
             return;
         }
@@ -1678,9 +2242,11 @@ function isPastAppointmentSlot(
 
         renderScheduleManager();
 
-        alert(
-            `Appointment schedule now generates every ${value} minutes.`
-        );
+       showAdminModal(
+    `Appointment schedule now generates every ${value} minutes.`,
+    'success',
+    'Schedule Updated'
+);
     }
 
     /* =========================================================
@@ -2640,9 +3206,11 @@ async function toggleScheduleSlot(
         isDateBlocked(date)
     ) {
 
-        alert(
-            'This entire date is blocked. Unblock the date before managing individual times.'
-        );
+      showAdminModal(
+    'This entire date is blocked. Unblock the date before managing individual times.',
+    'warning',
+    'Date Currently Blocked'
+);
 
         return;
     }
@@ -2654,9 +3222,11 @@ async function toggleScheduleSlot(
         )
     ) {
 
-        alert(
-            'This appointment time has already passed and cannot be changed.'
-        );
+      showAdminModal(
+    'This appointment time has already passed and cannot be changed.',
+    'warning',
+    'Appointment Time Passed'
+);
 
         return;
     }
@@ -2670,9 +3240,11 @@ async function toggleScheduleSlot(
         booked.includes(slot)
     ) {
 
-        alert(
-            'This appointment time is already booked and cannot be blocked from the scheduling grid.'
-        );
+   showAdminModal(
+    'This appointment time is already booked and cannot be blocked from the scheduling grid.',
+    'warning',
+    'Appointment Already Booked'
+);
 
         return;
     }
@@ -2749,9 +3321,11 @@ async function toggleEntireDate() {
                 readError
             );
 
-            alert(
-                `Unable to read scheduling settings:\n\n${readError.message}`
-            );
+          showAdminModal(
+    `Unable to read scheduling settings:\n\n${readError.message}`,
+    'error',
+    'Unable to Load Schedule'
+);
 
             return;
         }
@@ -2818,9 +3392,11 @@ async function toggleEntireDate() {
                 updateError
             );
 
-            alert(
-                `Unable to save schedule change:\n\n${updateError.message}`
-            );
+          showAdminModal(
+    `Unable to save schedule change:\n\n${updateError.message}`,
+    'error',
+    'Unable to Save Schedule'
+);
 
             return;
         }
@@ -2846,18 +3422,22 @@ async function toggleEntireDate() {
 
         renderScheduleManager();
 
-        if (currentlyBlocked) {
+   if (currentlyBlocked) {
 
-            alert(
-                `${formatDateForDisplay(date)} is now UNBLOCKED.`
-            );
+    showAdminModal(
+        `${formatDateForDisplay(date)} is now unblocked.`,
+        'success',
+        'Date Unblocked'
+    );
 
-        } else {
+} else {
 
-            alert(
-                `${formatDateForDisplay(date)} is now BLOCKED.`
-            );
-        }
+    showAdminModal(
+        `${formatDateForDisplay(date)} is now blocked.`,
+        'success',
+        'Date Blocked'
+    );
+}
 
     } catch (error) {
 
@@ -2866,9 +3446,11 @@ async function toggleEntireDate() {
             error
         );
 
-        alert(
-            `Schedule change failed:\n\n${error.message}`
-        );
+       showAdminModal(
+    `Schedule change failed:\n\n${error.message}`,
+    'error',
+    'Schedule Change Failed'
+);
     }
 }
 
@@ -2905,9 +3487,11 @@ async function saveBlockedDateSlots(blockedDateSlots) {
                 error
             );
 
-            alert(
-                `Unable to update scheduling settings:\n\n${error.message}`
-            );
+      showAdminModal(
+    `Unable to update scheduling settings:\n\n${error.message}`,
+    'error',
+    'Unable to Update Schedule'
+);
 
             return false;
         }
@@ -2951,9 +3535,11 @@ async function saveBlockedDateSlots(blockedDateSlots) {
             error
         );
 
-        alert(
-            `Unexpected scheduling error:\n\n${error.message}`
-        );
+      showAdminModal(
+    `Unexpected scheduling error:\n\n${error.message}`,
+    'error',
+    'Unexpected Scheduling Error'
+);
 
         return false;
     }
@@ -3193,9 +3779,11 @@ async function saveBlockedDateSlots(blockedDateSlots) {
             appointmentsData.length === 0
         ) {
 
-            alert(
-                'No appointment entries available to export.'
-            );
+        showAdminModal(
+    'There are currently no appointment entries available to export.',
+    'info',
+    'Nothing to Export'
+);
 
             return;
         }
