@@ -1,31 +1,3 @@
-/**
- * ReNew You Health & Wellness
- * DOT Screening Registry + Administrative Scheduling System
- *
- * Location:
- * assets/js/admin-dashboard.js
- *
- * Supabase tables used:
- *
- * scheduling_settings
- * -----------------------------------------
- * id
- * buffer_minutes
- * blocked_date_slots
- * updated_at
- *
- * dot_appointments
- * -----------------------------------------
- * id
- * created_at
- * client_name
- * cdl_number
- * client_email
- * client_phone
- * testing_reason
- * booking_date
- * booking_time
- */
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -612,86 +584,110 @@ function showAdminModal(
     );
 }
 
-    /* =========================================================
-       APPLICATION STATE
-    ========================================================= */
+  /* =========================================================
+   APPLICATION STATE
+========================================================= */
 
-    let appointmentsData = [];
+let appointmentsData = [];
 
-    let activeFilter = 'All';
+let mailingListData = [];
 
-    let searchQuery = '';
+let activeFilter = 'All';
 
-    let schedulingSettings = {
-        id: 'dot_config',
-        buffer_minutes: 30,
-        blocked_date_slots: {}
-    };
+let searchQuery = '';
 
-    let selectedScheduleDate = getTodayLocalDate();
+let mailingListSearchQuery = '';
 
-    /* =========================================================
-       DEFAULT CLINIC SCHEDULE
-       These are generated dynamically.
-       
-       IMPORTANT:
-       The four old hard-coded appointment buttons are gone.
-       
-       The buffer setting controls the generated interval.
-       
-       Example:
-       30 minutes =
-       8:00
-       8:30
-       9:00
-       9:30
-       etc.
-    ========================================================= */
+let schedulingSettings = {
+    id: 'dot_config',
+    buffer_minutes: 30,
+    blocked_date_slots: {}
+};
 
-    const CLINIC_OPEN_MINUTES = 8 * 60;
+let selectedScheduleDate = getTodayLocalDate();
 
-    const CLINIC_CLOSE_MINUTES = 17 * 60;
+/* =========================================================
+   DEFAULT CLINIC SCHEDULE
+========================================================= */
+
+const CLINIC_OPEN_MINUTES = 8 * 60;
+
+const CLINIC_CLOSE_MINUTES = 17 * 60;
 
     /* =========================================================
        AUTHENTICATION GUARD
     ========================================================= */
 
-    checkAuthenticationGuard();
+  /* =========================================================
+   AUTHENTICATION GUARD
+========================================================= */
 
-    async function checkAuthenticationGuard() {
+checkAuthenticationGuard();
 
-        try {
+async function checkAuthenticationGuard() {
 
-            const {
-                data: { session }
-            } = await supabaseClientInstance.auth.getSession();
+    try {
 
-            if (session) {
+        const {
+            data: { session }
+        } = await supabaseClientInstance.auth.getSession();
 
-                renderDashboardStructure();
-
-                await loadSchedulingSystemSettings();
-
-                await fetchAppointments();
-
-                renderScheduleManager();
-
-            } else {
-
-                renderSecureLoginForm();
-
-            }
-
-        } catch (error) {
-
-            console.error(
-                'Authentication initialization error:',
-                error
-            );
+        if (!session) {
 
             renderSecureLoginForm();
+
+            return;
         }
+
+        /*
+         * Build the dashboard first so all target
+         * containers exist before database data is loaded.
+         */
+        renderDashboardStructure();
+
+        /*
+         * Load scheduling configuration.
+         */
+        await loadSchedulingSystemSettings();
+
+        /*
+         * IMPORTANT:
+         *
+         * Appointments and mailing list are loaded
+         * independently.
+         *
+         * If one table fails, the other table will
+         * still be allowed to load.
+         */
+        await Promise.allSettled([
+            fetchAppointments(),
+            fetchMailingList()
+        ]);
+
+        /*
+         * Update all dashboard displays after
+         * database loading has completed.
+         */
+        calculateMetrics();
+
+        calculateMailingListMetrics();
+
+        populateDataGrid();
+
+        populateMailingList();
+
+        renderScheduleManager();
+
+    } catch (error) {
+
+        console.error(
+            'Authentication initialization error:',
+            error
+        );
+
+        renderSecureLoginForm();
     }
+}
 
     /* =========================================================
        LOGIN
@@ -1971,33 +1967,40 @@ function renderDashboardStructure() {
 
             <nav class="admin-page-nav">
 
-                <button
-                    class="admin-page-tab active"
-                    data-page="dashboardPage"
-                >
-                    📊 Dashboard
-                </button>
+  <button
+    class="admin-page-tab active"
+    data-page="dashboardPage"
+>
+    📊 Dashboard
+</button>
 
-                <button
-                    class="admin-page-tab"
-                    data-page="appointmentsPage"
-                >
-                    📋 Appointments
-                </button>
+<button
+    class="admin-page-tab"
+    data-page="appointmentsPage"
+>
+    📋 Appointments
+</button>
 
-                <button
-                    class="admin-page-tab"
-                    data-page="schedulePage"
-                >
-                    📅 Schedule
-                </button>
+<button
+    class="admin-page-tab"
+    data-page="mailingListPage"
+>
+    📧 Mailing List
+</button>
 
-                <button
-                    class="admin-page-tab"
-                    data-page="settingsPage"
-                >
-                    ⚙️ Settings
-                </button>
+<button
+    class="admin-page-tab"
+    data-page="schedulePage"
+>
+    📅 Schedule
+</button>
+
+<button
+    class="admin-page-tab"
+    data-page="settingsPage"
+>
+    ⚙️ Settings
+</button>
 
             </nav>
 
@@ -2187,6 +2190,153 @@ function renderDashboardStructure() {
                 </div>
 
             </section>
+
+            <!-- =================================================
+     MAILING LIST PAGE
+================================================= -->
+
+<section
+    id="mailingListPage"
+    class="admin-page"
+>
+
+    <div class="dash-metrics-grid">
+
+        <div style="
+            background:#fff;
+            padding:15px;
+            border-radius:14px;
+            border:1px solid rgba(138,52,159,0.06);
+            box-shadow:0 4px 15px rgba(0,0,0,0.01);
+        ">
+
+            <span style="
+                font-size:0.72rem;
+                font-weight:700;
+                color:#666;
+                text-transform:uppercase;
+                display:block;
+            ">
+                Total Subscribers
+            </span>
+
+            <h3
+                id="mailingListCount"
+                style="
+                    margin:5px 0 0 0;
+                    font-size:1.5rem;
+                    color:var(--purple-primary);
+                    font-weight:800;
+                "
+            >
+                0
+            </h3>
+
+        </div>
+
+    </div>
+
+    <div class="admin-card">
+
+        <div style="
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            gap:15px;
+            flex-wrap:wrap;
+            margin-bottom:18px;
+        ">
+
+            <div>
+
+                <h2 style="
+                    margin:0 0 5px 0;
+                    font-size:1.2rem;
+                ">
+                    Mailing List Subscribers
+                </h2>
+
+                <p style="
+                    margin:0;
+                    color:#666;
+                    font-size:.85rem;
+                ">
+                    Everyone who has subscribed to the ReNew You
+                    Health & Wellness mailing list.
+                </p>
+
+            </div>
+
+            <button
+                type="button"
+                id="exportMailingListBtn"
+                style="
+                    background:#fff;
+                    color:var(--green-primary);
+                    border:1px solid var(--green-primary);
+                    padding:10px 18px;
+                    border-radius:10px;
+                    font-weight:700;
+                    cursor:pointer;
+                "
+            >
+                📊 Export Subscribers
+            </button>
+
+        </div>
+
+        <div style="
+            position:relative;
+            width:100%;
+            margin-bottom:18px;
+        ">
+
+            <input
+                type="text"
+                id="mailingListSearch"
+                style="
+                    width:100%;
+                    padding:12px 16px 12px 40px;
+                    border-radius:10px;
+                    border:1px solid rgba(0,0,0,.08);
+                    font-size:.95rem;
+                    box-sizing:border-box;
+                    background:#fafafa;
+                "
+                placeholder="Search subscriber email..."
+            />
+
+            <div style="
+                position:absolute;
+                left:14px;
+                top:13px;
+                color:#777;
+            ">
+                🔎
+            </div>
+
+        </div>
+
+        <div
+            id="mailingListTarget"
+            style="
+                display:grid;
+                grid-template-columns:1fr;
+                gap:10px;
+            "
+        >
+            <p style="
+                color:#666;
+                text-align:center;
+                padding:30px;
+            ">
+                Loading mailing list...
+            </p>
+        </div>
+
+    </div>
+
+</section>
 
             <!-- =================================================
                  SCHEDULE PAGE
@@ -2400,14 +2550,32 @@ function bindAdminPageNavigation() {
                  * the Schedule tab is opened.
                  */
 
-                if (
-                    targetPage ===
-                    'schedulePage'
-                ) {
+               if (
+    targetPage ===
+    'schedulePage'
+) {
 
-                    renderScheduleManager();
+    renderScheduleManager();
 
-                }
+}
+
+if (
+    targetPage ===
+    'appointmentsPage'
+) {
+
+    fetchAppointments();
+
+}
+
+if (
+    targetPage ===
+    'mailingListPage'
+) {
+
+    fetchMailingList();
+
+}
 
             }
         );
@@ -2647,7 +2815,41 @@ function isPastAppointmentSlot(
             );
 
         }
+const mailingListSearch =
+    document.getElementById(
+        'mailingListSearch'
+    );
 
+if (mailingListSearch) {
+
+    mailingListSearch.addEventListener(
+        'input',
+        event => {
+
+            mailingListSearchQuery =
+                event.target.value
+                    .toLowerCase()
+                    .trim();
+
+            populateMailingList();
+
+        }
+    );
+}
+
+
+const exportMailingListButton =
+    document.getElementById(
+        'exportMailingListBtn'
+    );
+
+if (exportMailingListButton) {
+
+    exportMailingListButton.addEventListener(
+        'click',
+        exportMailingListToCsv
+    );
+}
     }
 
     /* =========================================================
@@ -2874,146 +3076,535 @@ function isPastAppointmentSlot(
 );
     }
 
-    /* =========================================================
-       FETCH APPOINTMENTS
-    ========================================================= */
+/* =========================================================
+   FETCH APPOINTMENTS
+========================================================= */
 
-    async function fetchAppointments() {
+async function fetchAppointments() {
 
-        try {
+    const grid =
+        document.getElementById(
+            'dataListTarget'
+        );
 
-            const {
-                data,
-                error
-            } = await supabaseClientInstance
-                .from('dot_appointments')
-                .select('*')
-                .order(
-                    'booking_date',
-                    { ascending: true }
-                )
-                .order(
-                    'booking_time',
-                    { ascending: true }
-                );
+    try {
 
-            if (error) {
-                throw error;
-            }
+        if (grid) {
 
-            appointmentsData =
-                data || [];
+            grid.innerHTML = `
+                <p style="
+                    color:#666;
+                    text-align:center;
+                    padding:40px;
+                ">
+                    Loading appointment records...
+                </p>
+            `;
 
-            calculateMetrics();
+        }
 
-            populateDataGrid();
+        const {
+            data,
+            error
+        } = await supabaseClientInstance
 
-        } catch (error) {
+            .from('dot_appointments')
+
+            .select('*')
+
+            .order(
+                'booking_date',
+                {
+                    ascending: true
+                }
+            )
+
+            .order(
+                'booking_time',
+                {
+                    ascending: true
+                }
+            );
+
+        if (error) {
 
             console.error(
-                'Appointment retrieval error:',
+                'Supabase appointment error:',
                 error
             );
 
-            const grid =
-                document.getElementById(
-                    'dataListTarget'
+            throw error;
+        }
+
+        appointmentsData =
+            Array.isArray(data)
+                ? data
+                : [];
+
+        console.log(
+            'Appointments loaded:',
+            appointmentsData.length,
+            appointmentsData
+        );
+
+        calculateMetrics();
+
+        populateDataGrid();
+
+        return appointmentsData;
+
+    } catch (error) {
+
+        console.error(
+            'Appointment retrieval error:',
+            error
+        );
+
+        appointmentsData = [];
+
+        if (grid) {
+
+            grid.innerHTML = `
+                <div style="
+                    color:#d90429;
+                    font-weight:600;
+                    text-align:center;
+                    padding:30px;
+                    border:1px dashed #d90429;
+                    border-radius:12px;
+                    background:#fff5f6;
+                ">
+
+                    <strong>
+                        Error reading appointment records
+                    </strong>
+
+                    <br><br>
+
+                    ${escapeHtml(
+                        error?.message ||
+                        'Unknown database error.'
+                    )}
+
+                </div>
+            `;
+
+        }
+
+        return [];
+    }
+}
+
+ /* =========================================================
+   FETCH MAILING LIST
+========================================================= */
+
+async function fetchMailingList() {
+
+    const target =
+        document.getElementById(
+            'mailingListTarget'
+        );
+
+    try {
+
+        if (target) {
+
+            target.innerHTML = `
+                <p style="
+                    color:#666;
+                    text-align:center;
+                    padding:30px;
+                ">
+                    Loading mailing list...
+                </p>
+            `;
+
+        }
+
+        const {
+            data,
+            error
+        } = await supabaseClientInstance
+
+            .from('Renew You Health Leads')
+
+            .select(
+                'id, email, created_at'
+            )
+
+            .order(
+                'created_at',
+                {
+                    ascending: false
+                }
+            );
+
+        if (error) {
+
+            console.error(
+                'Supabase mailing-list error:',
+                error
+            );
+
+            throw error;
+        }
+
+        mailingListData =
+            Array.isArray(data)
+                ? data
+                : [];
+
+        console.log(
+            'Mailing-list subscribers loaded:',
+            mailingListData.length,
+            mailingListData
+        );
+
+        calculateMailingListMetrics();
+
+        populateMailingList();
+
+        return mailingListData;
+
+    } catch (error) {
+
+        console.error(
+            'Mailing list retrieval error:',
+            error
+        );
+
+        mailingListData = [];
+
+        if (target) {
+
+            target.innerHTML = `
+                <div style="
+                    color:#d90429;
+                    font-weight:600;
+                    text-align:center;
+                    padding:30px;
+                    border:1px dashed #d90429;
+                    border-radius:12px;
+                    background:#fff5f6;
+                ">
+
+                    <strong>
+                        Unable to load mailing list
+                    </strong>
+
+                    <br><br>
+
+                    ${escapeHtml(
+                        error?.message ||
+                        'Unknown database error.'
+                    )}
+
+                </div>
+            `;
+
+        }
+
+        calculateMailingListMetrics();
+
+        return [];
+    }
+}
+ /* =========================================================
+   APPOINTMENT METRICS
+========================================================= */
+
+function calculateMetrics() {
+
+    const getCount = reason => {
+
+        const targetValue =
+            String(reason || '')
+                .toLowerCase()
+                .replace(
+                    /[\s_-]/g,
+                    ''
                 );
 
-            if (grid) {
+        return appointmentsData.filter(
+            appointment => {
 
-                grid.innerHTML = `
-                    <p style="
-                        color:#d90429;
-                        font-weight:600;
-                        text-align:center;
-                        padding:30px;
-                        border:1px dashed #d90429;
-                        border-radius:12px;
-                        background:#fff5f6;
-                    ">
-                        Error reading appointment records:
-                        ${escapeHtml(error.message)}
-                    </p>
-                `;
+                const databaseValue =
+                    String(
+                        appointment.testing_reason ||
+                        ''
+                    )
+                        .toLowerCase()
+                        .replace(
+                            /[\s_-]/g,
+                            ''
+                        );
+
+                return (
+                    databaseValue ===
+                    targetValue
+                );
+
             }
-        }
-    }
+        ).length;
+    };
+
+    setElementText(
+        'statTotal',
+        appointmentsData.length
+    );
+
+    setElementText(
+        'statPhysical',
+        getCount(
+            'DOT-Physical'
+        )
+    );
+
+    setElementText(
+        'statPre',
+        getCount(
+            'Pre-Employment'
+        )
+    );
+
+    setElementText(
+        'statRandom',
+        getCount(
+            'Random-Pool'
+        )
+    );
+
+    setElementText(
+        'statUrgent',
+        getCount(
+            'Post-Accident'
+        )
+    );
+
+    setElementText(
+        'statReturn',
+        getCount(
+            'Return-To-Duty'
+        )
+    );
+
+    setElementText(
+        'statFollow',
+        getCount(
+            'Follow-Up'
+        )
+    );
+}
+
+/* =========================================================
+   MAILING LIST METRICS
+========================================================= */
+
+function calculateMailingListMetrics() {
+
+    setElementText(
+        'mailingListCount',
+        mailingListData.length
+    );
+
+}
 
     /* =========================================================
-       METRICS
-    ========================================================= */
+   MAILING LIST DATA GRID
+========================================================= */
 
-    function calculateMetrics() {
+function populateMailingList() {
 
-        const getCount = reason => {
-
-            return appointmentsData.filter(
-                appointment => {
-
-                    const databaseValue =
-                        (
-                            appointment.testing_reason ||
-                            ''
-                        )
-                            .toLowerCase()
-                            .replace(
-                                /[\s_-]/g,
-                                ''
-                            );
-
-                    const targetValue =
-                        reason
-                            .toLowerCase()
-                            .replace(
-                                /[\s_-]/g,
-                                ''
-                            );
-
-                    return (
-                        databaseValue ===
-                        targetValue
-                    );
-                }
-            ).length;
-        };
-
-        setElementText(
-            'statTotal',
-            appointmentsData.length
+    const outputContainer =
+        document.getElementById(
+            'mailingListTarget'
         );
 
-        setElementText(
-            'statPhysical',
-            getCount('DOT-Physical')
-        );
-
-        setElementText(
-            'statPre',
-            getCount('Pre-Employment')
-        );
-
-        setElementText(
-            'statRandom',
-            getCount('Random-Pool')
-        );
-
-        setElementText(
-            'statUrgent',
-            getCount('Post-Accident')
-        );
-
-        setElementText(
-            'statReturn',
-            getCount('Return-To-Duty')
-        );
-
-        setElementText(
-            'statFollow',
-            getCount('Follow-Up')
-        );
+    if (!outputContainer) {
+        return;
     }
 
+    const filtered =
+        mailingListData.filter(
+            subscriber => {
+
+                const email =
+                    (
+                        subscriber.email ||
+                        ''
+                    )
+                        .toLowerCase();
+
+                return email.includes(
+                    mailingListSearchQuery
+                );
+            }
+        );
+
+    if (filtered.length === 0) {
+
+        outputContainer.innerHTML = `
+            <div style="
+                background:#fff;
+                border:1px solid rgba(0,0,0,0.04);
+                text-align:center;
+                padding:40px 20px;
+                color:#666;
+                border-radius:12px;
+                font-weight:500;
+                font-size:0.95rem;
+            ">
+                ${
+                    mailingListData.length === 0
+                        ? 'No mailing list subscribers yet.'
+                        : 'No subscribers match your search.'
+                }
+            </div>
+        `;
+
+        return;
+    }
+
+    outputContainer.innerHTML =
+        filtered.map(
+            subscriber => {
+
+                const email =
+                    subscriber.email || '';
+
+                const createdDate =
+                    subscriber.created_at
+                        ? new Date(
+                            subscriber.created_at
+                        ).toLocaleDateString(
+                            'en-US',
+                            {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                            }
+                        )
+                        : 'Unknown';
+
+                const createdTime =
+                    subscriber.created_at
+                        ? new Date(
+                            subscriber.created_at
+                        ).toLocaleTimeString(
+                            'en-US',
+                            {
+                                hour: 'numeric',
+                                minute: '2-digit'
+                            }
+                        )
+                        : '';
+
+                return `
+                    <div style="
+                        background:#fff;
+                        border:1px solid rgba(138,52,159,0.06);
+                        border-radius:14px;
+                        padding:16px 18px;
+                        display:flex;
+                        justify-content:space-between;
+                        align-items:center;
+                        gap:15px;
+                        flex-wrap:wrap;
+                        box-shadow:0 4px 15px rgba(62,13,95,0.02);
+                    ">
+
+                        <div style="
+                            display:flex;
+                            align-items:center;
+                            gap:12px;
+                            min-width:0;
+                            flex:1;
+                        ">
+
+                            <div style="
+                                width:42px;
+                                height:42px;
+                                border-radius:50%;
+                                background:rgba(138,52,159,0.08);
+                                color:var(--purple-primary);
+                                display:flex;
+                                align-items:center;
+                                justify-content:center;
+                                font-size:1.1rem;
+                                flex-shrink:0;
+                            ">
+                                ✉️
+                            </div>
+
+                            <div style="
+                                min-width:0;
+                            ">
+
+                                <div style="
+                                    color:var(--purple-primary);
+                                    font-weight:800;
+                                    font-size:.95rem;
+                                    word-break:break-word;
+                                ">
+                                    ${escapeHtml(email)}
+                                </div>
+
+                                <div style="
+                                    color:#777;
+                                    font-size:.76rem;
+                                    margin-top:4px;
+                                ">
+                                    Subscriber #${escapeHtml(
+                                        subscriber.id
+                                    )}
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div style="
+                            text-align:right;
+                            background:#fafafa;
+                            border-radius:10px;
+                            padding:9px 13px;
+                            flex-shrink:0;
+                        ">
+
+                            <span style="
+                                display:block;
+                                color:#777;
+                                font-size:.65rem;
+                                font-weight:700;
+                                text-transform:uppercase;
+                                margin-bottom:3px;
+                            ">
+                                Subscribed
+                            </span>
+
+                            <strong style="
+                                display:block;
+                                color:#555;
+                                font-size:.8rem;
+                            ">
+                                ${escapeHtml(createdDate)}
+                            </strong>
+
+                            <span style="
+                                color:#888;
+                                font-size:.72rem;
+                            ">
+                                ${escapeHtml(createdTime)}
+                            </span>
+
+                        </div>
+
+                    </div>
+                `;
+            }
+        ).join('');
+}
     /* =========================================================
        REGISTRY DATA GRID
     ========================================================= */
@@ -4394,6 +4985,89 @@ async function saveBlockedDateSlots(blockedDateSlots) {
         );
     }
 
+    /* =========================================================
+   MAILING LIST CSV EXPORT
+========================================================= */
+
+function exportMailingListToCsv() {
+
+    if (
+        mailingListData.length === 0
+    ) {
+
+        showAdminModal(
+            'There are currently no mailing list subscribers available to export.',
+            'info',
+            'Nothing to Export'
+        );
+
+        return;
+    }
+
+    const headers = [
+        'ID',
+        'Email',
+        'Subscribed At'
+    ];
+
+    const csvRows = [
+        headers.join(',')
+    ];
+
+    mailingListData.forEach(
+        subscriber => {
+
+            const rowData = [
+
+                `"${escapeCsv(
+                    subscriber.id
+                )}"`,
+
+                `"${escapeCsv(
+                    subscriber.email
+                )}"`,
+
+                `"${escapeCsv(
+                    subscriber.created_at
+                )}"`
+            ];
+
+            csvRows.push(
+                rowData.join(',')
+            );
+        }
+    );
+
+    const csvContent =
+        "data:text/csv;charset=utf-8," +
+        csvRows.join('\n');
+
+    const encodedUri =
+        encodeURI(csvContent);
+
+    const downloadLink =
+        document.createElement('a');
+
+    downloadLink.setAttribute(
+        'href',
+        encodedUri
+    );
+
+    downloadLink.setAttribute(
+        'download',
+        `Renew_You_Mailing_List_${getTodayLocalDate()}.csv`
+    );
+
+    document.body.appendChild(
+        downloadLink
+    );
+
+    downloadLink.click();
+
+    document.body.removeChild(
+        downloadLink
+    );
+}
     /* =========================================================
        CSV EXPORT
     ========================================================= */
