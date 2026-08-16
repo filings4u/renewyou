@@ -303,7 +303,7 @@ section {
 
 /* Global Footer Styles */ 
 footer { 
-    background-color: var(--purple-primary); 
+    background-color: var(--purple-primary, #3E0D5F);
     color: var(--bg-white); 
     padding: 40px 20px 20px 20px; 
     margin-top: auto; 

@@ -8,8 +8,7 @@ function renderFooterModule() {
     const target = document.getElementById('footer-target'); 
     if (!target) return; 
     target.innerHTML = ` 
-        <footer style="background-color: var(--purple-primary); color: var(--bg-white); padding: 80px 20px 30px 20px; font-family: system-ui, -apple-system, sans-serif; box-sizing: border-box; width: 100%;"> 
-            <style>
+<footer style="background-color: #3E0D5F; color: var(--bg-white); padding: 80px 20px 30px 20px; font-family: system-ui, -apple-system, sans-serif; box-sizing: border-box; width: 100%;">            <style>
                 /* Desktop & General Variables Fallback */
                 .footer-container {
                     display: grid; 
