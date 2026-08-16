@@ -1,360 +1,3338 @@
 /**
- * ReNew You Health & Wellness - Protected Admin Registry Dashboard (Supabase Auth System)
- * Location: assets/js/admin-dashboard.js
+ * ReNew You Health & Wellness
+ * DOT Screening Registry + Administrative Scheduling System
+ *
+ * Location:
+ * assets/js/admin-dashboard.js
+ *
+ * Supabase tables used:
+ *
+ * scheduling_settings
+ * -----------------------------------------
+ * id
+ * buffer_minutes
+ * blocked_date_slots
+ * updated_at
+ *
+ * dot_appointments
+ * -----------------------------------------
+ * id
+ * created_at
+ * client_name
+ * cdl_number
+ * client_email
+ * client_phone
+ * testing_reason
+ * booking_date
+ * booking_time
  */
-document.addEventListener('DOMContentLoaded', () => {
-    // SUPABASE CONFIGURATION - Using project client library framework
-    const SUPABASE_PROJECT_URL = "https://lrbimrlbskjweynxlgas.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxyYmltcmxic2tqd2V5bnhsZ2FzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1MjQ0NTYsImV4cCI6MjA5NDEwMDQ1Nn0.I8fQ6ZjA9oaTqJCF-7Z7vUboXC8zv2cogBv4PC_1ihU"; 
-    
-    // Instantiates official client controller via global window variable context
-    const supabaseClientInstance = window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
 
-    const target = document.getElementById('admin-dashboard-target');
-    if (!target) return;
+document.addEventListener('DOMContentLoaded', () => {
+
+    /* =========================================================
+       SUPABASE CONFIGURATION
+    ========================================================= */
+
+    const SUPABASE_PROJECT_URL =
+        "https://lrbimrlbskjweynxlgas.supabase.co";
+
+    const SUPABASE_ANON_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxyYmltcmxic2tqd2V5bnhsZ2FzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1MjQ0NTYsImV4cCI6MjA5NDEwMDQ1Nn0.I8fQ6ZjA9oaTqJCF-7Z7vUboXC8zv2cogBv4PC_1ihU";
+
+    const supabaseClientInstance =
+        window.supabase.createClient(
+            SUPABASE_PROJECT_URL,
+            SUPABASE_ANON_KEY
+        );
+
+    const target =
+        document.getElementById('admin-dashboard-target');
+
+    if (!target) {
+        return;
+    }
+
+    /* =========================================================
+       APPLICATION STATE
+    ========================================================= */
 
     let appointmentsData = [];
+
     let activeFilter = 'All';
+
     let searchQuery = '';
 
-    // AUTH GUARD: Query active session state directly from Supabase token storage ecosystem
+    let schedulingSettings = {
+        id: 'dot_config',
+        buffer_minutes: 30,
+        blocked_date_slots: {}
+    };
+
+    let selectedScheduleDate = getTodayLocalDate();
+
+    /* =========================================================
+       DEFAULT CLINIC SCHEDULE
+       These are generated dynamically.
+       
+       IMPORTANT:
+       The four old hard-coded appointment buttons are gone.
+       
+       The buffer setting controls the generated interval.
+       
+       Example:
+       30 minutes =
+       8:00
+       8:30
+       9:00
+       9:30
+       etc.
+    ========================================================= */
+
+    const CLINIC_OPEN_MINUTES = 8 * 60;
+
+    const CLINIC_CLOSE_MINUTES = 17 * 60;
+
+    /* =========================================================
+       AUTHENTICATION GUARD
+    ========================================================= */
+
     checkAuthenticationGuard();
 
     async function checkAuthenticationGuard() {
-        const { data: { session } } = await supabaseClientInstance.auth.getSession();
-        if (session) {
-            renderDashboardStructure();
-            fetchAppointments();
-        } else {
+
+        try {
+
+            const {
+                data: { session }
+            } = await supabaseClientInstance.auth.getSession();
+
+            if (session) {
+
+                renderDashboardStructure();
+
+                await loadSchedulingSystemSettings();
+
+                await fetchAppointments();
+
+                renderScheduleManager();
+
+            } else {
+
+                renderSecureLoginForm();
+
+            }
+
+        } catch (error) {
+
+            console.error(
+                'Authentication initialization error:',
+                error
+            );
+
             renderSecureLoginForm();
         }
     }
 
-    /**
-     * Renders a secure, responsive administrative login interface
-     */
-function renderSecureLoginForm() {
-    target.innerHTML = `
-        <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 15px; box-sizing: border-box; background: #fafafa;">
-            <div style="background: #ffffff; border: 1px solid rgba(138, 52, 159, 0.1); border-radius: 20px; padding: clamp(20px, 5vw, 40px); width: 100%; max-width: 420px; box-shadow: 0 15px 40px rgba(62,13,95,0.04); box-sizing: border-box;">
-                
-                <!-- Centralized Corporate Branding -->
-                <div style="text-align: center; margin-bottom: 25px;">
-                    <div style="display: inline-block; margin-bottom: 15px;">
-                        <img src="images/logo2.png" 
-                             alt="ReNew You Health & Wellness Logo" 
-                             style="max-width: 160px; height: auto; display: block; object-fit: contain; margin: 0 auto;"
-                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
-                        
-                        <!-- Professional Fallback Box if Image Fails to Load -->
-                        <div style="display: none; width: 54px; height: 54px; background: rgba(138,52,159,0.04); color: var(--purple-primary); border-radius: 14px; align-items: center; justify-content: center; font-size: 1.6rem; margin: 0 auto;">
-                            🏥
-                        </div>
-                    </div>
-                    <h2 style="color: var(--purple-primary); margin: 0 0 8px 0; font-weight: 800; font-size: clamp(1.3rem, 4vw, 1.6rem);">Staff Console Sign-In</h2>
-                    <p style="color: #666; font-size: 0.9rem; margin: 0;">Authorized clinic personnel authentication gateway.</p>
-                </div>
+    /* =========================================================
+       LOGIN
+    ========================================================= */
 
-                <form id="clinicLoginForm">
-                    <div style="margin-bottom: 16px;">
-                        <label style="display: block; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 6px; color: #444;">Clinic Email</label>
-                        <input type="email" id="loginEmail" required style="width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 10px; font-size: 1rem; box-sizing: border-box;" placeholder="admin@renewyou.com">
-                    </div>
-                    <div style="margin-bottom: 20px;">
-                        <label style="display: block; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 6px; color: #444;">Account Password</label>
-                        <input type="password" id="loginPassword" required style="width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 10px; font-size: 1rem; box-sizing: border-box;" placeholder="••••••••">
-                    </div>
-                    <button type="submit" id="loginSubmitBtn" style="width: 100%; background: var(--purple-primary); color: #fff; padding: 14px; border: none; border-radius: 10px; font-weight: 700; font-size: 0.95rem; cursor: pointer; box-sizing: border-box;">Sign In to Registry</button>
-                    <p id="loginErrorMsg" style="color: #d90429; font-size: 0.85rem; font-weight: 600; text-align: center; margin: 15px 0 0 0; display: none;"></p>
-                </form>
-            </div>
-        </div>
-    `;
+    function renderSecureLoginForm() {
 
-        const loginForm = document.getElementById('clinicLoginForm');
-        const submitBtn = document.getElementById('loginSubmitBtn');
-        const errorMsg = document.getElementById('loginErrorMsg');
-
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            submitBtn.disabled = true;
-            errorMsg.style.display = 'none';
-
-            const email = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPassword').value;
-
-            // Execute account authentication handshake directly through Supabase Auth endpoints
-            const { error } = await supabaseClientInstance.auth.signInWithPassword({ email, password });
-
-            if (error) {
-                errorMsg.innerText = error.message;
-                errorMsg.style.display = 'block';
-                submitBtn.disabled = false;
-            } else {
-                renderDashboardStructure();
-                fetchAppointments();
-            }
-        });
-    }
-    /**
-     * Builds main dashboard data frame layout shell with mobile responsive classes
-     */
-    function renderDashboardStructure() {
         target.innerHTML = `
-            <style>
-                .dash-outer-wrap { max-width: 1400px; margin: 0 auto; padding: 40px 20px; box-sizing: border-box; }
-                .dash-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 35px; flex-wrap: wrap; gap: 20px; }
-                .dash-title-block h1 { color: var(--purple-primary); margin: 0 0 5px 0; font-weight: 800; font-size: clamp(1.6rem, 4vw, 2.2rem); letter-spacing: -0.5px; }
-                .dash-metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; margin-bottom: 35px; }
-                .dash-control-card { background: #ffffff; border: 1px solid rgba(138, 52, 159, 0.06); padding: 20px; border-radius: 16px; margin-bottom: 25px; display: flex; flex-direction: column; gap: 15px; }
-                .dash-tab-row { display: flex; gap: 8px; flex-wrap: wrap; }
-                .filter-tab { padding: 8px 16px; border: none; border-radius: 30px; font-weight: 600; cursor: pointer; font-size: 0.85rem; background: #eee; color: #333; transition: all 0.2s ease; white-space: nowrap; }
-                .filter-tab.active { background: var(--purple-primary) !important; color: #fff !important; }
-                @media (max-width: 992px) {
-                    .dash-metrics-grid { grid-template-columns: repeat(3, 1fr); gap: 12px; }
-                }
-                @media (max-width: 768px) {
-                    .dash-outer-wrap { padding: 20px 12px; }
-                    .dash-header-row { flex-direction: column; align-items: stretch; text-align: center; gap: 15px; margin-bottom: 25px; }
-                    .dash-header-actions { display: flex; gap: 10px; width: 100%; }
-                    .dash-header-actions button { flex: 1; text-align: center; justify-content: center; }
-                    .dash-metrics-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 25px; }
-                    .dash-control-card { padding: 12px; margin-bottom: 15px; gap: 12px; }
-                    .dash-tab-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; width: 100%; }
-                    .filter-tab { text-align: center; padding: 10px 5px; font-size: 0.8rem; border-radius: 8px; }
-                }
-            </style>
-            <div class="dash-outer-wrap">
-                <div class="dash-header-row">
-                    <div class="dash-title-block">
-                        <h1>DOT Screening Registry</h1>
-                        <p style="color: #666; margin: 0; font-size: 0.95rem;">Active occupational testing queues and driver manifests.</p>
-                    </div>
-                    <div class="dash-header-actions" style="display: flex; gap: 12px; flex-wrap: wrap;">
-                        <button id="exportCsvBtn" style="background: #ffffff; color: var(--green-primary); border: 1px solid var(--green-primary); padding: 10px 18px; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; gap: 6px;">📊 Export CSV</button>
-                        <button id="logoutBtn" style="background: transparent; color: #666; border: 1px solid #ddd; padding: 10px 18px; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 0.9rem;">Sign Out</button>
-                    </div>
-                </div>
+            <div style="
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                min-height:100vh;
+                padding:15px;
+                box-sizing:border-box;
+                background:#fafafa;
+            ">
 
-                <!-- 7-Card Expanded Metrics Counter Grid Matrix -->
-                <div class="dash-metrics-grid" id="metricsCounterMatrix">
-                    <div style="background: #fff; padding: 15px; border-radius: 14px; border: 1px solid rgba(138,52,159,0.06); box-shadow: 0 4px 15px rgba(0,0,0,0.01);">
-                        <span style="font-size: 0.72rem; font-weight: 700; color: #666; text-transform: uppercase; display: block;">Total Forms</span>
-                        <h3 id="statTotal" style="margin: 5px 0 0 0; font-size: 1.5rem; color: var(--purple-primary); font-weight: 800;">0</h3>
-                    </div>
-                    <div style="background: #fff; padding: 15px; border-radius: 14px; border: 1px solid rgba(138,52,159,0.06); box-shadow: 0 4px 15px rgba(0,0,0,0.01);">
-                        <span style="font-size: 0.72rem; font-weight: 700; color: #666; text-transform: uppercase; display: block;">DOT Physical</span>
-                        <h3 id="statPhysical" style="margin: 5px 0 0 0; font-size: 1.5rem; color: var(--purple-accent); font-weight: 800;">0</h3>
-                    </div>
-                    <div style="background: #fff; padding: 15px; border-radius: 14px; border: 1px solid rgba(138,52,159,0.06); box-shadow: 0 4px 15px rgba(0,0,0,0.01);">
-                        <span style="font-size: 0.72rem; font-weight: 700; color: #666; text-transform: uppercase; display: block;">Pre-Emp</span>
-                        <h3 id="statPre" style="margin: 5px 0 0 0; font-size: 1.5rem; color: #4f940c; font-weight: 800;">0</h3>
-                    </div>
-                    <div style="background: #fff; padding: 15px; border-radius: 14px; border: 1px solid rgba(138,52,159,0.06); box-shadow: 0 4px 15px rgba(0,0,0,0.01);">
-                        <span style="font-size: 0.72rem; font-weight: 700; color: #666; text-transform: uppercase; display: block;">Random</span>
-                        <h3 id="statRandom" style="margin: 5px 0 0 0; font-size: 1.5rem; color: var(--purple-accent); font-weight: 800;">0</h3>
-                    </div>
-                    <div style="background: #fff; padding: 15px; border-radius: 14px; border: 1px solid rgba(138,52,159,0.06); box-shadow: 0 4px 15px rgba(0,0,0,0.01);">
-                        <span style="font-size: 0.72rem; font-weight: 700; color: #666; text-transform: uppercase; display: block;">Accident</span>
-                        <h3 id="statUrgent" style="margin: 5px 0 0 0; font-size: 1.5rem; color: #d90429; font-weight: 800;">0</h3>
-                    </div>
-                    <div style="background: #fff; padding: 15px; border-radius: 14px; border: 1px solid rgba(138,52,159,0.06); box-shadow: 0 4px 15px rgba(0,0,0,0.01);">
-                        <span style="font-size: 0.72rem; font-weight: 700; color: #666; text-transform: uppercase; display: block;">Return Duty</span>
-                        <h3 id="statReturn" style="margin: 5px 0 0 0; font-size: 1.5rem; color: #0077b6; font-weight: 800;">0</h3>
-                    </div>
-                    <div style="background: #fff; padding: 15px; border-radius: 14px; border: 1px solid rgba(138,52,159,0.06); box-shadow: 0 4px 15px rgba(0,0,0,0.01);">
-                        <span style="font-size: 0.72rem; font-weight: 700; color: #666; text-transform: uppercase; display: block;">Follow Up</span>
-                        <h3 id="statFollow" style="margin: 5px 0 0 0; font-size: 1.5rem; color: #f77f00; font-weight: 800;">0</h3>
-                    </div>
-                </div>
+                <div style="
+                    background:#ffffff;
+                    border:1px solid rgba(138,52,159,0.1);
+                    border-radius:20px;
+                    padding:clamp(20px,5vw,40px);
+                    width:100%;
+                    max-width:420px;
+                    box-shadow:0 15px 40px rgba(62,13,95,0.04);
+                    box-sizing:border-box;
+                ">
 
-                <div class="dash-control-card">
-                    <div class="dash-tab-row" id="filterRow">
-                        <button class="filter-tab active" data-filter="All">All Forms</button>
-                        <button class="filter-tab" data-filter="DOT-Physical">DOT Physical</button>
-                        <button class="filter-tab" data-filter="Pre-Employment">Pre-Employment</button>
-                        <button class="filter-tab" data-filter="Random-Pool">Random Pool</button>
-                        <button class="filter-tab" data-filter="Post-Accident">Post-Accident</button>
-                        <button class="filter-tab" data-filter="Return-To-Duty">Return To Duty</button>
-                        <button class="filter-tab" data-filter="Follow-Up">Follow Up</button>
-                    </div>
-                    
-                    <div style="position: relative; width: 100%;">
-                        <input type="text" id="dashboardSearch" style="width: 100%; padding: 12px 16px 12px 40px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.08); font-size: 0.95rem; box-sizing: border-box; background-color: #fafafa;" placeholder="Search name or CDL string...">
-                        <div style="position: absolute; left: 14px; top: 13px; color: #777; display: flex; align-items: center;">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <div style="
+                        text-align:center;
+                        margin-bottom:25px;
+                    ">
+
+                        <div style="
+                            display:inline-block;
+                            margin-bottom:15px;
+                        ">
+
+                            <img
+                                src="images/logo2.png"
+                                alt="ReNew You Health & Wellness Logo"
+                                style="
+                                    max-width:160px;
+                                    height:auto;
+                                    display:block;
+                                    object-fit:contain;
+                                    margin:0 auto;
+                                "
+                                onerror="
+                                    this.style.display='none';
+                                    this.nextElementSibling.style.display='flex';
+                                "
+                            />
+
+                            <div style="
+                                display:none;
+                                width:54px;
+                                height:54px;
+                                background:rgba(138,52,159,0.04);
+                                color:var(--purple-primary);
+                                border-radius:14px;
+                                align-items:center;
+                                justify-content:center;
+                                font-size:1.6rem;
+                                margin:0 auto;
+                            ">
+                                🏥
+                            </div>
+
                         </div>
+
+                        <h2 style="
+                            color:var(--purple-primary);
+                            margin:0 0 8px 0;
+                            font-weight:800;
+                            font-size:clamp(1.3rem,4vw,1.6rem);
+                        ">
+                            Staff Console Sign-In
+                        </h2>
+
+                        <p style="
+                            color:#666;
+                            font-size:0.9rem;
+                            margin:0;
+                        ">
+                            Authorized clinic personnel authentication gateway.
+                        </p>
+
                     </div>
+
+                    <form id="clinicLoginForm">
+
+                        <div style="margin-bottom:16px;">
+
+                            <label style="
+                                display:block;
+                                font-size:0.8rem;
+                                font-weight:700;
+                                text-transform:uppercase;
+                                margin-bottom:6px;
+                                color:#444;
+                            ">
+                                Clinic Email
+                            </label>
+
+                            <input
+                                type="email"
+                                id="loginEmail"
+                                required
+                                style="
+                                    width:100%;
+                                    padding:12px 16px;
+                                    border:1px solid #ddd;
+                                    border-radius:10px;
+                                    font-size:1rem;
+                                    box-sizing:border-box;
+                                "
+                                placeholder="admin@renewyou.com"
+                            />
+
+                        </div>
+
+                        <div style="margin-bottom:20px;">
+
+                            <label style="
+                                display:block;
+                                font-size:0.8rem;
+                                font-weight:700;
+                                text-transform:uppercase;
+                                margin-bottom:6px;
+                                color:#444;
+                            ">
+                                Account Password
+                            </label>
+
+                            <input
+                                type="password"
+                                id="loginPassword"
+                                required
+                                style="
+                                    width:100%;
+                                    padding:12px 16px;
+                                    border:1px solid #ddd;
+                                    border-radius:10px;
+                                    font-size:1rem;
+                                    box-sizing:border-box;
+                                "
+                                placeholder="••••••••"
+                            />
+
+                        </div>
+
+                        <button
+                            type="submit"
+                            id="loginSubmitBtn"
+                            style="
+                                width:100%;
+                                background:var(--purple-primary);
+                                color:#fff;
+                                padding:14px;
+                                border:none;
+                                border-radius:10px;
+                                font-weight:700;
+                                font-size:0.95rem;
+                                cursor:pointer;
+                            "
+                        >
+                            Sign In to Registry
+                        </button>
+
+                        <p
+                            id="loginErrorMsg"
+                            style="
+                                color:#d90429;
+                                font-size:0.85rem;
+                                font-weight:600;
+                                text-align:center;
+                                margin:15px 0 0 0;
+                                display:none;
+                            "
+                        ></p>
+
+                    </form>
+
                 </div>
 
-                <div id="dataListTarget" style="display: grid; grid-template-columns: 1fr; gap: 15px;">
-                    <p style="color: #666; text-align: center; padding: 40px;">Querying database secure tables...</p>
-                </div>
             </div>
         `;
 
-        const tabs = document.querySelectorAll('.filter-tab');
-        tabs.forEach(tabBtn => {
-            tabBtn.addEventListener('click', () => {
-                tabs.forEach(b => b.classList.remove('active'));
-                tabBtn.classList.add('active');
-                activeFilter = tabBtn.getAttribute('data-filter');
-                populateDataGrid();
-            });
-        });
+        const loginForm =
+            document.getElementById('clinicLoginForm');
 
-        document.getElementById('dashboardSearch').addEventListener('input', (e) => {
-            searchQuery = e.target.value.toLowerCase().trim();
-            populateDataGrid();
-        });
+        const submitBtn =
+            document.getElementById('loginSubmitBtn');
 
-        document.getElementById('exportCsvBtn').addEventListener('click', () => {
-            exportRegistryToCsv();
-        });
+        const errorMsg =
+            document.getElementById('loginErrorMsg');
 
-        document.getElementById('logoutBtn').addEventListener('click', async () => {
-            await supabaseClientInstance.auth.signOut();
-            window.location.href = 'index.html';
+        loginForm.addEventListener('submit', async (event) => {
+
+            event.preventDefault();
+
+            submitBtn.disabled = true;
+
+            errorMsg.style.display = 'none';
+
+            const email =
+                document.getElementById('loginEmail')
+                    .value
+                    .trim();
+
+            const password =
+                document.getElementById('loginPassword')
+                    .value;
+
+            const { error } =
+                await supabaseClientInstance.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+
+            if (error) {
+
+                errorMsg.innerText = error.message;
+
+                errorMsg.style.display = 'block';
+
+                submitBtn.disabled = false;
+
+                return;
+            }
+
+            renderDashboardStructure();
+
+            await loadSchedulingSystemSettings();
+
+            await fetchAppointments();
+
+            renderScheduleManager();
         });
     }
-    /**
-     * Executes asynchronous direct REST calls to database endpoints safely
-     */
-    async function fetchAppointments() {
-        try {
-            const response = await fetch(`${SUPABASE_PROJECT_URL}/rest/v1/dot_appointments?select=*&order=booking_date.asc,booking_time.asc`, {
-                method: 'GET',
-                headers: {
-                    'apikey': SUPABASE_ANON_KEY,
-                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                    'Content-Type': 'application/json'
-                }
-            });
 
-            if (!response.ok) throw new Error('Database secure authorization connection rejected.');
-            appointmentsData = await response.json();
-            
+/* =========================================================
+   MAIN DASHBOARD
+   ========================================================= */
+
+function renderDashboardStructure() {
+
+    target.innerHTML = `
+
+        <style>
+
+            .dash-outer-wrap {
+                max-width:1400px;
+                margin:0 auto;
+                padding:30px 20px;
+                box-sizing:border-box;
+            }
+
+            /* =====================================================
+               TOP HEADER
+            ===================================================== */
+
+            .dash-header-row {
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+                margin-bottom:20px;
+                flex-wrap:wrap;
+                gap:20px;
+            }
+
+            .dash-title-block h1 {
+                color:var(--purple-primary);
+                margin:0 0 5px 0;
+                font-weight:800;
+                font-size:clamp(1.6rem,4vw,2.2rem);
+            }
+
+            .dash-title-block p {
+                color:#666;
+                margin:0;
+                font-size:0.95rem;
+            }
+
+            /* =====================================================
+               MAIN NAVIGATION
+            ===================================================== */
+
+            .admin-page-nav {
+                display:flex;
+                gap:8px;
+                background:#fff;
+                border:1px solid rgba(138,52,159,0.08);
+                border-radius:14px;
+                padding:7px;
+                margin-bottom:25px;
+                box-shadow:0 4px 15px rgba(62,13,95,0.03);
+                overflow-x:auto;
+            }
+
+            .admin-page-tab {
+                border:none;
+                background:transparent;
+                color:#555;
+                padding:11px 18px;
+                border-radius:10px;
+                font-weight:700;
+                cursor:pointer;
+                white-space:nowrap;
+                transition:all .2s ease;
+                font-size:.88rem;
+            }
+
+            .admin-page-tab:hover {
+                background:#f7f4f9;
+                color:var(--purple-primary);
+            }
+
+            .admin-page-tab.active {
+                background:var(--purple-primary);
+                color:#fff;
+            }
+
+            .admin-page {
+                display:none;
+            }
+
+            .admin-page.active {
+                display:block;
+            }
+
+            /* =====================================================
+               METRICS
+            ===================================================== */
+
+            .dash-metrics-grid {
+                display:grid;
+                grid-template-columns:
+                    repeat(auto-fit,minmax(160px,1fr));
+                gap:15px;
+                margin-bottom:25px;
+            }
+
+            /* =====================================================
+               CARDS
+            ===================================================== */
+
+            .admin-card {
+                background:#fff;
+                border:1px solid rgba(138,52,159,0.08);
+                border-radius:16px;
+                padding:22px;
+                margin-bottom:20px;
+                box-sizing:border-box;
+                box-shadow:0 6px 20px rgba(62,13,95,0.025);
+            }
+
+            .admin-card h2,
+            .admin-card h3 {
+                color:var(--purple-primary);
+            }
+
+            /* =====================================================
+               SETTINGS
+            ===================================================== */
+
+            .admin-settings-panel {
+                display:grid;
+                grid-template-columns:1fr 1fr;
+                gap:20px;
+            }
+
+            .setting-inner-card {
+                background:#fff;
+                border:1px solid rgba(138,52,159,0.08);
+                padding:25px;
+                border-radius:16px;
+                box-shadow:0 10px 30px rgba(62,13,95,0.02);
+            }
+
+            /* =====================================================
+               FILTERS
+            ===================================================== */
+
+            .dash-control-card {
+                background:#fff;
+                border:1px solid rgba(138,52,159,0.06);
+                padding:20px;
+                border-radius:16px;
+                margin-bottom:20px;
+                display:flex;
+                flex-direction:column;
+                gap:15px;
+            }
+
+            .dash-tab-row {
+                display:flex;
+                gap:8px;
+                flex-wrap:wrap;
+            }
+
+            .filter-tab {
+                padding:8px 16px;
+                border:none;
+                border-radius:30px;
+                font-weight:600;
+                cursor:pointer;
+                font-size:.85rem;
+                background:#eee;
+                color:#333;
+            }
+
+            .filter-tab.active {
+                background:var(--purple-primary)!important;
+                color:#fff!important;
+            }
+
+            /* =====================================================
+               SCHEDULE
+            ===================================================== */
+
+            .schedule-manager-card {
+                background:#fff;
+                border:1px solid rgba(138,52,159,0.08);
+                border-radius:18px;
+                padding:25px;
+                margin-bottom:20px;
+                box-sizing:border-box;
+            }
+
+            .schedule-layout {
+                display:grid;
+                grid-template-columns:350px 1fr;
+                gap:25px;
+            }
+
+            .schedule-calendar-panel {
+                border:1px solid #eee;
+                border-radius:14px;
+                padding:18px;
+                background:#fafafa;
+            }
+
+            .schedule-times-panel {
+                border:1px solid #eee;
+                border-radius:14px;
+                padding:18px;
+                background:#fff;
+            }
+
+            .schedule-calendar-header {
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+                gap:10px;
+                margin-bottom:15px;
+            }
+
+            .schedule-date-input {
+                width:100%;
+                padding:12px;
+                border:1px solid #ddd;
+                border-radius:10px;
+                font-size:1rem;
+                box-sizing:border-box;
+                background:#fff;
+            }
+
+            .schedule-action-btn {
+                border:none;
+                border-radius:9px;
+                padding:10px 14px;
+                font-weight:700;
+                cursor:pointer;
+                font-size:.85rem;
+            }
+
+            .schedule-primary-btn {
+                background:var(--purple-primary);
+                color:#fff;
+            }
+
+            .schedule-danger-btn {
+                background:#d90429;
+                color:#fff;
+            }
+
+            .schedule-neutral-btn {
+                background:#eee;
+                color:#333;
+            }
+
+            .schedule-time-grid {
+                display:grid;
+                grid-template-columns:
+                    repeat(3,1fr);
+                gap:10px;
+                margin-top:15px;
+            }
+
+            .schedule-time-btn {
+                padding:13px 8px;
+                border:1px solid rgba(138,52,159,.15);
+                background:#fff;
+                color:var(--purple-primary);
+                border-radius:10px;
+                font-weight:700;
+                cursor:pointer;
+                transition:all .2s;
+            }
+
+            .schedule-time-btn:hover {
+                border-color:var(--purple-accent);
+                transform:translateY(-1px);
+            }
+
+            .schedule-time-btn.booked {
+                background:#f1f1f1;
+                border-color:#ddd;
+                color:#888;
+                cursor:not-allowed;
+            }
+
+            .schedule-time-btn.blocked {
+                background:#fff0f2;
+                border-color:#d90429;
+                color:#d90429;
+            }
+
+            .schedule-time-btn.past {
+                background:#f1f1f1;
+                border-color:#ddd;
+                color:#999;
+                cursor:not-allowed;
+                opacity:.75;
+            }
+
+            .schedule-time-status {
+                display:block;
+                font-size:.65rem;
+                margin-top:4px;
+                text-transform:uppercase;
+            }
+
+            /* =====================================================
+               MOBILE
+            ===================================================== */
+
+            @media(max-width:992px) {
+
+                .admin-settings-panel {
+                    grid-template-columns:1fr;
+                }
+
+                .schedule-layout {
+                    grid-template-columns:1fr;
+                }
+
+            }
+
+            @media(max-width:768px) {
+
+                .dash-outer-wrap {
+                    padding:20px 12px;
+                }
+
+                .admin-page-nav {
+                    margin-left:-4px;
+                    margin-right:-4px;
+                }
+
+                .admin-page-tab {
+                    padding:10px 13px;
+                    font-size:.8rem;
+                }
+
+                .schedule-time-grid {
+                    grid-template-columns:repeat(2,1fr);
+                }
+
+            }
+
+        </style>
+
+        <div class="dash-outer-wrap">
+
+            <!-- =================================================
+                 HEADER
+            ================================================= -->
+
+            <div class="dash-header-row">
+
+                <div class="dash-title-block">
+
+                    <h1>
+                        DOT Screening Registry
+                    </h1>
+
+                    <p>
+                        Appointment registry and scheduling control center.
+                    </p>
+
+                </div>
+
+                <div
+                    style="
+                        display:flex;
+                        gap:10px;
+                        flex-wrap:wrap;
+                    "
+                >
+
+                    <button
+                        id="exportCsvBtn"
+                        style="
+                            background:#fff;
+                            color:var(--green-primary);
+                            border:1px solid var(--green-primary);
+                            padding:10px 18px;
+                            border-radius:10px;
+                            font-weight:700;
+                            cursor:pointer;
+                        "
+                    >
+                        📊 Export CSV
+                    </button>
+
+                    <button
+                        id="logoutBtn"
+                        style="
+                            background:transparent;
+                            color:#666;
+                            border:1px solid #ddd;
+                            padding:10px 18px;
+                            border-radius:10px;
+                            font-weight:600;
+                            cursor:pointer;
+                        "
+                    >
+                        Sign Out
+                    </button>
+
+                </div>
+
+            </div>
+
+            <!-- =================================================
+                 PAGE NAVIGATION
+            ================================================= -->
+
+            <nav class="admin-page-nav">
+
+                <button
+                    class="admin-page-tab active"
+                    data-page="dashboardPage"
+                >
+                    📊 Dashboard
+                </button>
+
+                <button
+                    class="admin-page-tab"
+                    data-page="appointmentsPage"
+                >
+                    📋 Appointments
+                </button>
+
+                <button
+                    class="admin-page-tab"
+                    data-page="schedulePage"
+                >
+                    📅 Schedule
+                </button>
+
+                <button
+                    class="admin-page-tab"
+                    data-page="settingsPage"
+                >
+                    ⚙️ Settings
+                </button>
+
+            </nav>
+
+            <!-- =================================================
+                 DASHBOARD PAGE
+            ================================================= -->
+
+            <section
+                id="dashboardPage"
+                class="admin-page active"
+            >
+
+                <div
+                    class="dash-metrics-grid"
+                    id="metricsCounterMatrix"
+                >
+
+                    ${createMetricCard(
+                        'Total Forms',
+                        'statTotal',
+                        'var(--purple-primary)'
+                    )}
+
+                    ${createMetricCard(
+                        'DOT Physical',
+                        'statPhysical',
+                        'var(--purple-accent)'
+                    )}
+
+                    ${createMetricCard(
+                        'Pre-Emp',
+                        'statPre',
+                        '#4f940c'
+                    )}
+
+                    ${createMetricCard(
+                        'Random',
+                        'statRandom',
+                        'var(--purple-accent)'
+                    )}
+
+                    ${createMetricCard(
+                        'Accident',
+                        'statUrgent',
+                        '#d90429'
+                    )}
+
+                    ${createMetricCard(
+                        'Return Duty',
+                        'statReturn',
+                        '#0077b6'
+                    )}
+
+                    ${createMetricCard(
+                        'Follow Up',
+                        'statFollow',
+                        '#f77f00'
+                    )}
+
+                </div>
+
+                <div class="admin-card">
+
+                    <h2 style="
+                        margin:0 0 8px 0;
+                        font-size:1.2rem;
+                    ">
+                        Scheduling Overview
+                    </h2>
+
+                    <p style="
+                        color:#666;
+                        margin:0;
+                        line-height:1.5;
+                    ">
+                        Use the Schedule tab to manage appointment
+                        availability, block individual times, or
+                        close an entire date.
+                    </p>
+
+                </div>
+
+            </section>
+
+            <!-- =================================================
+                 APPOINTMENTS PAGE
+            ================================================= -->
+
+            <section
+                id="appointmentsPage"
+                class="admin-page"
+            >
+
+                <div class="dash-control-card">
+
+                    <div
+                        class="dash-tab-row"
+                        id="filterRow"
+                    >
+
+                        ${createFilterButton(
+                            'All',
+                            'All Forms',
+                            true
+                        )}
+
+                        ${createFilterButton(
+                            'DOT-Physical',
+                            'DOT Physical'
+                        )}
+
+                        ${createFilterButton(
+                            'Pre-Employment',
+                            'Pre-Employment'
+                        )}
+
+                        ${createFilterButton(
+                            'Random-Pool',
+                            'Random Pool'
+                        )}
+
+                        ${createFilterButton(
+                            'Post-Accident',
+                            'Post-Accident'
+                        )}
+
+                        ${createFilterButton(
+                            'Return-To-Duty',
+                            'Return To Duty'
+                        )}
+
+                        ${createFilterButton(
+                            'Follow-Up',
+                            'Follow Up'
+                        )}
+
+                    </div>
+
+                    <div style="
+                        position:relative;
+                        width:100%;
+                    ">
+
+                        <input
+                            type="text"
+                            id="dashboardSearch"
+                            style="
+                                width:100%;
+                                padding:12px 16px 12px 40px;
+                                border-radius:10px;
+                                border:1px solid rgba(0,0,0,.08);
+                                font-size:.95rem;
+                                box-sizing:border-box;
+                                background:#fafafa;
+                            "
+                            placeholder="Search name or CDL..."
+                        />
+
+                        <div style="
+                            position:absolute;
+                            left:14px;
+                            top:13px;
+                            color:#777;
+                        ">
+                            🔎
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div
+                    id="dataListTarget"
+                    style="
+                        display:grid;
+                        grid-template-columns:1fr;
+                        gap:15px;
+                    "
+                >
+                    <p style="
+                        color:#666;
+                        text-align:center;
+                        padding:40px;
+                    ">
+                        Querying database secure tables...
+                    </p>
+                </div>
+
+            </section>
+
+            <!-- =================================================
+                 SCHEDULE PAGE
+            ================================================= -->
+
+            <section
+                id="schedulePage"
+                class="admin-page"
+            >
+
+                <div
+                    id="scheduleManagerTarget"
+                >
+                    <div class="schedule-manager-card">
+                        Loading scheduling manager...
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- =================================================
+                 SETTINGS PAGE
+            ================================================= -->
+
+            <section
+                id="settingsPage"
+                class="admin-page"
+            >
+
+                <div class="admin-settings-panel">
+
+                    <div class="setting-inner-card">
+
+                        <h3 style="
+                            margin:0 0 10px 0;
+                            font-size:1.1rem;
+                            font-weight:800;
+                        ">
+                            Appointment Buffer / Time Interval
+                        </h3>
+
+                        <p style="
+                            font-size:.85rem;
+                            color:#666;
+                            margin:0 0 15px 0;
+                            line-height:1.5;
+                        ">
+                            Controls how frequently appointment times
+                            are generated throughout the clinic schedule.
+                        </p>
+
+                        <div style="
+                            display:flex;
+                            gap:10px;
+                            align-items:center;
+                        ">
+
+                            <select
+                                id="bufferSettingSelect"
+                                style="
+                                    flex:1;
+                                    padding:10px;
+                                    border-radius:8px;
+                                    border:1px solid #ddd;
+                                    font-weight:600;
+                                "
+                            >
+
+                                <option value="15">
+                                    Every 15 Minutes
+                                </option>
+
+                                <option value="30">
+                                    Every 30 Minutes
+                                </option>
+
+                                <option value="45">
+                                    Every 45 Minutes
+                                </option>
+
+                                <option value="60">
+                                    Every 60 Minutes
+                                </option>
+
+                            </select>
+
+                            <button
+                                id="saveBufferBtn"
+                                class="schedule-action-btn schedule-primary-btn"
+                            >
+                                Save
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    <div class="setting-inner-card">
+
+                        <h3 style="
+                            margin:0 0 10px 0;
+                            font-size:1.1rem;
+                            font-weight:800;
+                        ">
+                            Clinic Schedule
+                        </h3>
+
+                        <p style="
+                            font-size:.85rem;
+                            color:#666;
+                            margin:0 0 15px 0;
+                            line-height:1.5;
+                        ">
+                            Appointment availability currently generates
+                            from 8:00 AM through 5:00 PM.
+                        </p>
+
+                        <div style="
+                            background:#f7f4f9;
+                            border-radius:10px;
+                            padding:12px;
+                            font-size:.85rem;
+                            color:#555;
+                        ">
+
+                            <strong style="
+                                color:var(--purple-primary);
+                            ">
+                                Current Hours:
+                            </strong>
+
+                            8:00 AM – 5:00 PM
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </div>
+    `;
+
+    bindDashboardEvents();
+    bindAdminPageNavigation();
+}
+
+/* =========================================================
+   ADMIN PAGE NAVIGATION
+   ========================================================= */
+
+function bindAdminPageNavigation() {
+
+    const pageTabs =
+        document.querySelectorAll(
+            '.admin-page-tab'
+        );
+
+    const pages =
+        document.querySelectorAll(
+            '.admin-page'
+        );
+
+    pageTabs.forEach(tab => {
+
+        tab.addEventListener(
+            'click',
+            () => {
+
+                const targetPage =
+                    tab.getAttribute(
+                        'data-page'
+                    );
+
+                pageTabs.forEach(button => {
+
+                    button.classList.remove(
+                        'active'
+                    );
+
+                });
+
+                pages.forEach(page => {
+
+                    page.classList.remove(
+                        'active'
+                    );
+
+                });
+
+                tab.classList.add(
+                    'active'
+                );
+
+                const page =
+                    document.getElementById(
+                        targetPage
+                    );
+
+                if (page) {
+
+                    page.classList.add(
+                        'active'
+                    );
+
+                }
+
+                /*
+                 * Refresh schedule whenever
+                 * the Schedule tab is opened.
+                 */
+
+                if (
+                    targetPage ===
+                    'schedulePage'
+                ) {
+
+                    renderScheduleManager();
+
+                }
+
+            }
+        );
+
+    });
+
+}
+
+/* =========================================================
+   CHECK IF SLOT HAS PASSED
+   ========================================================= */
+
+function isPastAppointmentSlot(
+    date,
+    slot
+) {
+
+    const today =
+        getTodayLocalDate();
+
+    if (date !== today) {
+        return false;
+    }
+
+    const match =
+        normalizeTimeLabel(slot)
+            .match(
+                /^(\d{2}):(\d{2})\s*(AM|PM)$/
+            );
+
+    if (!match) {
+        return false;
+    }
+
+    let hours =
+        parseInt(
+            match[1],
+            10
+        );
+
+    const minutes =
+        parseInt(
+            match[2],
+            10
+        );
+
+    const period =
+        match[3];
+
+    if (
+        period === 'PM' &&
+        hours !== 12
+    ) {
+        hours += 12;
+    }
+
+    if (
+        period === 'AM' &&
+        hours === 12
+    ) {
+        hours = 0;
+    }
+
+    const slotDate =
+        new Date();
+
+    slotDate.setHours(
+        hours,
+        minutes,
+        0,
+        0
+    );
+
+    return (
+        slotDate.getTime() <=
+        Date.now()
+    );
+}
+
+    /* =========================================================
+       HTML HELPERS
+    ========================================================= */
+
+    function createMetricCard(label, id, color) {
+
+        return `
+            <div style="
+                background:#fff;
+                padding:15px;
+                border-radius:14px;
+                border:1px solid rgba(138,52,159,0.06);
+                box-shadow:0 4px 15px rgba(0,0,0,0.01);
+            ">
+
+                <span style="
+                    font-size:0.72rem;
+                    font-weight:700;
+                    color:#666;
+                    text-transform:uppercase;
+                    display:block;
+                ">
+                    ${label}
+                </span>
+
+                <h3
+                    id="${id}"
+                    style="
+                        margin:5px 0 0 0;
+                        font-size:1.5rem;
+                        color:${color};
+                        font-weight:800;
+                    "
+                >
+                    0
+                </h3>
+
+            </div>
+        `;
+    }
+
+    function createFilterButton(
+        value,
+        label,
+        active
+    ) {
+
+        return `
+            <button
+                class="filter-tab ${active ? 'active' : ''}"
+                data-filter="${value}"
+            >
+                ${label}
+            </button>
+        `;
+    }
+
+    /* =========================================================
+       DASHBOARD EVENTS
+    ========================================================= */
+
+    function bindDashboardEvents() {
+
+        const tabs =
+            document.querySelectorAll('.filter-tab');
+
+        tabs.forEach(tabButton => {
+
+            tabButton.addEventListener(
+                'click',
+                () => {
+
+                    tabs.forEach(button => {
+                        button.classList.remove('active');
+                    });
+
+                    tabButton.classList.add('active');
+
+                    activeFilter =
+                        tabButton.getAttribute(
+                            'data-filter'
+                        );
+
+                    populateDataGrid();
+                }
+            );
+
+        });
+
+        const searchInput =
+            document.getElementById(
+                'dashboardSearch'
+            );
+
+        if (searchInput) {
+
+            searchInput.addEventListener(
+                'input',
+                event => {
+
+                    searchQuery =
+                        event.target.value
+                            .toLowerCase()
+                            .trim();
+
+                    populateDataGrid();
+                }
+            );
+
+        }
+
+        const exportButton =
+            document.getElementById(
+                'exportCsvBtn'
+            );
+
+        if (exportButton) {
+
+            exportButton.addEventListener(
+                'click',
+                exportRegistryToCsv
+            );
+
+        }
+
+        const logoutButton =
+            document.getElementById(
+                'logoutBtn'
+            );
+
+        if (logoutButton) {
+
+            logoutButton.addEventListener(
+                'click',
+                async () => {
+
+                    await supabaseClientInstance
+                        .auth
+                        .signOut();
+
+                    window.location.href =
+                        'index.html';
+                }
+            );
+
+        }
+
+        const saveBufferButton =
+            document.getElementById(
+                'saveBufferBtn'
+            );
+
+        if (saveBufferButton) {
+
+            saveBufferButton.addEventListener(
+                'click',
+                saveBufferRuleConfig
+            );
+
+        }
+
+    }
+
+    /* =========================================================
+       LOAD SCHEDULING SETTINGS
+    ========================================================= */
+
+    async function loadSchedulingSystemSettings() {
+
+        try {
+
+            const {
+                data,
+                error
+            } = await supabaseClientInstance
+                .from('scheduling_settings')
+                .select('*')
+                .eq('id', 'dot_config')
+                .maybeSingle();
+
+            if (error) {
+
+                console.error(
+                    'Scheduling settings error:',
+                    error
+                );
+
+                return;
+            }
+
+            if (data) {
+
+                schedulingSettings = {
+                    id: data.id,
+                    buffer_minutes:
+                        parseInt(
+                            data.buffer_minutes,
+                            10
+                        ) || 30,
+                    blocked_date_slots:
+                        normalizeBlockedSlots(
+                            data.blocked_date_slots
+                        )
+                };
+
+            } else {
+
+                /*
+                 * If the configuration row does not yet exist,
+                 * create the expected dot_config record.
+                 */
+
+                const defaultConfig = {
+                    id: 'dot_config',
+                    buffer_minutes: 30,
+                    blocked_date_slots: {}
+                };
+
+                const {
+                    error: insertError
+                } = await supabaseClientInstance
+                    .from('scheduling_settings')
+                    .insert(defaultConfig);
+
+                if (insertError) {
+
+                    console.error(
+                        'Unable to create scheduling configuration:',
+                        insertError
+                    );
+
+                } else {
+
+                    schedulingSettings =
+                        defaultConfig;
+                }
+
+            }
+
+            const bufferSelect =
+                document.getElementById(
+                    'bufferSettingSelect'
+                );
+
+            if (bufferSelect) {
+
+                bufferSelect.value =
+                    String(
+                        schedulingSettings.buffer_minutes
+                    );
+            }
+
+        } catch (error) {
+
+            console.error(
+                'Scheduling configuration load failed:',
+                error
+            );
+        }
+    }
+
+    /* =========================================================
+       NORMALIZE JSONB BLOCK STRUCTURE
+       
+       Expected format:
+       
+       {
+           "2026-08-20": [
+               "08:00 AM",
+               "09:30 AM"
+           ],
+           "2026-08-21": [
+               "10:00 AM"
+           ]
+       }
+    ========================================================= */
+
+    function normalizeBlockedSlots(value) {
+
+        if (
+            !value ||
+            typeof value !== 'object' ||
+            Array.isArray(value)
+        ) {
+            return {};
+        }
+
+        const normalized = {};
+
+        Object.keys(value).forEach(dateKey => {
+
+            if (Array.isArray(value[dateKey])) {
+
+                normalized[dateKey] =
+                    value[dateKey].map(
+                        slot => String(slot)
+                    );
+
+            }
+
+        });
+
+        return normalized;
+    }
+
+    /* =========================================================
+       SAVE BUFFER
+    ========================================================= */
+
+    async function saveBufferRuleConfig() {
+
+        const select =
+            document.getElementById(
+                'bufferSettingSelect'
+            );
+
+        if (!select) {
+            return;
+        }
+
+        const value =
+            parseInt(
+                select.value,
+                10
+            );
+
+        if (
+            ![15, 30, 45, 60].includes(value)
+        ) {
+
+            alert(
+                'Please select a valid appointment interval.'
+            );
+
+            return;
+        }
+
+        const button =
+            document.getElementById(
+                'saveBufferBtn'
+            );
+
+        if (button) {
+            button.disabled = true;
+            button.innerText = 'Saving...';
+        }
+
+        const {
+            error
+        } = await supabaseClientInstance
+            .from('scheduling_settings')
+            .update({
+                buffer_minutes: value,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', 'dot_config');
+
+        if (button) {
+            button.disabled = false;
+            button.innerText = 'Save';
+        }
+
+        if (error) {
+
+            alert(
+                `Error saving schedule interval: ${error.message}`
+            );
+
+            return;
+        }
+
+        schedulingSettings.buffer_minutes =
+            value;
+
+        renderScheduleManager();
+
+        alert(
+            `Appointment schedule now generates every ${value} minutes.`
+        );
+    }
+
+    /* =========================================================
+       FETCH APPOINTMENTS
+    ========================================================= */
+
+    async function fetchAppointments() {
+
+        try {
+
+            const {
+                data,
+                error
+            } = await supabaseClientInstance
+                .from('dot_appointments')
+                .select('*')
+                .order(
+                    'booking_date',
+                    { ascending: true }
+                )
+                .order(
+                    'booking_time',
+                    { ascending: true }
+                );
+
+            if (error) {
+                throw error;
+            }
+
+            appointmentsData =
+                data || [];
+
             calculateMetrics();
+
             populateDataGrid();
-        } catch (err) {
-            const grid = document.getElementById('dataListTarget');
+
+        } catch (error) {
+
+            console.error(
+                'Appointment retrieval error:',
+                error
+            );
+
+            const grid =
+                document.getElementById(
+                    'dataListTarget'
+                );
+
             if (grid) {
-                grid.innerHTML = `<p style="color:#d90429; font-weight:600; text-align:center; padding:30px; border:1px dashed #d90429; border-radius:12px; background:#fff5f6;">Error reading records: ${err.message}. Verify network table status configs.</p>`;
+
+                grid.innerHTML = `
+                    <p style="
+                        color:#d90429;
+                        font-weight:600;
+                        text-align:center;
+                        padding:30px;
+                        border:1px dashed #d90429;
+                        border-radius:12px;
+                        background:#fff5f6;
+                    ">
+                        Error reading appointment records:
+                        ${escapeHtml(error.message)}
+                    </p>
+                `;
             }
         }
     }
 
-    /**
-     * Calculates processing indicators matrix for all 7 categories
-     */
-    function calculateMetrics() {
-        const getCount = (reason) => appointmentsData.filter(a => {
-            const dbVal = (a.testing_reason || '').toLowerCase().replace(/[\s_-]/g, '');
-            const targetVal = reason.toLowerCase().replace(/[\s_-]/g, '');
-            return dbVal === targetVal;
-        }).length;
+    /* =========================================================
+       METRICS
+    ========================================================= */
 
-        document.getElementById('statTotal').innerText = appointmentsData.length;
-        document.getElementById('statPhysical').innerText = getCount('DOT-Physical');
-        document.getElementById('statPre').innerText = getCount('Pre-Employment');
-        document.getElementById('statRandom').innerText = getCount('Random-Pool');
-        document.getElementById('statUrgent').innerText = getCount('Post-Accident');
-        document.getElementById('statReturn').innerText = getCount('Return-To-Duty');
-        document.getElementById('statFollow').innerText = getCount('Follow-Up');
+    function calculateMetrics() {
+
+        const getCount = reason => {
+
+            return appointmentsData.filter(
+                appointment => {
+
+                    const databaseValue =
+                        (
+                            appointment.testing_reason ||
+                            ''
+                        )
+                            .toLowerCase()
+                            .replace(
+                                /[\s_-]/g,
+                                ''
+                            );
+
+                    const targetValue =
+                        reason
+                            .toLowerCase()
+                            .replace(
+                                /[\s_-]/g,
+                                ''
+                            );
+
+                    return (
+                        databaseValue ===
+                        targetValue
+                    );
+                }
+            ).length;
+        };
+
+        setElementText(
+            'statTotal',
+            appointmentsData.length
+        );
+
+        setElementText(
+            'statPhysical',
+            getCount('DOT-Physical')
+        );
+
+        setElementText(
+            'statPre',
+            getCount('Pre-Employment')
+        );
+
+        setElementText(
+            'statRandom',
+            getCount('Random-Pool')
+        );
+
+        setElementText(
+            'statUrgent',
+            getCount('Post-Accident')
+        );
+
+        setElementText(
+            'statReturn',
+            getCount('Return-To-Duty')
+        );
+
+        setElementText(
+            'statFollow',
+            getCount('Follow-Up')
+        );
     }
 
-    /**
-     * Filters, searches, and outputs data arrays to screen viewport components
-     */
-    function populateDataGrid() {
-        const outputContainer = document.getElementById('dataListTarget');
-        if (!outputContainer) return;
+    /* =========================================================
+       REGISTRY DATA GRID
+    ========================================================= */
 
-        const filtered = appointmentsData.filter(app => {
-            const dbReason = (app.testing_reason || '').toLowerCase().replace(/[\s_-]/g, '');
-            const currentTab = activeFilter.toLowerCase().replace(/[\s_-]/g, '');
-            
-            const matchesTab = (activeFilter === 'All' || dbReason === currentTab);
-            const matchesSearch = (
-                (app.client_name || '').toLowerCase().includes(searchQuery) || 
-                (app.cdl_number || '').toLowerCase().includes(searchQuery)
+    function populateDataGrid() {
+
+        const outputContainer =
+            document.getElementById(
+                'dataListTarget'
             );
-            return matchesTab && matchesSearch;
-        });
+
+        if (!outputContainer) {
+            return;
+        }
+
+        const filtered =
+            appointmentsData.filter(
+                appointment => {
+
+                    const databaseReason =
+                        (
+                            appointment.testing_reason ||
+                            ''
+                        )
+                            .toLowerCase()
+                            .replace(
+                                /[\s_-]/g,
+                                ''
+                            );
+
+                    const currentTab =
+                        activeFilter
+                            .toLowerCase()
+                            .replace(
+                                /[\s_-]/g,
+                                ''
+                            );
+
+                    const matchesTab =
+                        (
+                            activeFilter === 'All' ||
+                            databaseReason ===
+                                currentTab
+                        );
+
+                    const matchesSearch =
+                        (
+                            (
+                                appointment.client_name ||
+                                ''
+                            )
+                                .toLowerCase()
+                                .includes(
+                                    searchQuery
+                                )
+                            ||
+                            (
+                                appointment.cdl_number ||
+                                ''
+                            )
+                                .toLowerCase()
+                                .includes(
+                                    searchQuery
+                                )
+                        );
+
+                    return (
+                        matchesTab &&
+                        matchesSearch
+                    );
+                }
+            );
 
         if (filtered.length === 0) {
-            outputContainer.innerHTML = `<div style="background:#fff; border:1px solid rgba(0,0,0,0.04); text-align:center; padding:40px 20px; color:#666; border-radius:12px; font-weight:500; font-size:0.95rem;">No screening appointments match your filter criteria or search terms.</div>`;
-            return;
-        }
 
-        outputContainer.innerHTML = filtered.map(app => {
-            let regulatoryBadgeColor = '#8a349b'; 
-            let readableLabel = app.testing_reason;
-
-            if (app.testing_reason === 'Pre-Employment') regulatoryBadgeColor = '#4f940c';
-            if (app.testing_reason === 'Post-Accident') regulatoryBadgeColor = '#d90429';
-            if (app.testing_reason === 'Return-To-Duty') { regulatoryBadgeColor = '#0077b6'; readableLabel = 'Return to Duty'; }
-            if (app.testing_reason === 'Follow-Up') { regulatoryBadgeColor = '#f77f00'; readableLabel = 'Follow Up'; }
-            if (app.testing_reason === 'DOT-Physical') { regulatoryBadgeColor = '#4f940c'; readableLabel = 'DOT Physical'; }
-
-            return `
-                <div style="background: #ffffff; border: 1px solid rgba(138, 52, 159, 0.05); border-radius: 14px; padding: clamp(15px, 4vw, 22px); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 15px; box-shadow: 0 4px 15px rgba(62,13,95,0.01); box-sizing: border-box; width: 100%;">
-                    <div style="flex: 1; min-width: 240px;">
-                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap;">
-                            <h3 style="margin: 0; color: var(--purple-primary); font-size: clamp(1.1rem, 3vw, 1.25rem); font-weight: 800;">${app.client_name}</h3>
-                            <span style="font-size: 0.7rem; background: rgba(138,52,159,0.02); color: ${regulatoryBadgeColor}; padding: 3px 8px; border-radius: 20px; font-weight: 700; text-transform: uppercase; border: 1px solid ${regulatoryBadgeColor}25; white-space: nowrap;">${readableLabel}</span>
-                        </div>
-                        <div style="font-size: 0.85rem; color: #555; display: flex; flex-direction: column; gap: 4px; margin: 0;">
-                            <span>🆔 <strong>CDL:</strong> ${app.cdl_number}</span>
-                            <span>📞 <strong>Phone:</strong> ${app.client_phone}</span>
-                            <span>✉️ <strong>Email:</strong> ${app.client_email}</span>
-                        </div>
-                    </div>
-                    
-                    <div style="text-align: left; min-width: 140px; background: #fafafa; padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.02); box-sizing: border-box; flex-shrink: 0;">
-                        <span style="font-size: 0.7rem; font-weight: 700; color: #777; text-transform: uppercase; display: block; margin-bottom: 2px;">Schedule</span>
-                        <strong style="color: var(--purple-primary); font-size: 0.95rem; display: block;">${app.booking_date}</strong>
-                        <span style="color: var(--purple-accent); font-size: 0.85rem; font-weight: 600;">⏱️ ${app.booking_time}</span>
-                    </div>
+            outputContainer.innerHTML = `
+                <div style="
+                    background:#fff;
+                    border:1px solid rgba(0,0,0,0.04);
+                    text-align:center;
+                    padding:40px 20px;
+                    color:#666;
+                    border-radius:12px;
+                    font-weight:500;
+                    font-size:0.95rem;
+                ">
+                    No screening appointments match your
+                    filter criteria or search terms.
                 </div>
             `;
-        }).join('');
-    }
 
-    /**
-     * Parses the current data array and downloads an audit-ready CSV sheet file
-     */
-    function exportRegistryToCsv() {
-        if (appointmentsData.length === 0) {
-            alert("No appointment entries available to export.");
             return;
         }
 
-        const headers = ["Driver Name", "CDL String", "Email Context", "Phone Number", "DOT Category", "Target Date", "Target Window"];
-        const csvRows = [headers.join(",")];
+        outputContainer.innerHTML =
+            filtered.map(
+                appointment => {
 
-        appointmentsData.forEach(app => {
-            const rowData = [
-                `"${(app.client_name || '').replace(/"/g, '""')}"`,
-                `"${(app.cdl_number || '').replace(/"/g, '""')}"`,
-                `"${(app.client_email || '').replace(/"/g, '""')}"`,
-                `"${(app.client_phone || '').replace(/"/g, '""')}"`,
-                `"${(app.testing_reason || '').replace(/"/g, '""')}"`,
-                `"${app.booking_date || ''}"`,
-                `"${app.booking_time || ''}"`
-            ];
-            csvRows.push(rowData.join(","));
-        });
+                    let badgeColor =
+                        '#8a349b';
 
-        const csvContent = "data:text/csv;charset=utf-8," + csvRows.join("\n");
-        const encodedUri = encodeURI(csvContent);
-        const downloadLink = document.createElement("a");
-        
-        downloadLink.setAttribute("href", encodedUri);
-        downloadLink.setAttribute("download", `DOT_Screening_Registry_${new Date().toISOString().split('T')[0]}.csv`);
-        document.body.appendChild(downloadLink);
-        
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
+                    let readableLabel =
+                        appointment.testing_reason;
+
+                    if (
+                        appointment.testing_reason ===
+                        'Pre-Employment'
+                    ) {
+                        badgeColor =
+                            '#4f940c';
+                    }
+
+                    if (
+                        appointment.testing_reason ===
+                        'Post-Accident'
+                    ) {
+                        badgeColor =
+                            '#d90429';
+                    }
+
+                    if (
+                        appointment.testing_reason ===
+                        'Return-To-Duty'
+                    ) {
+
+                        badgeColor =
+                            '#0077b6';
+
+                        readableLabel =
+                            'Return to Duty';
+                    }
+
+                    if (
+                        appointment.testing_reason ===
+                        'Follow-Up'
+                    ) {
+
+                        badgeColor =
+                            '#f77f00';
+
+                        readableLabel =
+                            'Follow Up';
+                    }
+
+                    if (
+                        appointment.testing_reason ===
+                        'DOT-Physical'
+                    ) {
+
+                        badgeColor =
+                            '#4f940c';
+
+                        readableLabel =
+                            'DOT Physical';
+                    }
+
+                    return `
+                        <div style="
+                            background:#ffffff;
+                            border:1px solid rgba(138,52,159,0.05);
+                            border-radius:14px;
+                            padding:clamp(15px,4vw,22px);
+                            display:flex;
+                            flex-wrap:wrap;
+                            justify-content:space-between;
+                            align-items:flex-start;
+                            gap:15px;
+                            box-shadow:0 4px 15px rgba(62,13,95,0.01);
+                            box-sizing:border-box;
+                            width:100%;
+                        ">
+
+                            <div style="
+                                flex:1;
+                                min-width:240px;
+                            ">
+
+                                <div style="
+                                    display:flex;
+                                    align-items:center;
+                                    gap:10px;
+                                    margin-bottom:8px;
+                                    flex-wrap:wrap;
+                                ">
+
+                                    <h3 style="
+                                        margin:0;
+                                        color:var(--purple-primary);
+                                        font-size:clamp(1.1rem,3vw,1.25rem);
+                                        font-weight:800;
+                                    ">
+                                        ${escapeHtml(
+                                            appointment.client_name
+                                        )}
+                                    </h3>
+
+                                    <span style="
+                                        font-size:0.7rem;
+                                        background:rgba(138,52,159,0.02);
+                                        color:${badgeColor};
+                                        padding:3px 8px;
+                                        border-radius:20px;
+                                        font-weight:700;
+                                        text-transform:uppercase;
+                                        border:1px solid ${badgeColor}25;
+                                        white-space:nowrap;
+                                    ">
+                                        ${escapeHtml(
+                                            readableLabel
+                                        )}
+                                    </span>
+
+                                </div>
+
+                                <div style="
+                                    font-size:0.85rem;
+                                    color:#555;
+                                    display:flex;
+                                    flex-direction:column;
+                                    gap:4px;
+                                ">
+
+                                    <span>
+                                        🆔
+                                        <strong>CDL:</strong>
+                                        ${escapeHtml(
+                                            appointment.cdl_number
+                                        )}
+                                    </span>
+
+                                    <span>
+                                        📞
+                                        <strong>Phone:</strong>
+                                        ${escapeHtml(
+                                            appointment.client_phone
+                                        )}
+                                    </span>
+
+                                    <span>
+                                        ✉️
+                                        <strong>Email:</strong>
+                                        ${escapeHtml(
+                                            appointment.client_email
+                                        )}
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                            <div style="
+                                text-align:left;
+                                min-width:140px;
+                                background:#fafafa;
+                                padding:10px 14px;
+                                border-radius:10px;
+                                border:1px solid rgba(0,0,0,0.02);
+                                box-sizing:border-box;
+                                flex-shrink:0;
+                            ">
+
+                                <span style="
+                                    font-size:0.7rem;
+                                    font-weight:700;
+                                    color:#777;
+                                    text-transform:uppercase;
+                                    display:block;
+                                    margin-bottom:2px;
+                                ">
+                                    Schedule
+                                </span>
+
+                                <strong style="
+                                    color:var(--purple-primary);
+                                    font-size:0.95rem;
+                                    display:block;
+                                ">
+                                    ${escapeHtml(
+                                        appointment.booking_date
+                                    )}
+                                </strong>
+
+                                <span style="
+                                    color:var(--purple-accent);
+                                    font-size:0.85rem;
+                                    font-weight:600;
+                                ">
+                                    ⏱️
+                                    ${escapeHtml(
+                                        appointment.booking_time
+                                    )}
+                                </span>
+
+                            </div>
+
+                        </div>
+                    `;
+                }
+            ).join('');
     }
+
+    /* =========================================================
+       SCHEDULE MANAGER
+    ========================================================= */
+
+    function renderScheduleManager() {
+
+        const manager =
+            document.getElementById(
+                'scheduleManagerTarget'
+            );
+
+        if (!manager) {
+            return;
+        }
+
+        const selectedDate =
+            selectedScheduleDate;
+
+        const dateBlocked =
+            isDateBlocked(
+                selectedDate
+            );
+
+        const blockedSlots =
+            getBlockedSlotsForDate(
+                selectedDate
+            );
+
+        const bookedSlots =
+            getBookedSlotsForDate(
+                selectedDate
+            );
+
+        const buffer =
+            schedulingSettings.buffer_minutes ||
+            30;
+
+        const slots =
+            generateTimeSlots(buffer);
+
+        const readableDate =
+            formatDateForDisplay(
+                selectedDate
+            );
+
+        manager.innerHTML = `
+
+
+                <div class="schedule-layout">
+
+                    <!-- DATE PANEL -->
+
+                    <div class="schedule-calendar-panel">
+
+                        <div class="schedule-calendar-header">
+
+                            <strong style="
+                                color:var(--purple-primary);
+                                font-size:0.95rem;
+                            ">
+                                Select Date
+                            </strong>
+
+                        </div>
+
+                        <input
+                            type="date"
+                            id="scheduleDatePicker"
+                            class="schedule-date-input"
+                            value="${selectedDate}"
+                            min="${getTodayLocalDate()}"
+                        />
+
+                        <div style="
+                            margin-top:15px;
+                            background:#fff;
+                            border:1px solid #eee;
+                            border-radius:12px;
+                            padding:14px;
+                        ">
+
+                            <span style="
+                                display:block;
+                                font-size:0.7rem;
+                                text-transform:uppercase;
+                                font-weight:700;
+                                color:#777;
+                                margin-bottom:5px;
+                            ">
+                                Selected Date
+                            </span>
+
+                            <strong style="
+                                display:block;
+                                color:var(--purple-primary);
+                                font-size:1.05rem;
+                            ">
+                                ${escapeHtml(
+                                    readableDate
+                                )}
+                            </strong>
+
+                        </div>
+
+                        <div style="margin-top:15px;">
+
+                            <button
+                                type="button"
+                                id="todayScheduleBtn"
+                                class="schedule-action-btn schedule-neutral-btn"
+                                style="width:100%;"
+                            >
+                                Go to Today
+                            </button>
+
+                        </div>
+
+                        <div style="
+                            margin-top:15px;
+                        ">
+
+                            <button
+                                type="button"
+                                id="toggleWholeDateBtn"
+                                class="
+                                    schedule-action-btn
+                                    ${dateBlocked
+                                        ? 'schedule-primary-btn'
+                                        : 'schedule-danger-btn'}
+                                "
+                                style="width:100%;"
+                            >
+                                ${
+                                    dateBlocked
+                                        ? 'Unblock Entire Date'
+                                        : 'Block Entire Date'
+                                }
+                            </button>
+
+                        </div>
+
+                        <div style="
+                            margin-top:18px;
+                            padding:12px;
+                            border-radius:10px;
+                            background:${
+                                dateBlocked
+                                    ? '#fff0f2'
+                                    : '#f4faf0'
+                            };
+                            color:${
+                                dateBlocked
+                                    ? '#d90429'
+                                    : '#4f940c'
+                            };
+                            font-size:0.8rem;
+                            line-height:1.45;
+                        ">
+
+                            ${
+                                dateBlocked
+                                    ? '<strong>DATE BLOCKED</strong><br>Customers will not be able to select appointment times on this date.'
+                                    : '<strong>DATE OPEN</strong><br>Individual appointment times can be blocked below.'
+                            }
+
+                        </div>
+
+                    </div>
+
+                    <!-- TIME PANEL -->
+
+                    <div class="schedule-times-panel">
+
+                        <div class="block-date-banner">
+
+                            <div>
+
+                                <strong style="
+                                    display:block;
+                                    color:var(--purple-primary);
+                                    margin-bottom:4px;
+                                ">
+                                    ${escapeHtml(
+                                        readableDate
+                                    )}
+                                </strong>
+
+                                <span style="
+                                    color:#666;
+                                    font-size:0.8rem;
+                                ">
+                                    ${slots.length}
+                                    generated appointment times
+                                </span>
+
+                            </div>
+
+                            <div style="
+                                font-size:0.75rem;
+                                color:#666;
+                                text-align:right;
+                            ">
+
+                                <div>
+                                    <strong>
+                                        ${bookedSlots.length}
+                                    </strong>
+                                    booked
+                                </div>
+
+                                <div>
+                                    <strong>
+                                        ${blockedSlots.length}
+                                    </strong>
+                                    blocked
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="schedule-day-status">
+
+                            <strong>How this works:</strong>
+
+                            Click an available time to block it.
+                            Click a blocked time to make it available again.
+                            Booked appointments cannot be altered from
+                            the scheduling grid.
+
+                        </div>
+
+                        <div
+                            id="scheduleTimeGrid"
+                            class="schedule-time-grid"
+                        >
+
+                            ${
+                                slots.length
+                                    ? slots.map(
+                                        slot =>
+                                            createScheduleTimeButton(
+                                                selectedDate,
+                                                slot,
+                                                dateBlocked,
+                                                blockedSlots,
+                                                bookedSlots
+                                            )
+                                      ).join('')
+                                    : `
+                                        <div style="
+                                            grid-column:1/-1;
+                                            padding:30px;
+                                            text-align:center;
+                                            color:#666;
+                                        ">
+                                            No appointment times generated.
+                                        </div>
+                                    `
+                            }
+
+                        </div>
+
+                       <div class="schedule-legend">
+
+    <div class="schedule-legend-item">
+        <span class="schedule-legend-dot available"></span>
+        <span>Available</span>
+    </div>
+
+    <div class="schedule-legend-item">
+        <span class="schedule-legend-dot booked"></span>
+        <span>Booked</span>
+    </div>
+
+    <div class="schedule-legend-item">
+        <span class="schedule-legend-dot blocked"></span>
+        <span>Blocked</span>
+    </div>
+
+</div>
+
+<style>
+.schedule-legend {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+    margin-top: 15px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(0,0,0,0.06);
+}
+
+.schedule-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: #555;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.schedule-legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.schedule-legend-dot.available {
+    background: #70ad47;
+}
+
+.schedule-legend-dot.booked {
+    background: #d90429;
+}
+
+.schedule-legend-dot.blocked {
+    background: #777;
+}
+    </style>
+
+                    </div>
+
+                </div>
+
+            </div>
+        `;
+
+        bindScheduleManagerEvents();
+    }
+
+ function createScheduleTimeButton(
+    date,
+    slot,
+    dateBlocked,
+    blockedSlots,
+    bookedSlots
+) {
+
+    const isBooked =
+        bookedSlots.includes(slot);
+
+    const isBlocked =
+        blockedSlots.includes(slot);
+
+    const isPast =
+        isPastAppointmentSlot(
+            date,
+            slot
+        );
+
+    let status =
+        'Available';
+
+    let className =
+        'schedule-time-btn';
+
+    let disabled =
+        false;
+
+    if (dateBlocked) {
+
+        status =
+            'Date Blocked';
+
+        className +=
+            ' blocked';
+
+        disabled = true;
+
+    } else if (isBooked) {
+
+        status =
+            'Booked';
+
+        className +=
+            ' booked';
+
+        disabled = true;
+
+    } else if (isBlocked) {
+
+        status =
+            'Blocked';
+
+        className +=
+            ' blocked';
+
+    } else if (isPast) {
+
+        status =
+            'Past';
+
+        className +=
+            ' past';
+
+        disabled = true;
+
+    }
+
+    return `
+        <button
+            type="button"
+            class="${className}"
+            data-schedule-slot="${escapeHtml(slot)}"
+            data-schedule-date="${escapeHtml(date)}"
+            ${disabled ? 'disabled' : ''}
+        >
+
+            ${escapeHtml(slot)}
+
+            <span class="schedule-time-status">
+                ${status}
+            </span>
+
+        </button>
+    `;
+}
+
+    /* =========================================================
+       SCHEDULE EVENT BINDING
+    ========================================================= */
+
+    function bindScheduleManagerEvents() {
+
+        const datePicker =
+            document.getElementById(
+                'scheduleDatePicker'
+            );
+
+        if (datePicker) {
+
+            datePicker.addEventListener(
+                'change',
+                event => {
+
+                    if (!event.target.value) {
+                        return;
+                    }
+
+                    selectedScheduleDate =
+                        event.target.value;
+
+                    renderScheduleManager();
+                }
+            );
+        }
+
+        const todayButton =
+            document.getElementById(
+                'todayScheduleBtn'
+            );
+
+        if (todayButton) {
+
+            todayButton.addEventListener(
+                'click',
+                () => {
+
+                    selectedScheduleDate =
+                        getTodayLocalDate();
+
+                    renderScheduleManager();
+                }
+            );
+        }
+
+        const blockDateButton =
+            document.getElementById(
+                'toggleWholeDateBtn'
+            );
+
+        if (blockDateButton) {
+
+            blockDateButton.addEventListener(
+                'click',
+                toggleEntireDate
+            );
+        }
+
+        const timeButtons =
+            document.querySelectorAll(
+                '[data-schedule-slot]'
+            );
+
+        timeButtons.forEach(button => {
+
+            button.addEventListener(
+                'click',
+                async () => {
+
+                    const slot =
+                        button.getAttribute(
+                            'data-schedule-slot'
+                        );
+
+                    await toggleScheduleSlot(
+                        selectedScheduleDate,
+                        slot
+                    );
+                }
+            );
+
+        });
+    }
+
+async function toggleScheduleSlot(
+    date,
+    slot
+) {
+
+    if (
+        isDateBlocked(date)
+    ) {
+
+        alert(
+            'This entire date is blocked. Unblock the date before managing individual times.'
+        );
+
+        return;
+    }
+
+    if (
+        isPastAppointmentSlot(
+            date,
+            slot
+        )
+    ) {
+
+        alert(
+            'This appointment time has already passed and cannot be changed.'
+        );
+
+        return;
+    }
+
+    const booked =
+        getBookedSlotsForDate(
+            date
+        );
+
+    if (
+        booked.includes(slot)
+    ) {
+
+        alert(
+            'This appointment time is already booked and cannot be blocked from the scheduling grid.'
+        );
+
+        return;
+    }
+
+    const current =
+        getBlockedSlotsForDate(
+            date
+        );
+
+    const exists =
+        current.includes(slot);
+
+    let updated;
+
+    if (exists) {
+
+        updated =
+            current.filter(
+                value =>
+                    value !== slot
+            );
+
+    } else {
+
+        updated =
+            current.concat(slot);
+
+    }
+
+    const updatedObject = {
+        ...schedulingSettings.blocked_date_slots
+    };
+
+    if (updated.length > 0) {
+
+        updatedObject[date] =
+            updated;
+
+    } else {
+
+        delete updatedObject[date];
+
+    }
+
+    await saveBlockedDateSlots(
+        updatedObject
+    );
+}
+
+async function toggleEntireDate() {
+
+    const date = selectedScheduleDate;
+
+    try {
+
+        /*
+         * Get the CURRENT database value first.
+         * This prevents the browser's local state from
+         * becoming out of sync with Supabase.
+         */
+        const {
+            data,
+            error: readError
+        } = await supabaseClientInstance
+            .from('scheduling_settings')
+            .select('id, blocked_date_slots')
+            .eq('id', 'dot_config')
+            .single();
+
+        if (readError) {
+
+            console.error(
+                'Unable to read scheduling settings:',
+                readError
+            );
+
+            alert(
+                `Unable to read scheduling settings:\n\n${readError.message}`
+            );
+
+            return;
+        }
+
+        let blockedSlots =
+            normalizeBlockedSlots(
+                data.blocked_date_slots
+            );
+
+        const currentlyBlocked =
+            Array.isArray(blockedSlots[date]) &&
+            blockedSlots[date].includes('__ALL__');
+
+        /*
+         * ================================================
+         * UNBLOCK ENTIRE DATE
+         * ================================================
+         */
+
+        if (currentlyBlocked) {
+
+            delete blockedSlots[date];
+
+        }
+
+        /*
+         * ================================================
+         * BLOCK ENTIRE DATE
+         * ================================================
+         */
+
+        else {
+
+            blockedSlots[date] = ['__ALL__'];
+
+        }
+
+        console.log(
+            'Saving new blocked_date_slots:',
+            blockedSlots
+        );
+
+        /*
+         * Write the modified JSON back to Supabase.
+         */
+
+        const {
+            data: updatedData,
+            error: updateError
+        } = await supabaseClientInstance
+            .from('scheduling_settings')
+            .update({
+                blocked_date_slots: blockedSlots,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', 'dot_config')
+            .select('id, blocked_date_slots')
+            .single();
+
+        if (updateError) {
+
+            console.error(
+                'Unable to save scheduling settings:',
+                updateError
+            );
+
+            alert(
+                `Unable to save schedule change:\n\n${updateError.message}`
+            );
+
+            return;
+        }
+
+        /*
+         * IMPORTANT:
+         * Use the value Supabase actually returned.
+         */
+
+        schedulingSettings.blocked_date_slots =
+            normalizeBlockedSlots(
+                updatedData.blocked_date_slots
+            );
+
+        console.log(
+            'Confirmed database value:',
+            schedulingSettings.blocked_date_slots
+        );
+
+        /*
+         * Re-render the schedule.
+         */
+
+        renderScheduleManager();
+
+        if (currentlyBlocked) {
+
+            alert(
+                `${formatDateForDisplay(date)} is now UNBLOCKED.`
+            );
+
+        } else {
+
+            alert(
+                `${formatDateForDisplay(date)} is now BLOCKED.`
+            );
+        }
+
+    } catch (error) {
+
+        console.error(
+            'Entire date toggle failed:',
+            error
+        );
+
+        alert(
+            `Schedule change failed:\n\n${error.message}`
+        );
+    }
+}
+
+/* =========================================================
+   SAVE BLOCKED DATE/TIME JSON
+========================================================= */
+
+async function saveBlockedDateSlots(blockedDateSlots) {
+
+    try {
+
+        console.log(
+            'Saving scheduling settings:',
+            blockedDateSlots
+        );
+
+        const {
+            data,
+            error
+        } = await supabaseClientInstance
+            .from('scheduling_settings')
+            .update({
+                blocked_date_slots: blockedDateSlots,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', 'dot_config')
+            .select('id, buffer_minutes, blocked_date_slots, updated_at')
+            .single();
+
+        if (error) {
+
+            console.error(
+                'Scheduling settings update failed:',
+                error
+            );
+
+            alert(
+                `Unable to update scheduling settings:\n\n${error.message}`
+            );
+
+            return false;
+        }
+
+        console.log(
+            'Scheduling settings saved:',
+            data
+        );
+
+        /*
+         * IMPORTANT:
+         * Replace the local state with exactly what
+         * Supabase returned.
+         */
+
+        schedulingSettings = {
+            id: data.id,
+            buffer_minutes:
+                parseInt(
+                    data.buffer_minutes,
+                    10
+                ) || 30,
+            blocked_date_slots:
+                normalizeBlockedSlots(
+                    data.blocked_date_slots
+                )
+        };
+
+        /*
+         * Re-render using the confirmed database state.
+         */
+
+        renderScheduleManager();
+
+        return true;
+
+    } catch (error) {
+
+        console.error(
+            'Unexpected scheduling save error:',
+            error
+        );
+
+        alert(
+            `Unexpected scheduling error:\n\n${error.message}`
+        );
+
+        return false;
+    }
+}
+    /* =========================================================
+       DATE BLOCK HELPERS
+    ========================================================= */
+
+    function isDateBlocked(date) {
+
+        const slots =
+            schedulingSettings
+                .blocked_date_slots[date];
+
+        return (
+            Array.isArray(slots) &&
+            slots.includes('__ALL__')
+        );
+    }
+
+    function getBlockedSlotsForDate(
+        date
+    ) {
+
+        const slots =
+            schedulingSettings
+                .blocked_date_slots[date];
+
+        if (!Array.isArray(slots)) {
+            return [];
+        }
+
+        return slots.filter(
+            slot => slot !== '__ALL__'
+        );
+    }
+
+    /* =========================================================
+       GET BOOKED TIMES
+    ========================================================= */
+
+    function getBookedSlotsForDate(
+        date
+    ) {
+
+        return appointmentsData
+            .filter(
+                appointment =>
+                    appointment.booking_date ===
+                    date
+            )
+            .map(
+                appointment =>
+                    normalizeTimeLabel(
+                        appointment.booking_time
+                    )
+            );
+    }
+
+    /* =========================================================
+       GENERATE TIME SLOTS
+       
+       Default:
+       8:00 AM through 5:00 PM.
+       
+       The buffer/interval determines the increments.
+    ========================================================= */
+
+    function generateTimeSlots(
+        intervalMinutes
+    ) {
+
+        const slots = [];
+
+        let current =
+            CLINIC_OPEN_MINUTES;
+
+        while (
+            current <=
+            CLINIC_CLOSE_MINUTES
+        ) {
+
+            slots.push(
+                minutesToTimeLabel(
+                    current
+                )
+            );
+
+            current +=
+                intervalMinutes;
+        }
+
+        return slots;
+    }
+
+    /* =========================================================
+       TIME FORMATTING
+    ========================================================= */
+
+    function minutesToTimeLabel(
+        totalMinutes
+    ) {
+
+        let hours =
+            Math.floor(
+                totalMinutes / 60
+            );
+
+        const minutes =
+            totalMinutes % 60;
+
+        const suffix =
+            hours >= 12
+                ? 'PM'
+                : 'AM';
+
+        if (hours === 0) {
+            hours = 12;
+        }
+
+        if (hours > 12) {
+            hours -= 12;
+        }
+
+        return `
+            ${String(hours).padStart(2, '0')}:
+            ${String(minutes).padStart(2, '0')}
+            ${suffix}
+        `.replace(/\s+/g, ' ').trim();
+    }
+
+    function normalizeTimeLabel(
+        value
+    ) {
+
+        if (!value) {
+            return '';
+        }
+
+        const raw =
+            String(value)
+                .trim()
+                .toUpperCase();
+
+        const match =
+            raw.match(
+                /^(\d{1,2}):(\d{2})\s*(AM|PM)$/
+            );
+
+        if (!match) {
+            return raw;
+        }
+
+        let hours =
+            parseInt(
+                match[1],
+                10
+            );
+
+        const minutes =
+            parseInt(
+                match[2],
+                10
+            );
+
+        const period =
+            match[3];
+
+        return `
+            ${String(hours).padStart(2, '0')}:
+            ${String(minutes).padStart(2, '0')}
+            ${period}
+        `.replace(/\s+/g, ' ').trim();
+    }
+
+    /* =========================================================
+       DATE HELPERS
+    ========================================================= */
+
+    function getTodayLocalDate() {
+
+        const now =
+            new Date();
+
+        const year =
+            now.getFullYear();
+
+        const month =
+            String(
+                now.getMonth() + 1
+            ).padStart(2, '0');
+
+        const day =
+            String(
+                now.getDate()
+            ).padStart(2, '0');
+
+        return `${year}-${month}-${day}`;
+    }
+
+    function formatDateForDisplay(
+        dateString
+    ) {
+
+        const parts =
+            dateString.split('-');
+
+        if (parts.length !== 3) {
+            return dateString;
+        }
+
+        const date =
+            new Date(
+                Number(parts[0]),
+                Number(parts[1]) - 1,
+                Number(parts[2])
+            );
+
+        return date.toLocaleDateString(
+            'en-US',
+            {
+                weekday: 'long',
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric'
+            }
+        );
+    }
+
+    /* =========================================================
+       CSV EXPORT
+    ========================================================= */
+
+    function exportRegistryToCsv() {
+
+        if (
+            appointmentsData.length === 0
+        ) {
+
+            alert(
+                'No appointment entries available to export.'
+            );
+
+            return;
+        }
+
+        const headers = [
+            'Driver Name',
+            'CDL Number',
+            'Email',
+            'Phone Number',
+            'DOT Category',
+            'Appointment Date',
+            'Appointment Time'
+        ];
+
+        const csvRows = [
+            headers.join(',')
+        ];
+
+        appointmentsData.forEach(
+            appointment => {
+
+                const rowData = [
+
+                    `"${escapeCsv(
+                        appointment.client_name
+                    )}"`,
+
+                    `"${escapeCsv(
+                        appointment.cdl_number
+                    )}"`,
+
+                    `"${escapeCsv(
+                        appointment.client_email
+                    )}"`,
+
+                    `"${escapeCsv(
+                        appointment.client_phone
+                    )}"`,
+
+                    `"${escapeCsv(
+                        appointment.testing_reason
+                    )}"`,
+
+                    `"${escapeCsv(
+                        appointment.booking_date
+                    )}"`,
+
+                    `"${escapeCsv(
+                        appointment.booking_time
+                    )}"`
+                ];
+
+                csvRows.push(
+                    rowData.join(',')
+                );
+            }
+        );
+
+        const csvContent =
+            "data:text/csv;charset=utf-8," +
+            csvRows.join('\n');
+
+        const encodedUri =
+            encodeURI(csvContent);
+
+        const downloadLink =
+            document.createElement('a');
+
+        downloadLink.setAttribute(
+            'href',
+            encodedUri
+        );
+
+        downloadLink.setAttribute(
+            'download',
+            `DOT_Screening_Registry_${getTodayLocalDate()}.csv`
+        );
+
+        document.body.appendChild(
+            downloadLink
+        );
+
+        downloadLink.click();
+
+        document.body.removeChild(
+            downloadLink
+        );
+    }
+
+    /* =========================================================
+       UTILITY FUNCTIONS
+    ========================================================= */
+
+    function setElementText(
+        elementId,
+        value
+    ) {
+
+        const element =
+            document.getElementById(
+                elementId
+            );
+
+        if (element) {
+            element.innerText =
+                String(value);
+        }
+    }
+
+    function escapeHtml(
+        value
+    ) {
+
+        return String(
+            value == null
+                ? ''
+                : value
+        )
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function escapeCsv(
+        value
+    ) {
+
+        return String(
+            value == null
+                ? ''
+                : value
+        ).replace(
+            /"/g,
+            '""'
+        );
+    }
+
 });
