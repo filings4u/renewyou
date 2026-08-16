@@ -605,7 +605,9 @@ let wellnessOfferSearchQuery = '';
 let schedulingSettings = {
     id: 'dot_config',
     buffer_minutes: 30,
-    blocked_date_slots: {}
+    blocked_date_slots: {},
+    opening_time: '08:00',
+    closing_time: '17:00'
 };
 
 let selectedScheduleDate = getTodayLocalDate();
@@ -614,9 +616,90 @@ let selectedScheduleDate = getTodayLocalDate();
    DEFAULT CLINIC SCHEDULE
 ========================================================= */
 
-const CLINIC_OPEN_MINUTES = 8 * 60;
+const DEFAULT_CLINIC_OPEN_TIME = '08:00';
 
-const CLINIC_CLOSE_MINUTES = 17 * 60;
+const DEFAULT_CLINIC_CLOSE_TIME = '17:00';
+
+function normalizeClinicTime(
+    value,
+    fallback
+) {
+
+    if (!value) {
+        return fallback;
+    }
+
+    const raw =
+        String(value)
+            .trim();
+
+    const match =
+        raw.match(
+            /^(\d{2}):(\d{2})(?::\d{2})?$/
+        );
+
+    if (!match) {
+        return fallback;
+    }
+
+    const hours =
+        parseInt(
+            match[1],
+            10
+        );
+
+    const minutes =
+        parseInt(
+            match[2],
+            10
+        );
+
+    if (
+        hours < 0 ||
+        hours > 23 ||
+        minutes < 0 ||
+        minutes > 59
+    ) {
+        return fallback;
+    }
+
+    return (
+        String(hours).padStart(2, '0') +
+        ':' +
+        String(minutes).padStart(2, '0')
+    );
+}
+
+function clinicTimeToMinutes(
+    value
+) {
+
+    const normalized =
+        normalizeClinicTime(
+            value,
+            DEFAULT_CLINIC_OPEN_TIME
+        );
+
+    const parts =
+        normalized.split(':');
+
+    return (
+        parseInt(parts[0], 10) * 60 +
+        parseInt(parts[1], 10)
+    );
+}
+
+function formatClinicTimeForDisplay(
+    value
+) {
+
+    const minutes =
+        clinicTimeToMinutes(value);
+
+    return minutesToTimeLabel(
+        minutes
+    );
+}
 
   /* =========================================================
    AUTHENTICATION GUARD
@@ -1609,6 +1692,14 @@ function renderDashboardStructure() {
         padding-right: 18px !important;
     }
 
+    #clinicOpeningTime,
+    #clinicClosingTime,
+    #saveClinicHoursBtn {
+        width:100%;
+        box-sizing:border-box;
+        min-height:44px;
+    }
+
 
     /* =====================================================
        SCHEDULE MANAGER
@@ -1851,7 +1942,10 @@ function renderDashboardStructure() {
     }
 
     #bufferSettingSelect,
-    #saveBufferBtn {
+    #saveBufferBtn,
+    #clinicOpeningTime,
+    #clinicClosingTime,
+    #saveClinicHoursBtn {
         width: 100%;
     }
 
@@ -2716,20 +2810,109 @@ function renderDashboardStructure() {
                             Clinic Schedule
                         </h3>
 
-                        <p style="
-                            font-size:.85rem;
-                            color:#666;
-                            margin:0 0 15px 0;
-                            line-height:1.5;
-                        ">
-                            Appointment availability currently generates
-                            from 8:00 AM through 5:00 PM.
+                        <p
+                            id="clinicHoursDescription"
+                            style="
+                                font-size:.85rem;
+                                color:#666;
+                                margin:0 0 15px 0;
+                                line-height:1.5;
+                            "
+                        >
+                            Appointment availability generates
+                            from 8:00 AM – 5:00 PM.
                         </p>
+
+                        <div style="
+                            display:grid;
+                            grid-template-columns:1fr 1fr auto;
+                            gap:10px;
+                            align-items:end;
+                        ">
+
+                            <div>
+
+                                <label
+                                    for="clinicOpeningTime"
+                                    style="
+                                        display:block;
+                                        font-size:.75rem;
+                                        font-weight:700;
+                                        color:#555;
+                                        margin-bottom:6px;
+                                    "
+                                >
+                                    Opening Time
+                                </label>
+
+                                <input
+                                    type="time"
+                                    id="clinicOpeningTime"
+                                    value="08:00"
+                                    style="
+                                        width:100%;
+                                        box-sizing:border-box;
+                                        padding:10px;
+                                        border-radius:8px;
+                                        border:1px solid #ddd;
+                                        font-weight:600;
+                                        background:#fff;
+                                    "
+                                />
+
+                            </div>
+
+                            <div>
+
+                                <label
+                                    for="clinicClosingTime"
+                                    style="
+                                        display:block;
+                                        font-size:.75rem;
+                                        font-weight:700;
+                                        color:#555;
+                                        margin-bottom:6px;
+                                    "
+                                >
+                                    Closing Time
+                                </label>
+
+                                <input
+                                    type="time"
+                                    id="clinicClosingTime"
+                                    value="17:00"
+                                    style="
+                                        width:100%;
+                                        box-sizing:border-box;
+                                        padding:10px;
+                                        border-radius:8px;
+                                        border:1px solid #ddd;
+                                        font-weight:600;
+                                        background:#fff;
+                                    "
+                                />
+
+                            </div>
+
+                            <button
+                                type="button"
+                                id="saveClinicHoursBtn"
+                                class="schedule-action-btn schedule-primary-btn"
+                                style="
+                                    min-height:42px;
+                                    white-space:nowrap;
+                                "
+                            >
+                                Save Hours
+                            </button>
+
+                        </div>
 
                         <div style="
                             background:#f7f4f9;
                             border-radius:10px;
                             padding:12px;
+                            margin-top:15px;
                             font-size:.85rem;
                             color:#555;
                         ">
@@ -2740,7 +2923,9 @@ function renderDashboardStructure() {
                                 Current Hours:
                             </strong>
 
-                            8:00 AM – 5:00 PM
+                            <span id="clinicHoursDisplay">
+                                8:00 AM – 5:00 PM
+                            </span>
 
                         </div>
 
@@ -3099,6 +3284,21 @@ function isPastAppointmentSlot(
             );
 
         }
+
+        const saveClinicHoursButton =
+            document.getElementById(
+                'saveClinicHoursBtn'
+            );
+
+        if (saveClinicHoursButton) {
+
+            saveClinicHoursButton.addEventListener(
+                'click',
+                saveClinicHours
+            );
+
+        }
+
 const mailingListSearch =
     document.getElementById(
         'mailingListSearch'
@@ -3212,14 +3412,28 @@ if (
 
                 schedulingSettings = {
                     id: data.id,
+
                     buffer_minutes:
                         parseInt(
                             data.buffer_minutes,
                             10
                         ) || 30,
+
                     blocked_date_slots:
                         normalizeBlockedSlots(
                             data.blocked_date_slots
+                        ),
+
+                    opening_time:
+                        normalizeClinicTime(
+                            data.opening_time,
+                            DEFAULT_CLINIC_OPEN_TIME
+                        ),
+
+                    closing_time:
+                        normalizeClinicTime(
+                            data.closing_time,
+                            DEFAULT_CLINIC_CLOSE_TIME
                         )
                 };
 
@@ -3233,7 +3447,9 @@ if (
                 const defaultConfig = {
                     id: 'dot_config',
                     buffer_minutes: 30,
-                    blocked_date_slots: {}
+                    blocked_date_slots: {},
+                    opening_time: DEFAULT_CLINIC_OPEN_TIME,
+                    closing_time: DEFAULT_CLINIC_CLOSE_TIME
                 };
 
                 const {
@@ -3270,12 +3486,237 @@ if (
                     );
             }
 
+            const openingTimeInput =
+                document.getElementById(
+                    'clinicOpeningTime'
+                );
+
+            if (openingTimeInput) {
+
+                openingTimeInput.value =
+                    schedulingSettings.opening_time;
+            }
+
+            const closingTimeInput =
+                document.getElementById(
+                    'clinicClosingTime'
+                );
+
+            if (closingTimeInput) {
+
+                closingTimeInput.value =
+                    schedulingSettings.closing_time;
+            }
+
+            updateClinicHoursDisplay();
+
         } catch (error) {
 
             console.error(
                 'Scheduling configuration load failed:',
                 error
             );
+        }
+    }
+
+    /* =========================================================
+       SAVE CLINIC HOURS
+    ========================================================= */
+
+    async function saveClinicHours() {
+
+        const openingInput =
+            document.getElementById(
+                'clinicOpeningTime'
+            );
+
+        const closingInput =
+            document.getElementById(
+                'clinicClosingTime'
+            );
+
+        const saveButton =
+            document.getElementById(
+                'saveClinicHoursBtn'
+            );
+
+        if (
+            !openingInput ||
+            !closingInput
+        ) {
+            return;
+        }
+
+        const openingTime =
+            normalizeClinicTime(
+                openingInput.value,
+                DEFAULT_CLINIC_OPEN_TIME
+            );
+
+        const closingTime =
+            normalizeClinicTime(
+                closingInput.value,
+                DEFAULT_CLINIC_CLOSE_TIME
+            );
+
+        const openingMinutes =
+            clinicTimeToMinutes(
+                openingTime
+            );
+
+        const closingMinutes =
+            clinicTimeToMinutes(
+                closingTime
+            );
+
+        if (
+            openingMinutes >=
+            closingMinutes
+        ) {
+
+            showAdminModal(
+                'The opening time must be earlier than the closing time.',
+                'warning',
+                'Invalid Clinic Hours'
+            );
+
+            return;
+        }
+
+        if (saveButton) {
+
+            saveButton.disabled = true;
+
+            saveButton.innerText =
+                'Saving...';
+        }
+
+        const {
+            data,
+            error
+        } = await supabaseClientInstance
+            .from('scheduling_settings')
+            .update({
+                opening_time:
+                    openingTime,
+
+                closing_time:
+                    closingTime,
+
+                updated_at:
+                    new Date().toISOString()
+            })
+            .eq('id', 'dot_config')
+            .select(
+                'id, buffer_minutes, blocked_date_slots, opening_time, closing_time, updated_at'
+            )
+            .single();
+
+        if (saveButton) {
+
+            saveButton.disabled = false;
+
+            saveButton.innerText =
+                'Save Hours';
+        }
+
+        if (error) {
+
+            console.error(
+                'Error saving clinic hours:',
+                error
+            );
+
+            showAdminModal(
+                `Error saving clinic hours:\n\n${error.message}`,
+                'error',
+                'Unable to Save Clinic Hours'
+            );
+
+            return;
+        }
+
+        schedulingSettings = {
+            id: data.id,
+
+            buffer_minutes:
+                parseInt(
+                    data.buffer_minutes,
+                    10
+                ) || 30,
+
+            blocked_date_slots:
+                normalizeBlockedSlots(
+                    data.blocked_date_slots
+                ),
+
+            opening_time:
+                normalizeClinicTime(
+                    data.opening_time,
+                    DEFAULT_CLINIC_OPEN_TIME
+                ),
+
+            closing_time:
+                normalizeClinicTime(
+                    data.closing_time,
+                    DEFAULT_CLINIC_CLOSE_TIME
+                )
+        };
+
+        openingInput.value =
+            schedulingSettings.opening_time;
+
+        closingInput.value =
+            schedulingSettings.closing_time;
+
+        updateClinicHoursDisplay();
+
+        renderScheduleManager();
+
+        showAdminModal(
+            `Clinic appointment hours are now ${formatClinicTimeForDisplay(schedulingSettings.opening_time)} – ${formatClinicTimeForDisplay(schedulingSettings.closing_time)}.`,
+            'success',
+            'Clinic Hours Updated'
+        );
+    }
+
+    /* =========================================================
+       UPDATE CLINIC HOURS DISPLAY
+    ========================================================= */
+
+    function updateClinicHoursDisplay() {
+
+        const hoursDisplay =
+            document.getElementById(
+                'clinicHoursDisplay'
+            );
+
+        const hoursDescription =
+            document.getElementById(
+                'clinicHoursDescription'
+            );
+
+        const openingTime =
+            schedulingSettings.opening_time ||
+            DEFAULT_CLINIC_OPEN_TIME;
+
+        const closingTime =
+            schedulingSettings.closing_time ||
+            DEFAULT_CLINIC_CLOSE_TIME;
+
+        const displayText =
+            `${formatClinicTimeForDisplay(openingTime)} – ${formatClinicTimeForDisplay(closingTime)}`;
+
+        if (hoursDisplay) {
+
+            hoursDisplay.textContent =
+                displayText;
+        }
+
+        if (hoursDescription) {
+
+            hoursDescription.textContent =
+                `Appointment availability generates from ${displayText}.`;
         }
     }
 
@@ -6578,12 +7019,30 @@ async function saveBlockedDateSlots(blockedDateSlots) {
 
         const slots = [];
 
+        const openingTime =
+            schedulingSettings.opening_time ||
+            DEFAULT_CLINIC_OPEN_TIME;
+
+        const closingTime =
+            schedulingSettings.closing_time ||
+            DEFAULT_CLINIC_CLOSE_TIME;
+
+        const openingMinutes =
+            clinicTimeToMinutes(
+                openingTime
+            );
+
+        const closingMinutes =
+            clinicTimeToMinutes(
+                closingTime
+            );
+
         let current =
-            CLINIC_OPEN_MINUTES;
+            openingMinutes;
 
         while (
             current <=
-            CLINIC_CLOSE_MINUTES
+            closingMinutes
         ) {
 
             slots.push(

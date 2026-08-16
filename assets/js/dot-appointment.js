@@ -1138,7 +1138,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             <p class="dot-section-description">
                                 Available appointment times are generated
                                 automatically from the clinic scheduling
-                                configuration.
+                                configuration and current business hours.
                             </p>
 
                             <div class="dot-calendar-layout">
@@ -1358,7 +1358,7 @@ document.addEventListener('DOMContentLoaded', function () {
             await supabaseClient
                 .from('scheduling_settings')
                 .select(
-                    'id, buffer_minutes, blocked_date_slots'
+                    'id, buffer_minutes, blocked_date_slots, opening_time, closing_time'
                 )
                 .eq(
                     'id',
@@ -1389,6 +1389,74 @@ document.addEventListener('DOMContentLoaded', function () {
 
         schedulingSettings.blocked_date_slots =
             result.data.blocked_date_slots || {};
+
+        /*
+         * The database stores clinic hours as PostgreSQL TIME values
+         * such as "08:00:00" and "17:00:00".
+         *
+         * The scheduler internally uses the existing AM/PM format.
+         * Convert the database values here so the rest of the
+         * scheduler can continue using the same time-generation logic.
+         */
+        var databaseOpeningMinutes =
+            parseTimeToMinutes(
+                result.data.opening_time
+            );
+
+        var databaseClosingMinutes =
+            parseTimeToMinutes(
+                result.data.closing_time
+            );
+
+        if (
+            databaseOpeningMinutes >= 0 &&
+            result.data.opening_time
+        ) {
+            schedulingSettings.opening_time =
+                formatTime(
+                    databaseOpeningMinutes
+                );
+        } else {
+            schedulingSettings.opening_time =
+                '08:00 AM';
+        }
+
+        if (
+            databaseClosingMinutes > 0 &&
+            result.data.closing_time
+        ) {
+            schedulingSettings.closing_time =
+                formatTime(
+                    databaseClosingMinutes
+                );
+        } else {
+            schedulingSettings.closing_time =
+                '05:00 PM';
+        }
+
+        /*
+         * Safety check:
+         * Never allow an invalid closing time to create
+         * appointment slots outside the clinic's hours.
+         */
+        if (
+            parseTimeToMinutes(
+                schedulingSettings.closing_time
+            ) <=
+            parseTimeToMinutes(
+                schedulingSettings.opening_time
+            )
+        ) {
+            console.warn(
+                'DOT Scheduler: Invalid clinic hours received. Falling back to 8:00 AM - 5:00 PM.'
+            );
+
+            schedulingSettings.opening_time =
+                '08:00 AM';
+
+            schedulingSettings.closing_time =
+                '05:00 PM';
+        }
 
         console.log(
             'DOT Scheduler settings:',
@@ -3039,6 +3107,58 @@ function isDateUnavailable(
                 .trim()
                 .toUpperCase();
 
+        /*
+         * PostgreSQL TIME format:
+         *
+         * 08:00:00
+         * 17:00:00
+         *
+         * Also accepts:
+         *
+         * 08:00
+         * 17:00
+         */
+        var databaseMatch =
+            normalized.match(
+                /^(\d{1,2}):(\d{2})(?::(\d{2}))?$/
+            );
+
+        if (databaseMatch) {
+
+            var databaseHours =
+                parseInt(
+                    databaseMatch[1],
+                    10
+                );
+
+            var databaseMinutes =
+                parseInt(
+                    databaseMatch[2],
+                    10
+                );
+
+            if (
+                databaseHours >= 0 &&
+                databaseHours <= 23 &&
+                databaseMinutes >= 0 &&
+                databaseMinutes <= 59
+            ) {
+
+                return (
+                    databaseHours * 60 +
+                    databaseMinutes
+                );
+            }
+
+            return 0;
+        }
+
+        /*
+         * Existing AM/PM format:
+         *
+         * 08:00 AM
+         * 05:00 PM
+         */
         var match =
             normalized.match(
                 /^(\d{1,2}):(\d{2})\s*(AM|PM)$/
@@ -3062,6 +3182,15 @@ function isDateUnavailable(
 
         var period =
             match[3];
+
+        if (
+            hours < 1 ||
+            hours > 12 ||
+            minutes < 0 ||
+            minutes > 59
+        ) {
+            return 0;
+        }
 
         if (
             period === 'PM' &&
