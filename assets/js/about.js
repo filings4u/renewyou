@@ -18,74 +18,219 @@ function renderAboutPageContent() {
   let htmlContent = `
     <main style="background-color: #F9F9F8; width: 100%;">
       
-        <style>
-          .about-split-grid {
-            display: grid;
-            grid-template-columns: 0.8fr 1.2fr;
-            align-items: center;
-            gap: 50px;
-            width: 100%;
-          }
-          .about-media-frame {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          }
-          .about-media-frame img {
-            width: 100%;
-            max-width: 480px;
-            height: auto;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(62,13,95,0.04);
-            display: block;
-          }
-          .about-content-frame {
-            text-align: left;
-          }
-            @media (max-width: 992px) {
-      .about-split-grid {
-        grid-template-columns: 1fr !important;
-        gap: 35px !important;
-      }
-      .about-split-grid.reverse-mobile {
-        display: flex !important;
-        flex-direction: column-reverse !important;
-      }
-      .about-content-frame {
-        text-align: center !important;
-      }
-      /* FIXED: Targets headings inside the split layout to gracefully downsize on mobile screens */
-      .about-content-frame h1 {
-        font-size: 1.85rem !important;
-        margin-bottom: 15px !important;
-      }
-      .about-content-frame h2 {
-        font-size: 1.65rem !important;
-        margin-bottom: 15px !important;
-      }
-      .about-content-frame h3 {
-        font-size: 1.45rem !important;
-      }
-      /* FIXED: Tightens body paragraph type sizing and internal padding for tight viewports */
-      .about-content-frame p {
-        font-size: 0.95rem !important;
-        line-height: 1.55 !important;
-      }
-      /* FIXED: Specifically scales down the text sizes inside the centered mission tooltip box */
-      .iv-callout-box p {
-        font-size: 1.15rem !important; /* Shrunk down from 1.4rem quote size */
-      }
-      .iv-callout-box p + p {
-        font-size: 0.9rem !important; /* Shrunk down from 15.5px description size */
-        line-height: 1.5 !important;
-      }
-      .about-media-frame img {
-        max-width: 310px !important; /* Marginally downsized for a tighter layout aspect ratio */
-      }
-    }
+  <style>
+/* =========================================================
+   ABOUT PAGE — MOBILE RESPONSIVE CSS
+   Desktop styling remains unchanged.
+========================================================= */
 
-        </style>
+/* ---------------------------------------------------------
+   TABLET / MOBILE
+--------------------------------------------------------- */
+@media (max-width: 992px) {
+
+  /* Main split sections */
+  .about-split-grid {
+    grid-template-columns: 1fr !important;
+    gap: 35px !important;
+    width: 100% !important;
+  }
+
+  /* Reverse the second founder section:
+     Image appears BELOW the text on mobile */
+  .about-split-grid.reverse-mobile {
+    display: flex !important;
+    flex-direction: column-reverse !important;
+    gap: 35px !important;
+  }
+
+  /* Center all text in founder sections */
+  .about-content-frame {
+    text-align: center !important;
+    width: 100% !important;
+  }
+
+  /* Founder names */
+  .about-content-frame h3 {
+    font-size: 1.65rem !important;
+    line-height: 1.25 !important;
+    margin-bottom: 10px !important;
+    text-align: center !important;
+  }
+
+  /* Founder titles */
+  .about-content-frame h4 {
+    font-size: 0.95rem !important;
+    line-height: 1.4 !important;
+    margin-bottom: 18px !important;
+    text-align: center !important;
+  }
+
+  /* Founder biography text */
+  .about-content-frame p {
+    font-size: 1rem !important;
+    line-height: 1.65 !important;
+    text-align: center !important;
+  }
+
+  /* Founder image container */
+  .about-media-frame {
+    width: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+  }
+
+  /* Keep founder images large on mobile */
+  .about-media-frame img {
+    width: 100% !important;
+    max-width: 420px !important;
+    height: auto !important;
+    display: block !important;
+    margin: 0 auto !important;
+  }
+
+  /* -------------------------------------------------------
+     MISSION SECTION
+  ------------------------------------------------------- */
+
+  .iv-callout-box {
+    padding: 30px 25px !important;
+  }
+
+  .iv-callout-box p {
+    font-size: 1.05rem !important;
+    line-height: 1.6 !important;
+  }
+
+  /* Mission heading */
+  .about-content-frame h2 {
+    font-size: 1.9rem !important;
+    line-height: 1.25 !important;
+    text-align: center !important;
+  }
+
+}
+
+
+/* ---------------------------------------------------------
+   SMALL PHONES
+--------------------------------------------------------- */
+@media (max-width: 600px) {
+
+  /* Prevent horizontal overflow */
+  #leadership-target,
+  #leadership-target main {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+  }
+
+  /* -------------------------------------------------------
+     MISSION SECTION
+  ------------------------------------------------------- */
+
+  .iv-callout-box {
+    padding: 25px 20px !important;
+    border-left-width: 4px !important;
+  }
+
+  .iv-callout-box p {
+    font-size: 1rem !important;
+    line-height: 1.6 !important;
+  }
+
+  .about-content-frame h2 {
+    font-size: 1.75rem !important;
+    line-height: 1.25 !important;
+    margin-bottom: 18px !important;
+  }
+
+  /* -------------------------------------------------------
+     FOUNDERS HEADER
+  ------------------------------------------------------- */
+
+  .about-split-grid + * {
+    max-width: 100% !important;
+  }
+
+  /* -------------------------------------------------------
+     FOUNDER NAMES
+  ------------------------------------------------------- */
+
+  .about-content-frame h3 {
+    font-size: 1.5rem !important;
+    line-height: 1.3 !important;
+    margin-bottom: 10px !important;
+  }
+
+  /* -------------------------------------------------------
+     FOUNDER TITLES
+  ------------------------------------------------------- */
+
+  .about-content-frame h4 {
+    font-size: 0.88rem !important;
+    line-height: 1.45 !important;
+    letter-spacing: 0.3px !important;
+    margin-bottom: 18px !important;
+  }
+
+  /* -------------------------------------------------------
+     BIOGRAPHIES
+  ------------------------------------------------------- */
+
+  .about-content-frame p {
+    font-size: 0.98rem !important;
+    line-height: 1.65 !important;
+    text-align: center !important;
+  }
+
+  /* -------------------------------------------------------
+     FOUNDER IMAGES
+  ------------------------------------------------------- */
+
+  .about-media-frame img {
+    width: 100% !important;
+    max-width: 390px !important;
+    height: auto !important;
+    border-radius: 22px !important;
+  }
+
+}
+
+
+/* ---------------------------------------------------------
+   VERY SMALL PHONES
+--------------------------------------------------------- */
+@media (max-width: 400px) {
+
+  .about-content-frame h2 {
+    font-size: 1.6rem !important;
+  }
+
+  .about-content-frame h3 {
+    font-size: 1.35rem !important;
+  }
+
+  .about-content-frame h4 {
+    font-size: 0.82rem !important;
+  }
+
+  .about-content-frame p {
+    font-size: 0.95rem !important;
+    line-height: 1.6 !important;
+  }
+
+  .iv-callout-box p {
+    font-size: 0.95rem !important;
+  }
+
+  .about-media-frame img {
+    max-width: 360px !important;
+  }
+
+}
+</style>
     
 
 
