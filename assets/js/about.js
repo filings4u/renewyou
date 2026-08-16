@@ -18,220 +18,683 @@ function renderAboutPageContent() {
   let htmlContent = `
     <main style="background-color: #F9F9F8; width: 100%;">
       
-  <style>
+
+<style>
 /* =========================================================
-   ABOUT PAGE — MOBILE RESPONSIVE CSS
-   Desktop styling remains unchanged.
+   ABOUT PAGE
+   DESKTOP + TABLET + MOBILE
+   MASTER CONTENT WIDTH: 1450px
 ========================================================= */
 
-/* ---------------------------------------------------------
-   TABLET / MOBILE
---------------------------------------------------------- */
+
+/* =========================================================
+   GLOBAL
+========================================================= */
+
+#leadership-target,
+#leadership-target main {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+
+/* =========================================================
+   DESKTOP
+   993px+
+========================================================= */
+
+.about-split-grid {
+  width: 100%;
+  max-width: 1450px;
+
+  margin-left: auto;
+  margin-right: auto;
+
+  padding-left: 30px;
+  padding-right: 30px;
+
+  display: grid;
+
+  /*
+     KEEP THE ORIGINAL TWO-COLUMN STRUCTURE
+  */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+
+  align-items: center;
+
+  gap: 70px;
+
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   REVERSE DESKTOP SECTION
+
+   LaToya:
+   TEXT LEFT
+   IMAGE RIGHT
+========================================================= */
+
+.about-split-grid.reverse-mobile {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+
+/* =========================================================
+   CONTENT
+========================================================= */
+
+.about-content-frame {
+  width: 100%;
+  max-width: 650px;
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   HEADINGS
+========================================================= */
+
+.about-content-frame h2 {
+  font-size: 2.5rem;
+  line-height: 1.2;
+
+  margin: 0 0 24px;
+
+  text-align: left;
+}
+
+
+.about-content-frame h3 {
+  font-size: 2.1rem;
+  line-height: 1.25;
+
+  margin: 0 0 10px;
+
+  text-align: left;
+}
+
+
+.about-content-frame h4 {
+  font-size: 1rem;
+  line-height: 1.45;
+
+  margin: 0 0 20px;
+
+  text-align: left;
+
+  letter-spacing: 0.3px;
+}
+
+
+.about-content-frame p {
+  font-size: 1.08rem;
+  line-height: 1.75;
+
+  margin: 0 0 18px;
+
+  text-align: left;
+}
+
+
+/* =========================================================
+   DESKTOP IMAGE CONTAINER
+
+   IMPORTANT:
+   The container can occupy its grid column,
+   but the IMAGE itself stays small.
+========================================================= */
+
+.about-media-frame {
+  width: 100%;
+
+  display: flex;
+
+  justify-content: center;
+  align-items: center;
+
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   DESKTOP IMAGES
+
+   CONTROLLED WIDTH
+========================================================= */
+
+.about-media-frame img {
+  display: block;
+
+  width: 420px;
+
+  max-width: 420px;
+
+  height: auto;
+
+  margin-left: auto;
+  margin-right: auto;
+
+  border-radius: 24px;
+
+  object-fit: cover;
+
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   MISSION CALLOUT
+========================================================= */
+
+.iv-callout-box {
+  width: 100%;
+  max-width: 1450px;
+
+  margin-left: auto;
+  margin-right: auto;
+
+  padding: 35px 40px;
+
+  box-sizing: border-box;
+}
+
+
+.iv-callout-box p {
+  font-size: 1.1rem;
+
+  line-height: 1.7;
+
+  margin: 0;
+}
+
+
+/* =========================================================
+   LARGE DESKTOP
+   1200px+
+========================================================= */
+
+@media (min-width: 1200px) {
+
+  /*
+     KEEP THE FULL PAGE AT 1450px
+  */
+
+  .about-split-grid {
+    width: 100%;
+    max-width: 1450px;
+
+    padding-left: 30px;
+    padding-right: 30px;
+
+    /*
+       ORIGINAL TWO-COLUMN LAYOUT
+    */
+
+    grid-template-columns:
+      minmax(0, 1fr)
+      minmax(0, 1fr);
+
+    gap: 80px;
+  }
+
+
+  .about-content-frame {
+    max-width: 650px;
+  }
+
+
+  .about-content-frame h2 {
+    font-size: 2.5rem;
+  }
+
+
+  .about-content-frame h3 {
+    font-size: 2.1rem;
+  }
+
+
+  .about-content-frame p {
+    font-size: 1.08rem;
+  }
+
+
+  /*
+     DESKTOP IMAGE SIZE
+
+     350px is the maximum.
+  */
+
+  .about-media-frame img {
+    width: 350px;
+
+    max-width: 350px;
+  }
+}
+
+
+/* =========================================================
+   EXTRA LARGE DESKTOP
+   1500px+
+========================================================= */
+
+@media (min-width: 1500px) {
+
+  .about-split-grid {
+    max-width: 1450px;
+  }
+
+
+  .about-media-frame img {
+    width: 350px;
+
+    max-width: 350px;
+  }
+}
+
+
+/* =========================================================
+   TABLET
+   601px – 992px
+========================================================= */
+
 @media (max-width: 992px) {
 
-  /* Main split sections */
   .about-split-grid {
-    grid-template-columns: 1fr !important;
-    gap: 35px !important;
     width: 100% !important;
+
+    max-width: 900px !important;
+
+    padding-left: 30px !important;
+    padding-right: 30px !important;
+
+    /*
+       STACK CONTENT
+    */
+
+    grid-template-columns: 1fr !important;
+
+    gap: 40px !important;
+
+    margin-left: auto !important;
+    margin-right: auto !important;
   }
 
-  /* Reverse the second founder section:
-     Image appears BELOW the text on mobile */
+
+  /*
+     LaToya:
+     TEXT FIRST
+     IMAGE SECOND
+  */
+
   .about-split-grid.reverse-mobile {
     display: flex !important;
+
     flex-direction: column-reverse !important;
-    gap: 35px !important;
+
+    gap: 40px !important;
   }
 
-  /* Center all text in founder sections */
+
+  /* =======================================================
+     TABLET CONTENT
+  ======================================================= */
+
   .about-content-frame {
-    text-align: center !important;
     width: 100% !important;
-  }
 
-  /* Founder names */
-  .about-content-frame h3 {
-    font-size: 1.65rem !important;
-    line-height: 1.25 !important;
-    margin-bottom: 10px !important;
+    max-width: 750px !important;
+
+    margin-left: auto !important;
+    margin-right: auto !important;
+
     text-align: center !important;
   }
 
-  /* Founder titles */
+
+  .about-content-frame h2 {
+    font-size: 2rem !important;
+
+    line-height: 1.25 !important;
+
+    text-align: center !important;
+  }
+
+
+  .about-content-frame h3 {
+    font-size: 1.75rem !important;
+
+    line-height: 1.3 !important;
+
+    text-align: center !important;
+  }
+
+
   .about-content-frame h4 {
     font-size: 0.95rem !important;
-    line-height: 1.4 !important;
-    margin-bottom: 18px !important;
+
+    line-height: 1.45 !important;
+
     text-align: center !important;
   }
 
-  /* Founder biography text */
+
   .about-content-frame p {
     font-size: 1rem !important;
-    line-height: 1.65 !important;
+
+    line-height: 1.7 !important;
+
     text-align: center !important;
   }
 
-  /* Founder image container */
+
+  /* =======================================================
+     TABLET IMAGE
+  ======================================================= */
+
   .about-media-frame {
     width: 100% !important;
+
     display: flex !important;
+
     justify-content: center !important;
+
     align-items: center !important;
   }
 
-  /* Keep founder images large on mobile */
+
   .about-media-frame img {
-    width: 100% !important;
-    max-width: 420px !important;
+    width: 350px !important;
+
+    max-width: 350px !important;
+
     height: auto !important;
-    display: block !important;
-    margin: 0 auto !important;
+
+    margin-left: auto !important;
+    margin-right: auto !important;
   }
 
-  /* -------------------------------------------------------
-     MISSION SECTION
-  ------------------------------------------------------- */
+
+  /* =======================================================
+     TABLET CALLOUT
+  ======================================================= */
 
   .iv-callout-box {
-    padding: 30px 25px !important;
+    width: 100% !important;
+
+    max-width: 900px !important;
+
+    padding: 30px !important;
   }
+
 
   .iv-callout-box p {
     font-size: 1.05rem !important;
-    line-height: 1.6 !important;
-  }
 
-  /* Mission heading */
-  .about-content-frame h2 {
-    font-size: 1.9rem !important;
-    line-height: 1.25 !important;
-    text-align: center !important;
+    line-height: 1.65 !important;
   }
-
 }
 
 
-/* ---------------------------------------------------------
-   SMALL PHONES
---------------------------------------------------------- */
+/* =========================================================
+   MOBILE
+   401px – 600px
+========================================================= */
+
 @media (max-width: 600px) {
 
-  /* Prevent horizontal overflow */
   #leadership-target,
   #leadership-target main {
     width: 100% !important;
+
     max-width: 100% !important;
+
     overflow-x: hidden !important;
   }
 
-  /* -------------------------------------------------------
-     MISSION SECTION
-  ------------------------------------------------------- */
 
-  .iv-callout-box {
-    padding: 25px 20px !important;
-    border-left-width: 4px !important;
-  }
+  /* =======================================================
+     MOBILE GRID
+  ======================================================= */
 
-  .iv-callout-box p {
-    font-size: 1rem !important;
-    line-height: 1.6 !important;
-  }
+  .about-split-grid {
+    width: 100% !important;
 
-  .about-content-frame h2 {
-    font-size: 1.75rem !important;
-    line-height: 1.25 !important;
-    margin-bottom: 18px !important;
-  }
-
-  /* -------------------------------------------------------
-     FOUNDERS HEADER
-  ------------------------------------------------------- */
-
-  .about-split-grid + * {
     max-width: 100% !important;
+
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+
+    grid-template-columns: 1fr !important;
+
+    gap: 30px !important;
+
+    box-sizing: border-box !important;
   }
 
-  /* -------------------------------------------------------
-     FOUNDER NAMES
-  ------------------------------------------------------- */
 
-  .about-content-frame h3 {
-    font-size: 1.5rem !important;
-    line-height: 1.3 !important;
-    margin-bottom: 10px !important;
+  /*
+     LaToya:
+     TEXT FIRST
+     IMAGE SECOND
+  */
+
+  .about-split-grid.reverse-mobile {
+    display: flex !important;
+
+    flex-direction: column-reverse !important;
+
+    gap: 30px !important;
   }
 
-  /* -------------------------------------------------------
-     FOUNDER TITLES
-  ------------------------------------------------------- */
 
-  .about-content-frame h4 {
-    font-size: 0.88rem !important;
-    line-height: 1.45 !important;
-    letter-spacing: 0.3px !important;
-    margin-bottom: 18px !important;
-  }
+  /* =======================================================
+     MOBILE CONTENT
+  ======================================================= */
 
-  /* -------------------------------------------------------
-     BIOGRAPHIES
-  ------------------------------------------------------- */
+  .about-content-frame {
+    width: 100% !important;
 
-  .about-content-frame p {
-    font-size: 0.98rem !important;
-    line-height: 1.65 !important;
+    max-width: 100% !important;
+
     text-align: center !important;
   }
 
-  /* -------------------------------------------------------
-     FOUNDER IMAGES
-  ------------------------------------------------------- */
+
+  .about-content-frame h2 {
+    font-size: 1.75rem !important;
+
+    line-height: 1.25 !important;
+
+    margin-bottom: 18px !important;
+
+    text-align: center !important;
+  }
+
+
+  .about-content-frame h3 {
+    font-size: 1.5rem !important;
+
+    line-height: 1.3 !important;
+
+    margin-bottom: 10px !important;
+
+    text-align: center !important;
+  }
+
+
+  .about-content-frame h4 {
+    font-size: 0.88rem !important;
+
+    line-height: 1.45 !important;
+
+    letter-spacing: 0.3px !important;
+
+    margin-bottom: 18px !important;
+
+    text-align: center !important;
+  }
+
+
+  .about-content-frame p {
+    font-size: 0.98rem !important;
+
+    line-height: 1.65 !important;
+
+    text-align: center !important;
+  }
+
+
+  /* =======================================================
+     MOBILE IMAGE
+  ======================================================= */
+
+  .about-media-frame {
+    width: 100% !important;
+
+    display: flex !important;
+
+    justify-content: center !important;
+
+    align-items: center !important;
+  }
+
 
   .about-media-frame img {
     width: 100% !important;
-    max-width: 390px !important;
+
+    max-width: 330px !important;
+
     height: auto !important;
+
+    margin-left: auto !important;
+    margin-right: auto !important;
+
     border-radius: 22px !important;
   }
 
+
+  /* =======================================================
+     MOBILE CALLOUT
+  ======================================================= */
+
+  .iv-callout-box {
+    width: 100% !important;
+
+    max-width: 100% !important;
+
+    padding: 25px 20px !important;
+
+    border-left-width: 4px !important;
+
+    box-sizing: border-box !important;
+  }
+
+
+  .iv-callout-box p {
+    font-size: 1rem !important;
+
+    line-height: 1.6 !important;
+  }
 }
 
 
-/* ---------------------------------------------------------
+/* =========================================================
    VERY SMALL PHONES
---------------------------------------------------------- */
+   400px and below
+========================================================= */
+
 @media (max-width: 400px) {
+
+  .about-split-grid {
+    padding-left: 12px !important;
+
+    padding-right: 12px !important;
+
+    gap: 25px !important;
+  }
+
 
   .about-content-frame h2 {
     font-size: 1.6rem !important;
   }
 
+
   .about-content-frame h3 {
     font-size: 1.35rem !important;
   }
+
 
   .about-content-frame h4 {
     font-size: 0.82rem !important;
   }
 
+
   .about-content-frame p {
     font-size: 0.95rem !important;
+
     line-height: 1.6 !important;
   }
+
+
+  .iv-callout-box {
+    padding: 22px 17px !important;
+  }
+
 
   .iv-callout-box p {
     font-size: 0.95rem !important;
   }
 
-  .about-media-frame img {
-    max-width: 360px !important;
-  }
 
+  .about-media-frame img {
+    width: 100% !important;
+
+    max-width: 280px !important;
+
+    border-radius: 18px !important;
+  }
+}
+
+
+/* =========================================================
+   BOX SIZING
+========================================================= */
+
+.about-split-grid *,
+.about-split-grid *::before,
+.about-split-grid *::after,
+.iv-callout-box *,
+.iv-callout-box *::before,
+.iv-callout-box *::after {
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   IMAGE SAFETY
+========================================================= */
+
+.about-media-frame img {
+  max-width: 100%;
+}
+
+
+/* =========================================================
+   PREVENT HORIZONTAL SCROLL
+========================================================= */
+
+#leadership-target {
+  max-width: 100%;
+
+  overflow-x: hidden;
 }
 </style>
-    
+
 
 
  <!-- Section 2: Mission Statement Highlight Block (Centered Tooltip Style) -->
@@ -275,8 +738,7 @@ function renderAboutPageContent() {
             <h3 style="color: var(--purple-primary, #3E0D5F); font-size: 1.8rem; font-weight: 800; margin: 0 0 6px 0; letter-spacing: -0.5px;">Angela Y. Martin, MSN, APRN-FPA, FNP-C</h3>
             <h4 style="color: var(--green-secondary, #2bb673); font-weight: 700; font-size: 1.05rem; margin: 0 0 20px 0; text-transform: uppercase; letter-spacing: 0.5px;">Founder / Board-Certified Family Nurse Practitioner</h4>
             <p style="font-size: 15px; line-height: 1.65; color: #4A4A4A; margin: 0;">
-              Angela Y. Martin, MSN, APRN-FPA, FNP-C is a dedicated and experienced Family Nurse Practitioner with more than 15 years of experience in the healthcare field. Throughout her career, she has remained committed to helping individuals improve their health, feel their best, and receive compassionate, personalized care. Angela believes that quality healthcare begins with listening. She takes the time to understand each patient’s concerns, health goals, lifestyle, and individual needs while creating realistic and personalized plans of care. Her approach focuses not only on treating current health concerns but also on prevention, education, and empowering patients to take an active role in their overall well-being. With experience caring for patients across a variety of healthcare settings, Angela brings a strong clinical background and a patient-centered approach to every visit. She is passionate about preventive care, weight management, wellness, acute care, and helping patients achieve sustainable improvements in their health. As the Nurse Practitioner behind ReNew You Health & Wellness, Angela’s goal is to provide a welcoming and supportive environment where patients feel heard, respected, and confident in their healthcare decisions. Her philosophy is simple: healthcare should be personal, accessible, compassionate, and focused on the whole person—not just the condition. At ReNew You Health & Wellness, Angela is committed to helping every patient take meaningful steps toward renewed health, confidence, and overall wellness.
-            </p>
+Angela Y. Martin, MSN, APRN-FPA, FNP-C, is an experienced Family Nurse Practitioner with over 15 years in healthcare. She is dedicated to helping individuals improve their health through compassionate, personalized care. Angela believes quality healthcare begins with listening, taking time to understand each patient’s concerns and health goals. Her approach includes not only treating current issues but also focusing on prevention, education, and empowering patients in their well-being. With a strong clinical background, she cares for patients in various settings. As the Nurse Practitioner at ReNew You Health & Wellness, her goal is to create a welcoming environment where patients feel heard and confident. Angela’s philosophy is that healthcare should be personal, accessible, and compassionate, focusing on the whole person.  She is committed to helping every patient achieve renewed health and overall wellness.</p>
           </div>
         </div>
       </section>
@@ -287,9 +749,9 @@ function renderAboutPageContent() {
             <!-- Text LEFT -->
         <div class="about-content-frame">
   <h3 style="color: var(--purple-primary, #3E0D5F); font-size: 1.8rem; font-weight: 800; margin: 0 0 6px 0; letter-spacing: -0.5px;">LaToya Newman, MBA, CPA, BFA</h3>
-  <h4 style="color: var(--green-secondary, #2bb673); font-weight: 700; font-size: 1.05rem; margin: 0 0 20px 0; text-transform: uppercase; letter-spacing: 0.5px;">Operations, Finance & Strategic Growth Director</h4>
+  <h4 style="color: var(--green-secondary, #2bb673); font-weight: 700; font-size: 1.05rem; margin: 0 0 20px 0; text-transform: uppercase; letter-spacing: 0.5px;">Co-Founder, Operations, Finance & Strategic Growth Director</h4>
   <p style="font-size: 15px; line-height: 1.65; color: #4A4A4A; margin: 0;">
-    LaToya Newman is the Co-Owner and Director of Operations at ReNew You Health & Wellness. With a strong background in business management, finance, accounting, and entrepreneurship, she helps oversee the practice’s operations, financial management, and continued growth.
+    LaToya Newman is the Co-Founder, Director of Operations and Finance, and Strategic Growth Director at ReNew You Health & Wellness. With a strong background in business management, finance, accounting, and entrepreneurship, she helps oversee the practice’s operations, financial management, and continued growth.
 
 Working alongside Angela Martin, APRN, FNP-C, LaToya is committed to creating a professional, welcoming, and patient centered healthcare experience.
 
