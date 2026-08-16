@@ -108,7 +108,7 @@ function renderDynamicHero() {
       badge: "Coverage & Billing",
       headline: "Insurance Networks We Accept",
       subheadline: "We are committed to making exceptional healthcare affordable and highly accessible by working directly with major insurance providers.",
-      image: "images/hero-insurance.jpg",
+      image: "images/hero-insurance.png",
       alt: "Health coverage documents and cards",
       showButtons: false
     },
