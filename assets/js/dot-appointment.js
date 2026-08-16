@@ -1816,158 +1816,207 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // =========================================================
-    // BLOCKED DATE/TIME LOGIC
-    // =========================================================
+// =========================================================
+// BLOCKED DATE/TIME LOGIC
+// =========================================================
 
-    function getBlockedSlotsForDate(
-        dateString
+function getBlockedSlotsForDate(
+    dateString
+) {
+
+    var blocked =
+        schedulingSettings.blocked_date_slots;
+
+    if (
+        !blocked ||
+        typeof blocked !== 'object'
     ) {
-
-        var blocked =
-            schedulingSettings.blocked_date_slots;
-
-        if (
-            !blocked ||
-            typeof blocked !== 'object'
-        ) {
-            return [];
-        }
-
-        var slots =
-            blocked[dateString];
-
-        if (Array.isArray(slots)) {
-            return slots;
-        }
-
-        if (slots === true) {
-            return generateTimeSlots();
-        }
-
         return [];
     }
 
-    function isDateUnavailable(
-        dateString
+    var slots =
+        blocked[dateString];
+
+    /*
+     * Entire date blocked.
+     *
+     * Admin scheduler stores this as:
+     *
+     * {
+     *     "2026-08-15": ["__ALL__"]
+     * }
+     *
+     * Convert that into all generated appointment
+     * times so every customer-facing slot is blocked.
+     */
+    if (
+        Array.isArray(slots) &&
+        slots.includes('__ALL__')
+    ) {
+        return generateTimeSlots();
+    }
+
+    /*
+     * Support the older boolean format as well.
+     */
+    if (slots === true) {
+        return generateTimeSlots();
+    }
+
+    /*
+     * Individual blocked times.
+     */
+    if (Array.isArray(slots)) {
+        return slots;
+    }
+
+    return [];
+}
+
+function isDateUnavailable(
+    dateString
+) {
+
+    var date =
+        parseDate(
+            dateString
+        );
+
+    var today =
+        new Date();
+
+    today.setHours(
+        0,
+        0,
+        0,
+        0
+    );
+
+    /*
+     * Past dates.
+     */
+
+    if (date < today) {
+        return true;
+    }
+
+    /*
+     * Optional future booking window.
+     */
+
+    if (
+        schedulingSettings.booking_window_days !==
+        null
     ) {
 
-        var date =
-            parseDate(
-                dateString
-            );
-
-        var today =
+        var maximumDate =
             new Date();
 
-        today.setHours(
+        maximumDate.setHours(
             0,
             0,
             0,
             0
         );
 
-        /*
-         * Past dates.
-         */
-
-        if (date < today) {
-            return true;
-        }
-
-        /*
-         * Optional future booking window.
-         */
-
-        if (
-            schedulingSettings.booking_window_days !==
-            null
-        ) {
-
-            var maximumDate =
-                new Date();
-
-            maximumDate.setHours(
-                0,
-                0,
-                0,
-                0
-            );
-
-            maximumDate.setDate(
-                maximumDate.getDate() +
-                schedulingSettings.booking_window_days
-            );
-
-            if (
-                date >
-                maximumDate
-            ) {
-                return true;
-            }
-        }
-
-        /*
-         * Entire date manually blocked.
-         */
-
-        var blocked =
-            schedulingSettings.blocked_date_slots;
-
-        if (
-            blocked &&
-            typeof blocked === 'object' &&
-            blocked[dateString] === true
-        ) {
-            return true;
-        }
-
-        /*
-         * No usable appointment times.
-         */
-
-        var generatedSlots =
-            generateTimeSlots();
-
-        if (
-            generatedSlots.length === 0
-        ) {
-            return true;
-        }
-
-        var blockedSlots =
-            getBlockedSlotsForDate(
-                dateString
-            );
-
-        var usableSlots =
-            generatedSlots.filter(
-                function (slot) {
-
-                    return (
-                        blockedSlots.indexOf(
-                            slot
-                        ) === -1 &&
-                        !isAppointmentBooked(
-                            dateString,
-                            slot
-                        ) &&
-                        !isPastCustomerAppointmentSlot(
-                            dateString,
-                            slot
-                        ) &&
-                        !appointmentConflicts(
-                            dateString,
-                            slot
-                        )
-                    );
-                }
-            );
-
-        return (
-            usableSlots.length === 0
+        maximumDate.setDate(
+            maximumDate.getDate() +
+            schedulingSettings.booking_window_days
         );
+
+        if (
+            date >
+            maximumDate
+        ) {
+            return true;
+        }
     }
+
+    /*
+     * Entire date manually blocked.
+     *
+     * Admin scheduler stores a full-day block as:
+     *
+     * {
+     *     "2026-08-15": ["__ALL__"]
+     * }
+     *
+     * Also support the older boolean format:
+     *
+     * {
+     *     "2026-08-15": true
+     * }
+     */
+
+    var blocked =
+        schedulingSettings.blocked_date_slots;
+
+    if (
+        blocked &&
+        typeof blocked === 'object'
+    ) {
+
+        var dateBlock =
+            blocked[dateString];
+
+        if (
+            dateBlock === true ||
+            (
+                Array.isArray(dateBlock) &&
+                dateBlock.includes('__ALL__')
+            )
+        ) {
+
+            return true;
+        }
+    }
+
+    /*
+     * No usable appointment times.
+     */
+
+    var generatedSlots =
+        generateTimeSlots();
+
+    if (
+        generatedSlots.length === 0
+    ) {
+        return true;
+    }
+
+    var blockedSlots =
+        getBlockedSlotsForDate(
+            dateString
+        );
+
+    var usableSlots =
+        generatedSlots.filter(
+            function (slot) {
+
+                return (
+                    blockedSlots.indexOf(
+                        slot
+                    ) === -1 &&
+                    !isAppointmentBooked(
+                        dateString,
+                        slot
+                    ) &&
+                    !isPastCustomerAppointmentSlot(
+                        dateString,
+                        slot
+                    ) &&
+                    !appointmentConflicts(
+                        dateString,
+                        slot
+                    )
+                );
+            }
+        );
+
+    return (
+        usableSlots.length === 0
+    );
+}
 
     // =========================================================
     // APPOINTMENT AVAILABILITY
