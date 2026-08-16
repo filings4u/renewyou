@@ -705,9 +705,6 @@ document.addEventListener('DOMContentLoaded', function () {
                                     Return To Duty
                                 </option>
 
-                                <option value="DOT-Physical">
-                                    DOT Physical Examination
-                                </option>
 
                             </select>
 

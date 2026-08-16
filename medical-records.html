@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Medical Records Policy | ReNew You Health & Wellness
+    </title>
+
+    <!-- Supabase Client Dependency -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Main Website Styles -->
+    <link
+        rel="stylesheet"
+        href="assets/css/style.css"
+    >
+
+    <!-- Favicon -->
+    <link
+        rel="icon"
+        type="image/png"
+        href="images/fav.png"
+    >
+
+</head>
+
+
+<body>
+
+
+<!-- =========================================================
+     DYNAMIC HEADER
+========================================================= -->
+
+<div id="navigation-target"></div>
+
+
+
+<!-- =========================================================
+     MEDICAL RECORDS POLICY CONTENT
+========================================================= -->
+
+<main
+    style="
+        width:100%;
+        max-width:1450px;
+        margin:0 auto;
+        padding:60px 30px 80px 30px;
+        box-sizing:border-box;
+        color:#333333;
+        font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    "
+>
+
+
+    <!-- PAGE TITLE -->
+
+    <div
+        style="
+            width:100%;
+            margin:0 0 45px 0;
+            padding:0;
+        "
+    >
+
+        <h1
+            style="
+                margin:0 0 15px 0;
+                padding:0;
+                color:#3E0D5F;
+                font-size:clamp(2rem,4vw,3.2rem);
+                line-height:1.15;
+                font-weight:800;
+            "
+        >
+            Medical Records Policy
+        </h1>
+
+        <p
+            style="
+                margin:0;
+                padding:0;
+                color:#666666;
+                font-size:0.92rem;
+                line-height:1.6;
+            "
+        >
+            ReNew You Health &amp; Wellness
+        </p>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         INTRODUCTION
+    ====================================================== -->
+
+    <section
+        style="
+            margin:0 0 30px 0;
+            padding:0;
+        "
+    >
+
+        <h2
+            style="
+                margin:0 0 10px 0;
+                padding:0;
+                color:#3E0D5F;
+                font-size:1.25rem;
+                line-height:1.35;
+                font-weight:750;
+            "
+        >
+            Introduction
+        </h2>
+
+        <p
+            style="
+                max-width:1450px;
+                margin:0;
+                padding:0;
+                color:#555555;
+                font-size:0.92rem;
+                line-height:1.65;
+            "
+        >
+            At ReNew You Health &amp; Wellness, maintaining the
+            confidentiality and security of your medical records
+            is of utmost importance. This policy outlines our
+            procedures regarding the management, access, and
+            protection of patient medical records in compliance
+            with the relevant laws and regulations in the State
+            of Illinois.
+        </p>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         1. PURPOSE
+    ====================================================== -->
+
+    <section
+        style="
+            margin:0 0 30px 0;
+            padding:0;
+        "
+    >
+
+        <h2
+            style="
+                margin:0 0 10px 0;
+                padding:0;
+                color:#3E0D5F;
+                font-size:1.25rem;
+                line-height:1.35;
+                font-weight:750;
+            "
+        >
+            1. Purpose
+        </h2>
+
+        <p
+            style="
+                max-width:1450px;
+                margin:0;
+                padding:0;
+                color:#555555;
+                font-size:0.92rem;
+                line-height:1.65;
+            "
+        >
+            This policy aims to ensure that all medical records
+            are accurately maintained, secure, and accessible
+            only to authorized personnel, in order to protect
+            patient privacy and comply with federal and state laws.
+        </p>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         2. SCOPE
+    ====================================================== -->
+
+    <section
+        style="
+            margin:0 0 30px 0;
+            padding:0;
+        "
+    >
+
+        <h2
+            style="
+                margin:0 0 10px 0;
+                padding:0;
+                color:#3E0D5F;
+                font-size:1.25rem;
+                line-height:1.35;
+                font-weight:750;
+            "
+        >
+            2. Scope
+        </h2>
+
+        <p
+            style="
+                max-width:1450px;
+                margin:0;
+                padding:0;
+                color:#555555;
+                font-size:0.92rem;
+                line-height:1.65;
+            "
+        >
+            This policy applies to all employees, contractors,
+            and affiliated personnel at ReNew You Health &amp;
+            Wellness who have access to medical records.
+        </p>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         3. DEFINITION OF MEDICAL RECORDS
+    ====================================================== -->
+
+    <section
+        style="
+            margin:0 0 30px 0;
+            padding:0;
+        "
+    >
+
+        <h2
+            style="
+                margin:0 0 10px 0;
+                padding:0;
+                color:#3E0D5F;
+                font-size:1.25rem;
+                line-height:1.35;
+                font-weight:750;
+            "
+        >
+            3. Definition of Medical Records
+        </h2>
+
+        <p
+            style="
+                max-width:1450px;
+                margin:0;
+                padding:0;
+                color:#555555;
+                font-size:0.92rem;
+                line-height:1.65;
+            "
+        >
+            Medical records include any documentation related
+            to patient health care, including but not limited to
+            medical history, diagnosis, treatment plans, test
+            results, and other pertinent health information.
+        </p>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         4. RECORD MAINTENANCE
+    ====================================================== -->
+
+    <section
+        style="
+            margin:0 0 30px 0;
+            padding:0;
+        "
+    >
+
+        <h2
+            style="
+                margin:0 0 10px 0;
+                padding:0;
+                color:#3E0D5F;
+                font-size:1.25rem;
+                line-height:1.35;
+                font-weight:750;
+            "
+        >
+            4. Record Maintenance
+        </h2>
+
+        <ul
+            style="
+                max-width:1450px;
+                margin:0;
+                padding-left:22px;
+                color:#555555;
+                font-size:0.92rem;
+                line-height:1.65;
+            "
+        >
+
+            <li>
+                All medical records will be maintained in a secure
+                environment, either physically or electronically,
+                ensuring that unauthorized access is prevented.
+            </li>
+
+            <li>
+                Records will be kept for a minimum of
+                <strong>10 years</strong>
+                after the last date of service in accordance with
+                Illinois state law.
+            </li>
+
+        </ul>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         5. ACCESS TO MEDICAL RECORDS
+    ====================================================== -->
+
+    <section
+        style="
+            margin:0 0 30px 0;
+            padding:0;
+        "
+    >
+
+        <h2
+            style="
+                margin:0 0 10px 0;
+                padding:0;
+                color:#3E0D5F;
+                font-size:1.25rem;
+                line-height:1.35;
+                font-weight:750;
+            "
+        >
+            5. Access to Medical Records
+        </h2>
+
+        <ul
+            style="
+                max-width:1450px;
+                margin:0;
+                padding-left:22px;
+                color:#555555;
+                font-size:0.92rem;
+                line-height:1.65;
+            "
+        >
+
+            <li>
+                Patients have the right to access their own
+                medical records upon request, and such requests
+                must be made in writing.
+            </li>
+
+            <li>
+                Authorized personnel within ReNew You Health &amp;
+                Wellness may access medical records for treatment,
+                payment, and healthcare operations.
+            </li>
+
+        </ul>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         6. RELEASE OF INFORMATION
+    ====================================================== -->
+
+    <section
+        style="
+            margin:0 0 30px 0;
+            padding:0;
+        "
+    >
+
+        <h2
+            style="
+                margin:0 0 10px 0;
+                padding:0;
+                color:#3E0D5F;
+                font-size:1.25rem;
+                line-height:1.35;
+                font-weight:750;
+            "
+        >
+            6. Release of Information
+        </h2>
+
+        <ul
+            style="
+                max-width:1450px;
+                margin:0;
+                padding-left:22px;
+                color:#555555;
+                font-size:0.92rem;
+                line-height:1.65;
+            "
+        >
+
+            <li>
+                Medical records may be released to third parties
+                only with written consent from the patient, except
+                as required by law, including subpoenas or court orders.
+            </li>
+
+            <li>
+                There may be associated fees for the copying and
+                transmission of medical records as allowed by
+                Illinois law.
+            </li>
+
+        </ul>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         7. CONFIDENTIALITY AND SECURITY
+    ====================================================== -->
+
+    <section
+        style="
+            margin:0 0 30px 0;
+            padding:0;
+        "
+    >
+
+        <h2
+            style="
+                margin:0 0 10px 0;
+                padding:0;
+                color:#3E0D5F;
+                font-size:1.25rem;
+                line-height:1.35;
+                font-weight:750;
+            "
+        >
+            7. Confidentiality and Security
+        </h2>
+
+        <ul
+            style="
+                max-width:1450px;
+                margin:0;
+                padding-left:22px;
+                color:#555555;
+                font-size:0.92rem;
+                line-height:1.65;
+            "
+        >
+
+            <li>
+                All staff members are required to uphold patient
+                confidentiality and are trained on HIPAA regulations
+                and this policy.
+            </li>
+
+            <li>
+                Any breaches of confidentiality or unauthorized
+                access will be subject to disciplinary action.
+            </li>
+
+        </ul>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         8. CHANGES TO POLICY
+    ====================================================== -->
+
+    <section
+        style="
+            margin:0 0 30px 0;
+            padding:0;
+        "
+    >
+
+        <h2
+            style="
+                margin:0 0 10px 0;
+                padding:0;
+                color:#3E0D5F;
+                font-size:1.25rem;
+                line-height:1.35;
+                font-weight:750;
+            "
+        >
+            8. Changes to Policy
+        </h2>
+
+        <p
+            style="
+                max-width:1450px;
+                margin:0;
+                padding:0;
+                color:#555555;
+                font-size:0.92rem;
+                line-height:1.65;
+            "
+        >
+            ReNew You Health &amp; Wellness reserves the right
+            to amend this policy as necessary to ensure compliance
+            with current laws and regulations. Any updates will be
+            communicated appropriately.
+        </p>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         9. CONTACT INFORMATION
+    ====================================================== -->
+
+    <section
+        style="
+            margin:0 0 30px 0;
+            padding:0;
+        "
+    >
+
+        <h2
+            style="
+                margin:0 0 10px 0;
+                padding:0;
+                color:#3E0D5F;
+                font-size:1.25rem;
+                line-height:1.35;
+                font-weight:750;
+            "
+        >
+            9. Contact Information
+        </h2>
+
+        <p
+            style="
+                margin:0;
+                padding:0;
+                color:#555555;
+                font-size:0.92rem;
+                line-height:1.7;
+            "
+        >
+            For questions regarding this policy or to request
+            access to medical records, please contact us:
+        </p>
+
+
+        <p
+            style="
+                margin:12px 0 0 0;
+                padding:0;
+                color:#555555;
+                font-size:0.92rem;
+                line-height:1.7;
+            "
+        >
+
+            <strong style="color:#3E0D5F;">
+                ReNew You Health &amp; Wellness
+            </strong>
+
+            <br>
+
+            500 Ashland Ave., Suite 101
+
+            <br>
+
+            Chicago Heights, IL 60411
+
+            <br>
+
+            Phone:
+            <a
+                href="tel:7083292155"
+                style="
+                    color:#3E0D5F;
+                    text-decoration:none;
+                    font-weight:600;
+                "
+            >
+                708-329-2155
+            </a>
+
+            <br>
+
+            Email:
+            <a
+                href="mailto:info@renewyouhealthwellness.com"
+                style="
+                    color:#3E0D5F;
+                    text-decoration:none;
+                    font-weight:600;
+                "
+            >
+                info@renewyouhealthwellness.com
+            </a>
+
+        </p>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         ACKNOWLEDGMENT
+    ====================================================== -->
+
+    <section
+        style="
+            margin:0;
+            padding:0;
+        "
+    >
+
+        <h2
+            style="
+                margin:0 0 10px 0;
+                padding:0;
+                color:#3E0D5F;
+                font-size:1.25rem;
+                line-height:1.35;
+                font-weight:750;
+            "
+        >
+            Acknowledgment
+        </h2>
+
+        <p
+            style="
+                max-width:1450px;
+                margin:0;
+                padding:0;
+                color:#555555;
+                font-size:0.92rem;
+                line-height:1.65;
+            "
+        >
+            By receiving care at ReNew You Health &amp; Wellness,
+            you acknowledge that you have read and understood the
+            Medical Records Policy.
+        </p>
+
+    </section>
+
+
+</main>
+
+
+
+<!-- =========================================================
+     DYNAMIC FOOTER
+========================================================= -->
+
+<div id="footer-target"></div>
+
+
+
+<!-- =========================================================
+     LAYOUT SCRIPTS
+========================================================= -->
+
+<script src="assets/js/navigation.js"></script>
+
+<script src="assets/js/footer.js"></script>
+
+
+</body>
+</html>
