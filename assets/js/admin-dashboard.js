@@ -618,10 +618,6 @@ const CLINIC_OPEN_MINUTES = 8 * 60;
 
 const CLINIC_CLOSE_MINUTES = 17 * 60;
 
-    /* =========================================================
-       AUTHENTICATION GUARD
-    ========================================================= */
-
   /* =========================================================
    AUTHENTICATION GUARD
 ========================================================= */
@@ -1969,51 +1965,56 @@ function renderDashboardStructure() {
                  PAGE NAVIGATION
             ================================================= -->
 
-            <nav class="admin-page-nav">
+ <nav class="admin-page-nav">
 
-  <button
-    class="admin-page-tab active"
-    data-page="dashboardPage"
->
-    📊 Dashboard
-</button>
+    <button
+        class="admin-page-tab active"
+        data-page="dashboardPage"
+    >
+        📊 Dashboard
+    </button>
 
-<button
-    class="admin-page-tab"
-    data-page="appointmentsPage"
->
-    📋 Appointments
-</button>
 
-<button
-    class="admin-page-tab"
-    data-page="mailingListPage"
->
-    📧 Mailing List
-</button>
+    <button
+        class="admin-page-tab"
+        data-page="appointmentsPage"
+    >
+        📋 Appointments
+    </button>
 
-<button
-    class="admin-page-tab"
-    data-page="wellnessOffersPage"
->
-    🎟️ Wellness Offers
-</button>
 
-<button
-    class="admin-page-tab"
-    data-page="schedulePage"
->
-    📅 Schedule
-</button>
+    <button
+        class="admin-page-tab"
+        data-page="mailingListPage"
+    >
+        📧 Mailing List
+    </button>
 
-<button
-    class="admin-page-tab"
-    data-page="settingsPage"
->
-    ⚙️ Settings
-</button>
 
-            </nav>
+    <button
+        class="admin-page-tab"
+        data-page="wellnessOffersPage"
+    >
+        🎟️ Wellness Offers
+    </button>
+
+
+    <button
+        class="admin-page-tab"
+        data-page="schedulePage"
+    >
+        📅 Schedule
+    </button>
+
+
+    <button
+        class="admin-page-tab"
+        data-page="settingsPage"
+    >
+        ⚙️ Settings
+    </button>
+
+</nav>
 
             <!-- =================================================
                  DASHBOARD PAGE
@@ -2362,11 +2363,145 @@ function renderDashboardStructure() {
     class="admin-page"
 >
 
+    <!-- =================================================
+         WELLNESS OFFER METRICS
+    ================================================== -->
+
+    <div
+        class="dash-metrics-grid"
+        style="
+            margin-bottom:18px;
+        "
+    >
+
+        <!-- TOTAL -->
+
+        <div
+            style="
+                background:#fff;
+                padding:18px;
+                border-radius:14px;
+                border:1px solid rgba(138,52,159,.06);
+                box-shadow:0 4px 15px rgba(0,0,0,.03);
+            "
+        >
+
+            <span
+                style="
+                    display:block;
+                    font-size:.72rem;
+                    font-weight:700;
+                    color:#666;
+                    text-transform:uppercase;
+                "
+            >
+                Total Codes
+            </span>
+
+
+            <h3
+                id="wellnessOfferTotalCount"
+                style="
+                    margin:6px 0 0;
+                    font-size:1.7rem;
+                    color:var(--purple-primary);
+                    font-weight:800;
+                "
+            >
+                0
+            </h3>
+
+        </div>
+
+
+        <!-- UNUSED -->
+
+        <div
+            style="
+                background:#fff;
+                padding:18px;
+                border-radius:14px;
+                border:1px solid rgba(79,148,12,.08);
+                box-shadow:0 4px 15px rgba(0,0,0,.03);
+            "
+        >
+
+            <span
+                style="
+                    display:block;
+                    font-size:.72rem;
+                    font-weight:700;
+                    color:#666;
+                    text-transform:uppercase;
+                "
+            >
+                Unredeemed
+            </span>
+
+
+            <h3
+                id="wellnessOfferUnusedCount"
+                style="
+                    margin:6px 0 0;
+                    font-size:1.7rem;
+                    color:#4f940c;
+                    font-weight:800;
+                "
+            >
+                0
+            </h3>
+
+        </div>
+
+
+        <!-- REDEEMED -->
+
+        <div
+            style="
+                background:#fff;
+                padding:18px;
+                border-radius:14px;
+                border:1px solid rgba(217,4,41,.08);
+                box-shadow:0 4px 15px rgba(0,0,0,.03);
+            "
+        >
+
+            <span
+                style="
+                    display:block;
+                    font-size:.72rem;
+                    font-weight:700;
+                    color:#666;
+                    text-transform:uppercase;
+                "
+            >
+                Redeemed
+            </span>
+
+
+            <h3
+                id="wellnessOfferRedeemedCount"
+                style="
+                    margin:6px 0 0;
+                    font-size:1.7rem;
+                    color:#d90429;
+                    font-weight:800;
+                "
+            >
+                0
+            </h3>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         OFFER CODES CARD
+    ================================================== -->
+
     <div
         class="admin-card"
-        style="
-            margin-bottom:20px;
-        "
     >
 
         <div
@@ -2376,6 +2511,7 @@ function renderDashboardStructure() {
                 align-items:center;
                 gap:15px;
                 flex-wrap:wrap;
+                margin-bottom:18px;
             "
         >
 
@@ -2384,171 +2520,90 @@ function renderDashboardStructure() {
                 <h2
                     style="
                         margin:0 0 6px;
-                        font-size:1.25rem;
+                        font-size:1.2rem;
                     "
                 >
                     Wellness Offer Codes
                 </h2>
 
+
                 <p
                     style="
                         margin:0;
                         color:#666;
-                        font-size:.88rem;
+                        font-size:.85rem;
                     "
                 >
-                    Manage discount codes generated by
-                    the 10% GLP-1 Vitamin Injection offer.
+                    Manage 10% GLP-1 Vitamin Injection
+                    discount codes and redemptions.
                 </p>
 
             </div>
 
 
             <button
+                type="button"
                 id="refreshWellnessOffersBtn"
-                class="schedule-action-btn schedule-primary-btn"
+                style="
+                    background:#fff;
+                    color:var(--purple-primary);
+                    border:1px solid var(--purple-primary);
+                    padding:10px 16px;
+                    border-radius:10px;
+                    font-weight:700;
+                    cursor:pointer;
+                "
             >
-                ↻ Refresh Codes
+                ↻ Refresh
             </button>
 
         </div>
 
-    </div>
 
-
-    <!-- METRICS -->
-
-    <div
-        class="dash-metrics-grid"
-        style="
-            margin-bottom:20px;
-        "
-    >
-
-        <div class="admin-card">
-
-            <div
-                style="
-                    color:#777;
-                    font-size:.78rem;
-                    font-weight:700;
-                    margin-bottom:7px;
-                "
-            >
-                TOTAL CODES
-            </div>
-
-            <div
-                id="wellnessTotalCount"
-                style="
-                    color:var(--purple-primary);
-                    font-size:2rem;
-                    font-weight:900;
-                "
-            >
-                0
-            </div>
-
-        </div>
-
-
-        <div class="admin-card">
-
-            <div
-                style="
-                    color:#777;
-                    font-size:.78rem;
-                    font-weight:700;
-                    margin-bottom:7px;
-                "
-            >
-                UNUSED CODES
-            </div>
-
-            <div
-                id="wellnessUnusedCount"
-                style="
-                    color:#4f940c;
-                    font-size:2rem;
-                    font-weight:900;
-                "
-            >
-                0
-            </div>
-
-        </div>
-
-
-        <div class="admin-card">
-
-            <div
-                style="
-                    color:#777;
-                    font-size:.78rem;
-                    font-weight:700;
-                    margin-bottom:7px;
-                "
-            >
-                REDEEMED
-            </div>
-
-            <div
-                id="wellnessRedeemedCount"
-                style="
-                    color:#d90429;
-                    font-size:2rem;
-                    font-weight:900;
-                "
-            >
-                0
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- SEARCH -->
-
-    <div
-        class="dash-control-card"
-        style="
-            margin-bottom:15px;
-        "
-    >
-
-        <input
-            type="search"
-            id="wellnessOfferSearch"
-            placeholder="Search email or discount code..."
-            style="
-                width:100%;
-                box-sizing:border-box;
-                padding:13px 15px;
-                border:1px solid #ddd;
-                border-radius:10px;
-                outline:none;
-                font-size:.9rem;
-            "
-        />
-
-    </div>
-
-
-    <!-- DATA -->
-
-    <div
-        id="wellnessOffersTarget"
-    >
+        <!-- SEARCH -->
 
         <div
             style="
-                text-align:center;
-                padding:40px;
-                color:#666;
+                position:relative;
+                margin-bottom:18px;
             "
         >
-            Loading wellness offer codes...
+
+            <input
+                type="text"
+                id="wellnessOfferSearch"
+                placeholder="Search email or discount code..."
+                style="
+                    width:100%;
+                    box-sizing:border-box;
+                    padding:12px 15px;
+                    border-radius:10px;
+                    border:1px solid #ddd;
+                    background:#fafafa;
+                    font-size:.9rem;
+                    outline:none;
+                "
+            />
+
+        </div>
+
+
+        <!-- OFFER LIST -->
+
+        <div
+            id="wellnessOffersTarget"
+        >
+
+            <div
+                style="
+                    text-align:center;
+                    color:#666;
+                    padding:35px;
+                "
+            >
+                Loading wellness offer codes...
+            </div>
+
         </div>
 
     </div>
@@ -4381,7 +4436,7 @@ async function fetchWellnessOfferCodes() {
 
         calculateWellnessOfferMetrics();
 
-        populateWellnessOfferCodes();
+        populateWellnessOffers();
 
 
     } catch (error) {
@@ -6045,7 +6100,7 @@ if (wellnessOfferSearch) {
                     .trim();
 
 
-            populateWellnessOfferCodes();
+            populateWellnessOffers();
 
         }
     );

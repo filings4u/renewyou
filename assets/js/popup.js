@@ -393,7 +393,7 @@ function createRenewYouOfferPopup(
                     >
                         Save on Your
                         <br>
-                        GLP-1 Vitamin Injection
+                        GLP-1 or Vitamin Injection
                     </h2>
 
                     <p class="renew-you-offer-subtitle">
