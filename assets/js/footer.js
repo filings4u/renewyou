@@ -1400,7 +1400,7 @@ function renderFooterModule() {
                         <div class="renew-footer-social">
 
                             <a
-                                href="#"
+                                href="https://www.facebook.com/Renewyouhealthwellness/"
                                 target="_blank"
                                 rel="noopener noreferrer"
                             >
@@ -1415,7 +1415,7 @@ function renderFooterModule() {
 
 
                             <a
-                                href="#"
+                                href="https://www.instagram.com/renewyouhealthwellness"
                                 target="_blank"
                                 rel="noopener noreferrer"
                             >
