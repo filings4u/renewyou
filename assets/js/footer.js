@@ -42,32 +42,34 @@ function renderFooterModule() {
                 /* =====================================================
                    FOOTER BASE
                 ===================================================== */
+.renew-footer {
+    background:
+        linear-gradient(
+            135deg,
+            #3E0D5F 0%,
+            #4B176B 45%,
+            #2F0848 100%
+        ) !important;
 
-                .renew-footer {
+    color:
+        rgba(255,255,255,0.85);
 
-                    background-color:
-                        var(--purple-primary, #3E0D5F);
+    width:
+        100%;
 
-                    color:
-                        rgba(255,255,255,0.85);
+    box-sizing:
+        border-box;
 
-                    width:
-                        100%;
+    padding:
+        78px 20px 18px 20px;
 
-                    box-sizing:
-                        border-box;
-
-                    padding:
-                        78px 20px 18px 20px;
-
-                    font-family:
-                        system-ui,
-                        -apple-system,
-                        BlinkMacSystemFont,
-                        "Segoe UI",
-                        sans-serif;
-
-                }
+    font-family:
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+}
 
 
                 .renew-footer *,
@@ -1277,17 +1279,12 @@ function renderFooterModule() {
                                 </span>
 
                                 <span>
-                                    Sun: Closed
+                                    Sundays & Holidays: Closed
                                 </span>
 
                             </div>
 
                         </div>
-
-
-                        <p class="renew-footer-holiday">
-                            *Closed on holidays
-                        </p>
 
                     </div>
 
@@ -1466,20 +1463,7 @@ function renderFooterModule() {
 
             <div class="renew-footer-disclaimer">
 
-                 <p
-        style="
-            margin:0;
-            padding:0;
-            width:100%;
-            color:rgba(255,255,255,0.5);
-            font-size:0.78rem;
-            line-height:1.5;
-            white-space:nowrap;
-        "
-    >
-        ReNew You Health & Wellness provides healthcare services in accordance with applicable laws and regulations. Please review our patient notices, policies, and terms for additional information.
-    </p>
-
+  
             </div>
 
 
