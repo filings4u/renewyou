@@ -1276,6 +1276,631 @@ function renderDashboardStructure() {
 
             }
 
+            /* =========================================================
+   MOBILE RESPONSIVE ADMIN DASHBOARD
+   Visual/layout only — no functionality changes
+========================================================= */
+
+/* ---------------------------------------------------------
+   TABLET / SMALL LAPTOP
+--------------------------------------------------------- */
+
+@media (max-width: 1100px) {
+
+    .dash-outer-wrap {
+        width: 100%;
+        max-width: 100%;
+        padding: 24px 16px;
+    }
+
+    .schedule-layout {
+        grid-template-columns: 280px 1fr;
+        gap: 18px;
+    }
+
+    .schedule-time-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+}
+
+
+/* ---------------------------------------------------------
+   TABLET
+--------------------------------------------------------- */
+
+@media (max-width: 900px) {
+
+    .dash-header-row {
+        align-items: flex-start;
+    }
+
+    .dash-title-block {
+        flex: 1 1 100%;
+    }
+
+    .dash-header-row > div:last-child {
+        width: 100%;
+    }
+
+    .dash-header-row > div:last-child button {
+        flex: 1;
+        min-width: 140px;
+    }
+
+    .admin-settings-panel {
+        grid-template-columns: 1fr;
+    }
+
+    .schedule-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .schedule-calendar-panel,
+    .schedule-times-panel {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+}
+
+
+/* ---------------------------------------------------------
+   MOBILE
+--------------------------------------------------------- */
+
+@media (max-width: 768px) {
+
+    html,
+    body {
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    .dash-outer-wrap {
+        width: 100%;
+        max-width: 100%;
+        padding: 18px 12px 30px;
+        box-sizing: border-box;
+    }
+
+
+    /* =====================================================
+       HEADER
+    ===================================================== */
+
+    .dash-header-row {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+        margin-bottom: 16px;
+    }
+
+    .dash-title-block h1 {
+        font-size: 1.55rem;
+        line-height: 1.2;
+    }
+
+    .dash-title-block p {
+        font-size: 0.82rem;
+        line-height: 1.45;
+        margin-top: 5px;
+    }
+
+    .dash-header-row > div:last-child {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px !important;
+        width: 100%;
+    }
+
+    .dash-header-row > div:last-child button {
+        width: 100%;
+        min-width: 0;
+        padding: 11px 8px !important;
+        font-size: 0.78rem !important;
+        white-space: nowrap;
+    }
+
+
+    /* =====================================================
+       NAVIGATION
+    ===================================================== */
+
+    .admin-page-nav {
+        width: 100%;
+        box-sizing: border-box;
+        margin-bottom: 18px;
+        padding: 5px;
+
+        display: flex;
+        gap: 4px;
+
+        overflow-x: auto;
+        overflow-y: hidden;
+
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .admin-page-nav::-webkit-scrollbar {
+        display: none;
+    }
+
+    .admin-page-tab {
+        flex: 0 0 auto;
+
+        padding: 10px 13px;
+
+        font-size: 0.76rem;
+        border-radius: 9px;
+
+        min-height: 40px;
+    }
+
+
+    /* =====================================================
+       METRICS
+    ===================================================== */
+
+    .dash-metrics-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 9px;
+        margin-bottom: 18px;
+    }
+
+    .dash-metrics-grid > div {
+        min-width: 0;
+        padding: 13px !important;
+    }
+
+    .dash-metrics-grid span {
+        font-size: 0.64rem !important;
+        line-height: 1.25;
+    }
+
+    .dash-metrics-grid h3 {
+        font-size: 1.35rem !important;
+        margin-top: 5px !important;
+    }
+
+
+    /* =====================================================
+       GENERAL CARDS
+    ===================================================== */
+
+    .admin-card {
+        padding: 17px;
+        border-radius: 14px;
+        margin-bottom: 15px;
+    }
+
+    .admin-card h2 {
+        font-size: 1.05rem !important;
+    }
+
+    .admin-card p {
+        font-size: 0.82rem !important;
+    }
+
+
+    /* =====================================================
+       APPOINTMENT FILTERS
+    ===================================================== */
+
+    .dash-control-card {
+        padding: 14px;
+        border-radius: 14px;
+        gap: 12px;
+    }
+
+    .dash-tab-row {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 7px;
+    }
+
+    .filter-tab {
+        width: 100%;
+        min-height: 40px;
+        padding: 9px 7px;
+
+        font-size: 0.72rem;
+        line-height: 1.2;
+    }
+
+    #dashboardSearch {
+        min-height: 44px;
+        padding-left: 40px !important;
+        font-size: 0.9rem !important;
+    }
+
+
+    /* =====================================================
+       APPOINTMENT CARDS
+    ===================================================== */
+
+    #dataListTarget {
+        gap: 10px !important;
+    }
+
+    #dataListTarget > div {
+        padding: 15px !important;
+        border-radius: 13px !important;
+
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 12px !important;
+    }
+
+    #dataListTarget > div > div {
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+
+    #dataListTarget h3 {
+        font-size: 1rem !important;
+        line-height: 1.3;
+        word-break: break-word;
+    }
+
+    #dataListTarget span {
+        word-break: break-word;
+    }
+
+
+    /* =====================================================
+       APPOINTMENT SCHEDULE BOX
+    ===================================================== */
+
+    #dataListTarget > div > div:last-child {
+        min-width: 0 !important;
+        width: 100% !important;
+
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+
+        padding: 11px !important;
+    }
+
+    #dataListTarget > div > div:last-child strong {
+        font-size: 0.82rem !important;
+    }
+
+    #dataListTarget > div > div:last-child span {
+        font-size: 0.78rem !important;
+    }
+
+
+    /* =====================================================
+       SETTINGS
+    ===================================================== */
+
+    .admin-settings-panel {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .setting-inner-card {
+        padding: 17px;
+        border-radius: 14px;
+    }
+
+    .setting-inner-card h3 {
+        font-size: 1rem !important;
+        line-height: 1.3;
+    }
+
+    .setting-inner-card p {
+        font-size: 0.8rem !important;
+        line-height: 1.5;
+    }
+
+    .setting-inner-card > div {
+        flex-wrap: wrap;
+    }
+
+    #bufferSettingSelect {
+        min-height: 44px;
+        font-size: 0.85rem;
+    }
+
+    #saveBufferBtn {
+        min-height: 44px;
+        padding-left: 18px !important;
+        padding-right: 18px !important;
+    }
+
+
+    /* =====================================================
+       SCHEDULE MANAGER
+    ===================================================== */
+
+    .schedule-manager-card {
+        padding: 12px;
+        border-radius: 15px;
+        margin-bottom: 15px;
+    }
+
+    .schedule-layout {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .schedule-calendar-panel,
+    .schedule-times-panel {
+        padding: 14px;
+        border-radius: 13px;
+    }
+
+
+    /* =====================================================
+       DATE PICKER
+    ===================================================== */
+
+    .schedule-date-input {
+        width: 100%;
+        min-height: 46px;
+        padding: 11px;
+        font-size: 0.95rem;
+    }
+
+    #todayScheduleBtn,
+    #toggleWholeDateBtn {
+        min-height: 44px;
+        font-size: 0.78rem;
+    }
+
+
+    /* =====================================================
+       SCHEDULE HEADER
+    ===================================================== */
+
+    .block-date-banner {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .block-date-banner > div:last-child {
+        width: 100%;
+        text-align: left !important;
+
+        display: flex;
+        gap: 18px;
+    }
+
+
+    /* =====================================================
+       TIME GRID
+    ===================================================== */
+
+    .schedule-time-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+        margin-top: 13px;
+    }
+
+    .schedule-time-btn {
+        min-height: 58px;
+
+        padding: 9px 5px;
+
+        border-radius: 10px;
+
+        font-size: 0.78rem;
+        line-height: 1.2;
+    }
+
+    .schedule-time-status {
+        font-size: 0.58rem;
+        margin-top: 4px;
+    }
+
+
+    /* =====================================================
+       SCHEDULE LEGEND
+    ===================================================== */
+
+    .schedule-legend {
+        gap: 10px 16px;
+        margin-top: 13px;
+        padding-top: 11px;
+    }
+
+    .schedule-legend-item {
+        font-size: 0.7rem;
+    }
+
+    .schedule-legend-dot {
+        width: 9px;
+        height: 9px;
+    }
+
+
+    /* =====================================================
+       MOBILE TOUCH TARGETS
+    ===================================================== */
+
+    button,
+    select,
+    input {
+        touch-action: manipulation;
+    }
+
+    button {
+        -webkit-tap-highlight-color: transparent;
+    }
+
+}
+
+
+/* ---------------------------------------------------------
+   SMALL PHONES
+--------------------------------------------------------- */
+
+@media (max-width: 480px) {
+
+    .dash-outer-wrap {
+        padding: 14px 9px 25px;
+    }
+
+
+    /* =====================================================
+       HEADER
+    ===================================================== */
+
+    .dash-title-block h1 {
+        font-size: 1.35rem;
+    }
+
+    .dash-title-block p {
+        font-size: 0.76rem;
+    }
+
+    .dash-header-row > div:last-child {
+        grid-template-columns: 1fr;
+    }
+
+    .dash-header-row > div:last-child button {
+        min-height: 43px;
+    }
+
+
+    /* =====================================================
+       NAV
+    ===================================================== */
+
+    .admin-page-nav {
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    .admin-page-tab {
+        padding: 9px 11px;
+        font-size: 0.7rem;
+    }
+
+
+    /* =====================================================
+       METRICS
+    ===================================================== */
+
+    .dash-metrics-grid {
+        gap: 7px;
+    }
+
+    .dash-metrics-grid > div {
+        padding: 11px !important;
+    }
+
+    .dash-metrics-grid h3 {
+        font-size: 1.2rem !important;
+    }
+
+
+    /* =====================================================
+       FILTERS
+    ===================================================== */
+
+    .dash-tab-row {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .filter-tab {
+        min-height: 42px;
+        font-size: 0.68rem;
+        padding: 8px 5px;
+    }
+
+
+    /* =====================================================
+       SCHEDULE
+    ===================================================== */
+
+    .schedule-calendar-panel,
+    .schedule-times-panel {
+        padding: 12px;
+    }
+
+    .schedule-time-grid {
+        gap: 6px;
+    }
+
+    .schedule-time-btn {
+        min-height: 55px;
+        font-size: 0.72rem;
+    }
+
+    .schedule-time-status {
+        font-size: 0.54rem;
+    }
+
+
+    /* =====================================================
+       SETTINGS
+    ===================================================== */
+
+    .setting-inner-card {
+        padding: 14px;
+    }
+
+    .setting-inner-card > div {
+        display: flex !important;
+        flex-direction: column;
+        align-items: stretch !important;
+    }
+
+    #bufferSettingSelect,
+    #saveBufferBtn {
+        width: 100%;
+    }
+
+
+    /* =====================================================
+       APPOINTMENT CARDS
+    ===================================================== */
+
+    #dataListTarget > div > div:last-child {
+        display: block;
+    }
+
+}
+
+
+/* ---------------------------------------------------------
+   VERY SMALL PHONES
+--------------------------------------------------------- */
+
+@media (max-width: 360px) {
+
+    .dash-outer-wrap {
+        padding-left: 7px;
+        padding-right: 7px;
+    }
+
+    .admin-page-tab {
+        padding-left: 9px;
+        padding-right: 9px;
+    }
+
+    .dash-metrics-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .schedule-time-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .schedule-time-btn {
+        font-size: 0.68rem;
+    }
+
+}
+
         </style>
 
         <div class="dash-outer-wrap">
