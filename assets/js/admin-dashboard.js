@@ -2202,6 +2202,8 @@ function renderDashboardStructure() {
 
             </section>
 
+            
+
             <!-- =================================================
      MAILING LIST PAGE
 ================================================= -->
@@ -2348,6 +2350,8 @@ function renderDashboardStructure() {
     </div>
 
 </section>
+
+
 
 <!-- =================================================
      WELLNESS OFFERS PAGE
@@ -3075,6 +3079,51 @@ if (exportMailingListButton) {
         exportMailingListToCsv
     );
 }
+
+const wellnessOfferSearch =
+    document.getElementById(
+        'wellnessOfferSearch'
+    );
+
+
+if (
+    wellnessOfferSearch
+) {
+
+    wellnessOfferSearch.addEventListener(
+        'input',
+        event => {
+
+            wellnessOfferSearchQuery =
+                event.target.value
+                    .toLowerCase()
+                    .trim();
+
+
+            populateWellnessOffers();
+
+        }
+    );
+
+}
+
+
+const refreshWellnessOffersButton =
+    document.getElementById(
+        'refreshWellnessOffersBtn'
+    );
+
+
+if (
+    refreshWellnessOffersButton
+) {
+
+    refreshWellnessOffersButton.addEventListener(
+        'click',
+        fetchWellnessOfferCodes
+    );
+
+}
     }
 
     /* =========================================================
@@ -3420,7 +3469,845 @@ async function fetchAppointments() {
     }
 }
 
+/* =========================================================
+   POPULATE WELLNESS OFFERS
+========================================================= */
 
+function populateWellnessOffers() {
+
+    const target =
+        document.getElementById(
+            'wellnessOffersTarget'
+        );
+
+
+    if (!target) {
+
+        return;
+
+    }
+
+
+    const search =
+        wellnessOfferSearchQuery
+            .toLowerCase()
+            .trim();
+
+
+    const filtered =
+        wellnessOfferCodes.filter(
+            offer => {
+
+                const email =
+                    String(
+                        offer.email || ''
+                    )
+                    .toLowerCase();
+
+
+                const code =
+                    String(
+                        offer.code || ''
+                    )
+                    .toLowerCase();
+
+
+                return (
+                    !search ||
+                    email.includes(search) ||
+                    code.includes(search)
+                );
+
+            }
+        );
+
+
+    if (
+        filtered.length === 0
+    ) {
+
+        target.innerHTML = `
+
+            <div
+                style="
+                    background:#fff;
+                    border:1px solid rgba(0,0,0,.04);
+                    text-align:center;
+                    padding:40px 20px;
+                    color:#666;
+                    border-radius:12px;
+                "
+            >
+
+                ${
+                    wellnessOfferCodes.length === 0
+                        ? 'No wellness offer codes yet.'
+                        : 'No offer codes match your search.'
+                }
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    target.innerHTML =
+        filtered.map(
+            offer => {
+
+                const created =
+                    offer.created_at
+                        ? new Date(
+                            offer.created_at
+                        ).toLocaleString(
+                            'en-US'
+                        )
+                        : 'Unknown';
+
+
+                const redeemedAt =
+                    offer.redeemed_at
+                        ? new Date(
+                            offer.redeemed_at
+                        ).toLocaleString(
+                            'en-US'
+                        )
+                        : '';
+
+
+                const isRedeemed =
+                    offer.is_redeemed === true;
+
+
+                return `
+
+                    <div
+                        style="
+                            background:#fff;
+                            border:1px solid rgba(138,52,159,.06);
+                            border-radius:14px;
+                            padding:17px;
+                            display:flex;
+                            justify-content:space-between;
+                            align-items:center;
+                            gap:18px;
+                            flex-wrap:wrap;
+                            box-shadow:
+                                0 4px 15px
+                                rgba(62,13,95,.02);
+                        "
+                    >
+
+                        <div
+                            style="
+                                display:flex;
+                                align-items:center;
+                                gap:13px;
+                                min-width:0;
+                                flex:1;
+                            "
+                        >
+
+                            <div
+                                style="
+                                    width:44px;
+                                    height:44px;
+                                    border-radius:50%;
+                                    background:
+                                        rgba(138,52,159,.08);
+                                    color:
+                                        var(--purple-primary);
+                                    display:flex;
+                                    align-items:center;
+                                    justify-content:center;
+                                    flex-shrink:0;
+                                "
+                            >
+                                🎟️
+                            </div>
+
+
+                            <div
+                                style="
+                                    min-width:0;
+                                "
+                            >
+
+                                <div
+                                    style="
+                                        color:
+                                            var(--purple-primary);
+                                        font-weight:800;
+                                        font-size:.92rem;
+                                        word-break:break-word;
+                                    "
+                                >
+                                    ${escapeHtml(
+                                        offer.email
+                                    )}
+                                </div>
+
+
+                                <div
+                                    style="
+                                        margin-top:4px;
+                                        font-size:.78rem;
+                                        color:#666;
+                                    "
+                                >
+                                    Code:
+                                    <strong
+                                        style="
+                                            color:
+                                                var(--purple-primary);
+                                            letter-spacing:1px;
+                                        "
+                                    >
+                                        ${escapeHtml(
+                                            offer.code
+                                        )}
+                                    </strong>
+                                </div>
+
+
+                                <div
+                                    style="
+                                        margin-top:3px;
+                                        font-size:.72rem;
+                                        color:#888;
+                                    "
+                                >
+                                    Created:
+                                    ${escapeHtml(
+                                        created
+                                    )}
+                                </div>
+
+
+                                ${
+                                    isRedeemed
+                                        ? `
+                                            <div
+                                                style="
+                                                    margin-top:4px;
+                                                    font-size:.72rem;
+                                                    color:#666;
+                                                "
+                                            >
+                                                Redeemed:
+                                                ${escapeHtml(
+                                                    redeemedAt
+                                                )}
+
+                                                ${
+                                                    offer.redeemed_location
+                                                        ? ` · ${escapeHtml(
+                                                            offer.redeemed_location
+                                                        )}`
+                                                        : ''
+                                                }
+
+                                            </div>
+                                        `
+                                        : ''
+                                }
+
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            style="
+                                display:flex;
+                                align-items:center;
+                                gap:10px;
+                                flex-wrap:wrap;
+                            "
+                        >
+
+                            ${
+                                isRedeemed
+
+                                    ? `
+
+                                        <span
+                                            style="
+                                                display:inline-flex;
+                                                align-items:center;
+                                                padding:8px 12px;
+                                                border-radius:20px;
+                                                background:#eef8e9;
+                                                color:#4f940c;
+                                                font-size:.72rem;
+                                                font-weight:800;
+                                            "
+                                        >
+                                            ✓ REDEEMED
+                                        </span>
+
+                                        <button
+                                            type="button"
+                                            class="wellness-undo-btn"
+                                            data-offer-id="${escapeHtml(
+                                                offer.id
+                                            )}"
+                                            style="
+                                                border:1px solid #ddd;
+                                                background:#fff;
+                                                color:#777;
+                                                padding:8px 12px;
+                                                border-radius:8px;
+                                                font-size:.72rem;
+                                                font-weight:700;
+                                                cursor:pointer;
+                                            "
+                                        >
+                                            Undo
+                                        </button>
+
+                                    `
+
+                                    : `
+
+                                        <button
+                                            type="button"
+                                            class="wellness-redeem-btn"
+                                            data-offer-id="${escapeHtml(
+                                                offer.id
+                                            )}"
+                                            style="
+                                                border:0;
+                                                background:
+                                                    linear-gradient(
+                                                        135deg,
+                                                        #8a349b,
+                                                        #6f2b82
+                                                    );
+                                                color:#fff;
+                                                padding:10px 17px;
+                                                border-radius:9px;
+                                                font-size:.75rem;
+                                                font-weight:800;
+                                                cursor:pointer;
+                                                box-shadow:
+                                                    0 5px 14px
+                                                    rgba(
+                                                        111,
+                                                        43,
+                                                        130,
+                                                        .18
+                                                    );
+                                            "
+                                        >
+                                            ✓ REDEEM
+                                        </button>
+
+                                    `
+
+                            }
+
+                        </div>
+
+                    </div>
+
+                `;
+
+            }
+        )
+        .join('');
+
+
+    bindWellnessOfferButtons();
+
+}
+
+/* =========================================================
+   WELLNESS OFFER BUTTONS
+========================================================= */
+
+function bindWellnessOfferButtons() {
+
+    const redeemButtons =
+        document.querySelectorAll(
+            '.wellness-redeem-btn'
+        );
+
+
+    redeemButtons.forEach(
+        button => {
+
+            button.addEventListener(
+                'click',
+                () => {
+
+                    const offerId =
+                        button.getAttribute(
+                            'data-offer-id'
+                        );
+
+
+                    openWellnessRedeemChoice(
+                        offerId
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+    const undoButtons =
+        document.querySelectorAll(
+            '.wellness-undo-btn'
+        );
+
+
+    undoButtons.forEach(
+        button => {
+
+            button.addEventListener(
+                'click',
+                () => {
+
+                    const offerId =
+                        button.getAttribute(
+                            'data-offer-id'
+                        );
+
+
+                    undoWellnessRedemption(
+                        offerId
+                    );
+
+                }
+            );
+
+        }
+    );
+
+}
+
+function openWellnessRedeemChoice(
+    offerId
+) {
+
+    const offer =
+        wellnessOfferCodes.find(
+            item =>
+                item.id === offerId
+        );
+
+
+    if (!offer) {
+
+        return;
+
+    }
+
+
+    const overlay =
+        document.createElement(
+            'div'
+        );
+
+
+    overlay.id =
+        'wellnessRedeemChoiceModal';
+
+
+    overlay.style.cssText = `
+        position:fixed;
+        inset:0;
+        z-index:1000000;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        padding:20px;
+        background:rgba(35,17,43,.65);
+        backdrop-filter:blur(6px);
+    `;
+
+
+    overlay.innerHTML = `
+
+        <div
+            style="
+                width:min(100%,430px);
+                background:#fff;
+                border-radius:18px;
+                padding:28px;
+                box-shadow:
+                    0 25px 80px
+                    rgba(0,0,0,.25);
+                box-sizing:border-box;
+            "
+        >
+
+            <div
+                style="
+                    width:55px;
+                    height:55px;
+                    margin:0 auto 15px;
+                    border-radius:50%;
+                    background:
+                        rgba(138,52,159,.1);
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    font-size:25px;
+                "
+            >
+                🎟️
+            </div>
+
+
+            <h3
+                style="
+                    margin:0 0 8px;
+                    text-align:center;
+                    color:#4f176d;
+                    font-size:1.2rem;
+                "
+            >
+                Redeem Wellness Offer
+            </h3>
+
+
+            <p
+                style="
+                    margin:0 0 5px;
+                    text-align:center;
+                    color:#555;
+                    font-size:.88rem;
+                "
+            >
+                ${escapeHtml(
+                    offer.email
+                )}
+            </p>
+
+
+            <p
+                style="
+                    margin:0 0 22px;
+                    text-align:center;
+                    color:#777;
+                    font-size:.78rem;
+                "
+            >
+                Code:
+                <strong>
+                    ${escapeHtml(
+                        offer.code
+                    )}
+                </strong>
+            </p>
+
+
+            <p
+                style="
+                    margin:0 0 10px;
+                    text-align:center;
+                    color:#444;
+                    font-weight:700;
+                    font-size:.82rem;
+                "
+            >
+                How was this offer redeemed?
+            </p>
+
+
+            <div
+                style="
+                    display:grid;
+                    grid-template-columns:1fr 1fr;
+                    gap:10px;
+                "
+            >
+
+                <button
+                    type="button"
+                    id="redeemInPersonBtn"
+                    style="
+                        border:0;
+                        border-radius:10px;
+                        padding:13px 10px;
+                        background:#8a349b;
+                        color:#fff;
+                        font-weight:800;
+                        cursor:pointer;
+                    "
+                >
+                    IN PERSON
+                </button>
+
+
+                <button
+                    type="button"
+                    id="redeemPhoneBtn"
+                    style="
+                        border:0;
+                        border-radius:10px;
+                        padding:13px 10px;
+                        background:#6f2b82;
+                        color:#fff;
+                        font-weight:800;
+                        cursor:pointer;
+                    "
+                >
+                    OVER PHONE
+                </button>
+
+            </div>
+
+
+            <button
+                type="button"
+                id="cancelRedeemBtn"
+                style="
+                    width:100%;
+                    margin-top:10px;
+                    padding:11px;
+                    border:1px solid #ddd;
+                    border-radius:10px;
+                    background:#fff;
+                    color:#666;
+                    font-weight:700;
+                    cursor:pointer;
+                "
+            >
+                CANCEL
+            </button>
+
+        </div>
+
+    `;
+
+
+    document.body.appendChild(
+        overlay
+    );
+
+
+    document
+        .getElementById(
+            'redeemInPersonBtn'
+        )
+        .addEventListener(
+            'click',
+            async () => {
+
+                await redeemWellnessOffer(
+                    offerId,
+                    'In Person'
+                );
+
+                overlay.remove();
+
+            }
+        );
+
+
+    document
+        .getElementById(
+            'redeemPhoneBtn'
+        )
+        .addEventListener(
+            'click',
+            async () => {
+
+                await redeemWellnessOffer(
+                    offerId,
+                    'Over the Phone'
+                );
+
+                overlay.remove();
+
+            }
+        );
+
+
+    document
+        .getElementById(
+            'cancelRedeemBtn'
+        )
+        .addEventListener(
+            'click',
+            () => {
+
+                overlay.remove();
+
+            }
+        );
+
+}
+
+
+/* =========================================================
+   REDEEM WELLNESS OFFER
+========================================================= */
+
+async function redeemWellnessOffer(
+    offerId,
+    location
+) {
+
+    try {
+
+        const {
+            error
+        } =
+            await supabaseClientInstance
+
+                .from(
+                    'wellness_offer_codes'
+                )
+
+                .update({
+
+                    is_redeemed:
+                        true,
+
+                    redeemed_at:
+                        new Date()
+                            .toISOString(),
+
+                    redeemed_location:
+                        location
+
+                })
+
+                .eq(
+                    'id',
+                    offerId
+                );
+
+
+        if (error) {
+
+            throw error;
+
+        }
+
+
+        showAdminModal(
+            `The wellness offer has been marked as redeemed.\n\nLocation: ${location}`,
+            'success',
+            'Offer Redeemed'
+        );
+
+
+        await fetchWellnessOfferCodes();
+
+
+    } catch (error) {
+
+        console.error(
+            'Wellness redemption error:',
+            error
+        );
+
+
+        showAdminModal(
+            `Unable to redeem this offer:\n\n${error.message}`,
+            'error',
+            'Redemption Failed'
+        );
+
+    }
+
+}
+
+/* =========================================================
+   UNDO WELLNESS REDEMPTION
+========================================================= */
+
+async function undoWellnessRedemption(
+    offerId
+) {
+
+    const confirmed =
+        window.confirm(
+            'Are you sure you want to mark this wellness offer as unused again?'
+        );
+
+
+    if (!confirmed) {
+
+        return;
+
+    }
+
+
+    try {
+
+        const {
+            error
+        } =
+            await supabaseClientInstance
+
+                .from(
+                    'wellness_offer_codes'
+                )
+
+                .update({
+
+                    is_redeemed:
+                        false,
+
+                    redeemed_at:
+                        null,
+
+                    redeemed_location:
+                        null
+
+                })
+
+                .eq(
+                    'id',
+                    offerId
+                );
+
+
+        if (error) {
+
+            throw error;
+
+        }
+
+
+        showAdminModal(
+            'The wellness offer has been returned to unused status.',
+            'success',
+            'Redemption Reversed'
+        );
+
+
+        await fetchWellnessOfferCodes();
+
+
+    } catch (error) {
+
+        console.error(
+            'Undo redemption error:',
+            error
+        );
+
+
+        showAdminModal(
+            `Unable to reverse this redemption:\n\n${error.message}`,
+            'error',
+            'Unable to Update Offer'
+        );
+
+    }
+
+}
 /* =========================================================
    FETCH WELLNESS OFFER CODES
 ========================================================= */

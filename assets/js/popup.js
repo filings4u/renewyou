@@ -26,31 +26,34 @@ const RENEW_YOU_POPUP_CONFIG = {
 
     /*
      * Supabase Edge Function endpoint.
-     *
-     * CHANGE THIS to the actual name of your deployed
-     * Supabase Edge Function if you use a different name.
      */
     edgeFunctionUrl:
         'https://lrbimrlbskjweynxlgas.supabase.co/functions/v1/send-wellness-offer',
 
     /*
-     * Delay before the popup appears.
-     *
-     * 4 seconds gives the visitor time to see the page
-     * before the offer appears.
+     * Delay before popup appears.
      */
     delayMilliseconds: 4000,
 
     /*
-     * Don't repeatedly show the popup to someone who
-     * has already submitted an email.
+     * How long a successful subscriber should wait
+     * before seeing the offer again.
+     *
+     * 30 days = 30 * 24 * 60 * 60 * 1000
      */
-    storageKey:
-        'renewYouWellnessOfferSubmitted',
+    submittedCooldownMilliseconds:
+        30 * 24 * 60 * 60 * 1000,
 
     /*
-     * Don't repeatedly show the popup during the same
-     * browsing session after someone closes it.
+     * Stores the date/time when the visitor successfully
+     * received an offer code.
+     */
+    storageKey:
+        'renewYouWellnessOfferSubmittedAt',
+
+    /*
+     * Prevents the popup from immediately reopening
+     * after the visitor closes it during the same session.
      */
     sessionKey:
         'renewYouWellnessOfferDismissed'
@@ -79,18 +82,51 @@ function initRenewYouOfferPopup() {
     }
 
 
-    /*
-     * Don't show the popup again if this visitor has
-     * already successfully submitted their email.
-     */
-    if (
+/*
+ * Don't show the popup again if the visitor
+ * successfully received a code recently.
+ *
+ * After the cooldown expires, the offer becomes
+ * eligible to appear again.
+ */
+const submittedAt =
+    Number(
         localStorage.getItem(
             RENEW_YOU_POPUP_CONFIG.storageKey
-        ) === 'true'
+        ) || 0
+    );
+
+
+if (
+    submittedAt > 0
+) {
+
+    const elapsed =
+        Date.now() -
+        submittedAt;
+
+
+    if (
+        elapsed <
+        RENEW_YOU_POPUP_CONFIG
+            .submittedCooldownMilliseconds
     ) {
+
         return;
+
     }
 
+
+    /*
+     * Cooldown expired.
+     * Remove the old timestamp so the popup
+     * can become active again.
+     */
+    localStorage.removeItem(
+        RENEW_YOU_POPUP_CONFIG.storageKey
+    );
+
+}
 
     /*
      * Don't immediately show again if the visitor
@@ -1625,15 +1661,18 @@ function bindRenewYouOfferEvents() {
             'renewYouOfferOverlay'
         );
 
+
     const closeButton =
         document.getElementById(
             'renewYouOfferClose'
         );
 
+
     const doneButton =
         document.getElementById(
             'renewYouOfferDone'
         );
+
 
     const form =
         document.getElementById(
@@ -1641,6 +1680,9 @@ function bindRenewYouOfferEvents() {
         );
 
 
+    /*
+     * CLOSE BUTTON
+     */
     if (closeButton) {
 
         closeButton.addEventListener(
@@ -1651,6 +1693,9 @@ function bindRenewYouOfferEvents() {
     }
 
 
+    /*
+     * DONE BUTTON
+     */
     if (doneButton) {
 
         doneButton.addEventListener(
@@ -1661,6 +1706,9 @@ function bindRenewYouOfferEvents() {
     }
 
 
+    /*
+     * CLICK OUTSIDE MODAL
+     */
     if (overlay) {
 
         overlay.addEventListener(
@@ -1681,6 +1729,9 @@ function bindRenewYouOfferEvents() {
     }
 
 
+    /*
+     * ESCAPE KEY
+     */
     document.addEventListener(
         'keydown',
         event => {
@@ -1701,6 +1752,9 @@ function bindRenewYouOfferEvents() {
     );
 
 
+    /*
+     * FORM SUBMISSION
+     */
     if (form) {
 
         form.addEventListener(
@@ -1709,32 +1763,6 @@ function bindRenewYouOfferEvents() {
         );
 
     }
-
-    if (success) {
-
-    success.hidden =
-        false;
-
-}
-
-
-/*
- * Switch the modal into its compact
- * success-state layout.
- */
-const modal =
-    document.querySelector(
-        '.renew-you-offer-modal'
-    );
-
-
-if (modal) {
-
-    modal.classList.add(
-        'success-state'
-    );
-
-}
 
 }
 
@@ -1750,14 +1778,18 @@ function openRenewYouOfferPopup() {
             'renewYouOfferOverlay'
         );
 
+
     if (!overlay) {
+
         return;
+
     }
 
 
     overlay.classList.add(
         'is-visible'
     );
+
 
     overlay.setAttribute(
         'aria-hidden',
@@ -1777,8 +1809,11 @@ function openRenewYouOfferPopup() {
                     'renewYouOfferEmail'
                 );
 
+
             if (emailInput) {
+
                 emailInput.focus();
+
             }
 
         },
@@ -1799,14 +1834,18 @@ function closeRenewYouOfferPopup() {
             'renewYouOfferOverlay'
         );
 
+
     if (!overlay) {
+
         return;
+
     }
 
 
     overlay.classList.remove(
         'is-visible'
     );
+
 
     overlay.setAttribute(
         'aria-hidden',
@@ -1846,25 +1885,30 @@ async function handleRenewYouOfferSubmit(
             'renewYouOfferEmail'
         );
 
+
     const submitButton =
         document.getElementById(
             'renewYouOfferSubmit'
         );
+
 
     const submitText =
         document.getElementById(
             'renewYouOfferSubmitText'
         );
 
+
     const errorBox =
         document.getElementById(
             'renewYouOfferError'
         );
 
+
     const form =
         document.getElementById(
             'renewYouOfferForm'
         );
+
 
     const success =
         document.getElementById(
@@ -1897,6 +1941,7 @@ async function handleRenewYouOfferSubmit(
 
         }
 
+
         emailInput.focus();
 
         return;
@@ -1914,6 +1959,7 @@ async function handleRenewYouOfferSubmit(
 
     submitButton.disabled =
         true;
+
 
     submitButton.classList.add(
         'is-loading'
@@ -1942,14 +1988,18 @@ async function handleRenewYouOfferSubmit(
                             'application/json'
                     },
 
-                    body:JSON.stringify({
-                        email:email
-                    })
+                    body:
+                        JSON.stringify({
+                            email:
+                                email
+                        })
                 }
             );
 
 
-        let result = null;
+        let result =
+            null;
+
 
         try {
 
@@ -1960,7 +2010,8 @@ async function handleRenewYouOfferSubmit(
             jsonError
         ) {
 
-            result = null;
+            result =
+                null;
 
         }
 
@@ -1976,18 +2027,19 @@ async function handleRenewYouOfferSubmit(
 
 
         /*
-         * Mark this visitor as successfully
-         * completing the offer.
+         * Store the exact time the visitor successfully
+         * received their offer code.
          */
         localStorage.setItem(
-            RENEW_YOU_POPUP_CONFIG
-                .storageKey,
-            'true'
+            RENEW_YOU_POPUP_CONFIG.storageKey,
+            String(
+                Date.now()
+            )
         );
 
 
         /*
-         * Hide form.
+         * Hide the form.
          */
         if (form) {
 
@@ -1998,7 +2050,7 @@ async function handleRenewYouOfferSubmit(
 
 
         /*
-         * Show success message.
+         * Show the success message.
          */
         if (success) {
 
@@ -2008,7 +2060,28 @@ async function handleRenewYouOfferSubmit(
         }
 
 
-    } catch (error) {
+        /*
+         * Switch the modal into the compact
+         * success-state layout.
+         */
+        const modal =
+            document.querySelector(
+                '.renew-you-offer-modal'
+            );
+
+
+        if (modal) {
+
+            modal.classList.add(
+                'success-state'
+            );
+
+        }
+
+
+    } catch (
+        error
+    ) {
 
         console.error(
             'Wellness offer submission error:',
@@ -2028,6 +2101,7 @@ async function handleRenewYouOfferSubmit(
         submitButton.disabled =
             false;
 
+
         submitButton.classList.remove(
             'is-loading'
         );
@@ -2043,7 +2117,6 @@ async function handleRenewYouOfferSubmit(
     }
 
 }
-
 
 /* ============================================================
    EMAIL VALIDATION
