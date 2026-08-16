@@ -202,41 +202,260 @@ if (page === 'index') {
         margin: 0 auto;
         padding: 60px 20px;
       }
-      @media (max-width: 768px) {
-        .hero-split-container {
-          flex-direction: column-reverse !important;
-          padding: 30px 20px !important;
-          gap: 30px !important;
-        }
-        .hero-image-block {
-          width: 100% !important;
-          min-width: 100% !important;
-        }
-        .hero-image-container {
-          width: 100% !important;
-          max-width: 100% !important;
-          height: 320px !important;
-        }
-        .hero-text-block {
-          text-align: center !important;
-        }
-        .hero-text-block div {
-          text-align: center !important;
-          margin-bottom: 15px !important;
-        }
-        .hero-text-block h1 {
-          font-size: 1.8rem !important;
-          line-height: 1.2 !important;
-        }
-        .hero-text-block p {
-          font-size: 1.05rem !important;
-          line-height: 1.55 !important;
-          margin-bottom: 0 !important;
-        }
-        .hero-buttons {
-          flex-wrap: nowrap !important;
-        }
-      }
+@media (max-width: 768px) {
+
+  /* =========================================================
+     MOBILE HERO LAYOUT
+     Keep desktop sizing intact.
+     Only change layout/centering for mobile.
+     ========================================================= */
+
+  .hero-split-container {
+    flex-direction: column-reverse !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 35px 18px !important;
+    gap: 30px !important;
+    box-sizing: border-box !important;
+  }
+
+
+  /* =========================================================
+     MOBILE IMAGE
+     Keep the image LARGE.
+     ========================================================= */
+
+  .hero-image-block {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+  }
+
+  .hero-image-container {
+    width: 100% !important;
+    max-width: 550px !important;
+    height: 320px !important;
+  }
+
+
+  /* =========================================================
+     MOBILE TEXT
+     Center everything.
+     ========================================================= */
+
+  .hero-text-block {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 700px !important;
+    text-align: center !important;
+    margin: 0 auto !important;
+  }
+
+
+  /* Header area containing badge + headline */
+
+  .hero-text-block > div:first-child {
+    width: 100% !important;
+    max-width: 700px !important;
+    margin: 0 auto 18px auto !important;
+    text-align: center !important;
+  }
+
+
+  /* =========================================================
+     MOBILE BADGE
+     ========================================================= */
+
+  #heroBadge {
+    display: inline-block !important;
+    margin: 0 auto 12px auto !important;
+    font-size: 0.78rem !important;
+    line-height: 1.35 !important;
+    letter-spacing: 1.3px !important;
+    text-align: center !important;
+  }
+
+
+  /* =========================================================
+     MOBILE HEADLINE
+     
+     Still large enough to look like a real hero headline.
+     ========================================================= */
+
+  #heroHeadline {
+    width: 100% !important;
+    max-width: 700px !important;
+    margin: 0 auto !important;
+    font-size: 1.8rem !important;
+    line-height: 1.2 !important;
+    font-weight: 800 !important;
+    text-align: center !important;
+  }
+
+
+  /* =========================================================
+     MOBILE SUBHEADLINE
+     ========================================================= */
+
+  #heroSubheadline {
+    width: 100% !important;
+    max-width: 650px !important;
+    margin: 0 auto 25px auto !important;
+    font-size: 1rem !important;
+    line-height: 1.55 !important;
+    text-align: center !important;
+  }
+
+
+  /* =========================================================
+     MOBILE BUTTONS
+     Keep the two buttons side-by-side.
+     ========================================================= */
+
+  #heroButtonTarget {
+    width: 100% !important;
+    max-width: 650px !important;
+    margin: 0 auto !important;
+    text-align: center !important;
+  }
+
+  .hero-buttons {
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    justify-content: center !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+    margin: 20px auto 0 auto !important;
+  }
+
+  .hero-buttons a {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+  }
+
+  .hero-buttons button {
+    width: 100% !important;
+    padding: 13px 8px !important;
+    font-size: 0.82rem !important;
+    line-height: 1.25 !important;
+  }
+}
+
+
+/* =========================================================
+   SMALL PHONES
+   ========================================================= */
+
+@media (max-width: 480px) {
+
+  .hero-split-container {
+    padding: 28px 14px !important;
+    gap: 25px !important;
+  }
+
+
+  /* Keep image substantial on phones */
+
+  .hero-image-container {
+    width: 100% !important;
+    max-width: 550px !important;
+    height: 280px !important;
+  }
+
+
+  /* Badge */
+
+  #heroBadge {
+    font-size: 0.7rem !important;
+    letter-spacing: 1px !important;
+    margin-bottom: 10px !important;
+  }
+
+
+  /* Headline */
+
+  #heroHeadline {
+    font-size: 1.65rem !important;
+    line-height: 1.2 !important;
+  }
+
+
+  /* Paragraph */
+
+  #heroSubheadline {
+    font-size: 0.95rem !important;
+    line-height: 1.5 !important;
+    margin-bottom: 22px !important;
+  }
+
+
+  /* Buttons */
+
+  .hero-buttons {
+    gap: 8px !important;
+    margin-top: 18px !important;
+  }
+
+  .hero-buttons button {
+    padding: 12px 7px !important;
+    font-size: 0.76rem !important;
+  }
+}
+
+
+/* =========================================================
+   VERY SMALL PHONES
+   ========================================================= */
+
+@media (max-width: 360px) {
+
+  .hero-split-container {
+    padding: 25px 12px !important;
+    gap: 22px !important;
+  }
+
+
+  .hero-image-container {
+    height: 250px !important;
+  }
+
+
+  #heroBadge {
+    font-size: 0.64rem !important;
+    letter-spacing: 0.8px !important;
+  }
+
+
+  #heroHeadline {
+    font-size: 1.5rem !important;
+    line-height: 1.2 !important;
+  }
+
+
+  #heroSubheadline {
+    font-size: 0.9rem !important;
+    line-height: 1.48 !important;
+  }
+
+
+  .hero-buttons {
+    gap: 7px !important;
+  }
+
+
+  .hero-buttons button {
+    padding: 11px 5px !important;
+    font-size: 0.7rem !important;
+  }
+}
+
     </style>
     
     <div class="hero-split-container" id="heroInnerFrame">
