@@ -184,376 +184,795 @@ document.addEventListener('DOMContentLoaded', function () {
 
         target.innerHTML = `
 
-            <style>
+        
+<style>
 
-                .dot-scheduler-wrapper {
-                    max-width: 1150px;
-                    margin: 40px auto;
-                    padding: 0 20px;
-                    box-sizing: border-box;
-                }
+    /* =========================================================
+       DOT SCHEDULER
+       RESPONSIVE BASE
+       ========================================================= */
 
-                .dot-scheduler-header {
-                    text-align: center;
-                    margin-bottom: 35px;
-                }
+    .dot-scheduler-wrapper {
+        width: 100%;
+        max-width: 1150px;
+        margin: 40px auto;
+        padding: 0 20px;
+        box-sizing: border-box;
+        overflow: hidden;
+    }
 
-                .dot-scheduler-header h1 {
-                    color: var(--purple-primary);
-                    font-size: clamp(1.8rem, 4vw, 2.4rem);
-                    font-weight: 800;
-                    margin: 0 0 10px 0;
-                }
+    .dot-scheduler-wrapper *,
+    .dot-scheduler-wrapper *::before,
+    .dot-scheduler-wrapper *::after {
+        box-sizing: border-box;
+    }
 
-                .dot-scheduler-header p {
-                    max-width: 700px;
-                    margin: 0 auto;
-                    color: #666;
-                    line-height: 1.6;
-                    font-size: 0.95rem;
-                }
 
-                .dot-scheduler-card {
-                    background: #fff;
-                    border: 1px solid rgba(138,52,159,0.07);
-                    border-radius: 24px;
-                    box-shadow: 0 15px 45px rgba(62,13,95,0.04);
-                    overflow: hidden;
-                }
+    /* =========================================================
+       HEADER
+       ========================================================= */
 
-                .dot-scheduler-form {
-                    padding: clamp(20px, 5vw, 45px);
-                }
+    .dot-scheduler-header {
+        text-align: center;
+        margin-bottom: 35px;
+    }
 
-                .dot-section-title {
-                    color: var(--purple-primary);
-                    font-size: 1.15rem;
-                    font-weight: 800;
-                    margin: 0 0 6px 0;
-                }
+    .dot-scheduler-header h1 {
+        color: var(--purple-primary);
+        font-size: clamp(1.75rem, 4vw, 2.4rem);
+        line-height: 1.15;
+        font-weight: 800;
+        margin: 0 0 10px 0;
+    }
 
-                .dot-section-description {
-                    color: #666;
-                    font-size: 0.85rem;
-                    margin: 0 0 20px 0;
-                    line-height: 1.5;
-                }
+    .dot-scheduler-header p {
+        width: 100%;
+        max-width: 700px;
+        margin: 0 auto;
+        color: #666;
+        line-height: 1.6;
+        font-size: 0.95rem;
+    }
 
-                .dot-form-grid {
-                    display: grid;
-                    grid-template-columns: repeat(2, 1fr);
-                    gap: 20px;
-                    margin-bottom: 20px;
-                }
 
-                .dot-form-field {
-                    min-width: 0;
-                    margin-bottom: 20px;
-                }
+    /* =========================================================
+       MAIN CARD
+       ========================================================= */
 
-                .dot-form-label {
-                    display: block;
-                    margin-bottom: 7px;
-                    color: #444;
-                    font-size: 0.78rem;
-                    font-weight: 800;
-                    text-transform: uppercase;
-                }
+    .dot-scheduler-card {
+        width: 100%;
+        background: #fff;
+        border: 1px solid rgba(138, 52, 159, 0.07);
+        border-radius: 24px;
+        box-shadow: 0 15px 45px rgba(62, 13, 95, 0.04);
+        overflow: hidden;
+    }
 
-                .dot-form-control {
-                    width: 100%;
-                    padding: 13px 14px;
-                    box-sizing: border-box;
-                    border: 1px solid rgba(0,0,0,0.10);
-                    border-radius: 10px;
-                    background: #fff;
-                    color: #222;
-                    font-size: 0.95rem;
-                    transition:
-                        border-color 0.2s,
-                        box-shadow 0.2s;
-                }
+    .dot-scheduler-form {
+        width: 100%;
+        padding: clamp(20px, 5vw, 45px);
+    }
 
-                .dot-form-control:focus {
-                    outline: none;
-                    border-color: var(--purple-accent);
-                    box-shadow:
-                        0 0 0 3px rgba(138,52,159,0.08);
-                }
 
-                .dot-calendar-section {
-                    margin-top: 30px;
-                    padding-top: 30px;
-                    border-top: 1px solid rgba(0,0,0,0.06);
-                }
+    /* =========================================================
+       SECTION HEADINGS
+       ========================================================= */
 
-                .dot-calendar-layout {
-                    display: grid;
-                    grid-template-columns: 1fr 1fr;
-                    gap: 25px;
-                }
+    .dot-section-title {
+        color: var(--purple-primary);
+        font-size: 1.15rem;
+        line-height: 1.3;
+        font-weight: 800;
+        margin: 0 0 6px 0;
+    }
 
-                .dot-calendar-panel,
-                .dot-times-panel {
-                    background: #fafafa;
-                    border: 1px solid rgba(138,52,159,0.06);
-                    border-radius: 16px;
-                    padding: 20px;
-                }
+    .dot-section-description {
+        color: #666;
+        font-size: 0.85rem;
+        line-height: 1.5;
+        margin: 0 0 20px 0;
+    }
 
-                .dot-calendar-header {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    margin-bottom: 15px;
-                }
 
-                .dot-calendar-header strong {
-                    color: var(--purple-primary);
-                    font-size: 1rem;
-                }
+    /* =========================================================
+       FORM
+       ========================================================= */
 
-                .dot-calendar-nav {
-                    display: flex;
-                    gap: 6px;
-                }
+    .dot-form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+        margin-bottom: 0;
+    }
 
-                .dot-calendar-nav button {
-                    width: 36px;
-                    height: 36px;
-                    border-radius: 8px;
-                    border: 1px solid rgba(138,52,159,0.12);
-                    background: #fff;
-                    color: var(--purple-primary);
-                    cursor: pointer;
-                    font-weight: 800;
-                    font-size: 1.1rem;
-                }
+    .dot-form-field {
+        min-width: 0;
+        width: 100%;
+        margin-bottom: 20px;
+    }
 
-                .dot-calendar-nav button:hover:not(:disabled) {
-                    background: rgba(138,52,159,0.06);
-                }
+    .dot-form-label {
+        display: block;
+        margin-bottom: 7px;
+        color: #444;
+        font-size: 0.78rem;
+        line-height: 1.3;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
 
-                .dot-calendar-nav button:disabled {
-                    opacity: 0.4;
-                    cursor: not-allowed;
-                }
+    .dot-form-control {
+        display: block;
+        width: 100%;
+        min-width: 0;
+        min-height: 46px;
+        padding: 12px 14px;
+        border: 1px solid rgba(0, 0, 0, 0.10);
+        border-radius: 10px;
+        background: #fff;
+        color: #222;
+        font-family: inherit;
+        font-size: 0.95rem;
+        line-height: 1.3;
+        transition:
+            border-color 0.2s,
+            box-shadow 0.2s;
+        appearance: auto;
+    }
 
-                .dot-calendar-weekdays {
-                    display: grid;
-                    grid-template-columns: repeat(7, 1fr);
-                    gap: 5px;
-                    margin-bottom: 5px;
-                }
+    .dot-form-control:focus {
+        outline: none;
+        border-color: var(--purple-accent);
+        box-shadow:
+            0 0 0 3px rgba(138, 52, 159, 0.08);
+    }
 
-                .dot-calendar-weekday {
-                    text-align: center;
-                    color: #777;
-                    font-size: 0.68rem;
-                    font-weight: 800;
-                    padding: 5px 0;
-                    text-transform: uppercase;
-                }
+    .dot-form-control::placeholder {
+        color: #999;
+    }
 
-                .dot-calendar-grid {
-                    display: grid;
-                    grid-template-columns: repeat(7, 1fr);
-                    gap: 5px;
-                }
 
-                .dot-calendar-day {
-                    min-height: 40px;
-                    border: 1px solid transparent;
-                    border-radius: 8px;
-                    background: #fff;
-                    color: #333;
-                    cursor: pointer;
-                    font-size: 0.82rem;
-                    font-weight: 700;
-                }
+    /* =========================================================
+       CALENDAR SECTION
+       ========================================================= */
 
-                .dot-calendar-day:hover:not(:disabled) {
-                    border-color: var(--purple-accent);
-                    color: var(--purple-primary);
-                }
+    .dot-calendar-section {
+        margin-top: 10px;
+        padding-top: 30px;
+        border-top: 1px solid rgba(0, 0, 0, 0.06);
+    }
 
-                .dot-calendar-day.other-month {
-                    color: #bbb;
-                    background: transparent;
-                }
+    .dot-calendar-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 25px;
+        width: 100%;
+    }
 
-                .dot-calendar-day.today {
-                    border-color: var(--purple-accent);
-                }
 
-                .dot-calendar-day.selected {
-                    background: var(--purple-primary);
-                    color: #fff;
-                    border-color: var(--purple-primary);
-                }
+    /* =========================================================
+       CALENDAR / TIME PANELS
+       ========================================================= */
 
-                .dot-calendar-day.unavailable {
-                    color: #aaa;
-                    background: #f1f1f1;
-                    cursor: not-allowed;
-                    text-decoration: line-through;
-                }
+    .dot-calendar-panel,
+    .dot-times-panel {
+        width: 100%;
+        min-width: 0;
+        background: #fafafa;
+        border: 1px solid rgba(138, 52, 159, 0.06);
+        border-radius: 16px;
+        padding: 20px;
+    }
 
-                .dot-times-grid {
-                    display: grid;
-                    grid-template-columns: repeat(2, 1fr);
-                    gap: 10px;
-                }
 
-                .dot-time-btn {
-                    min-height: 46px;
-                    padding: 10px;
-                    border: 1px solid rgba(138,52,159,0.15);
-                    border-radius: 9px;
-                    background: #fff;
-                    color: var(--purple-primary);
-                    font-weight: 700;
-                    cursor: pointer;
-                    transition: all 0.2s;
-                }
+    /* =========================================================
+       CALENDAR HEADER
+       ========================================================= */
 
-                .dot-time-btn:hover:not(:disabled) {
-                    border-color: var(--purple-accent);
-                    background: rgba(138,52,159,0.04);
-                }
+    .dot-calendar-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 15px;
+    }
 
-                .dot-time-btn.selected {
-                    background: var(--purple-primary);
-                    color: #fff;
-                    border-color: var(--purple-primary);
-                }
+    .dot-calendar-header strong {
+        min-width: 0;
+        color: var(--purple-primary);
+        font-size: 1rem;
+        line-height: 1.3;
+    }
 
-                .dot-time-btn:disabled {
-                    background: #eee;
-                    color: #aaa;
-                    border-color: #eee;
-                    cursor: not-allowed;
-                    text-decoration: line-through;
-                }
+    .dot-calendar-nav {
+        display: flex;
+        flex-shrink: 0;
+        gap: 6px;
+    }
 
-                .dot-no-date {
-                    color: #777;
-                    font-size: 0.85rem;
-                    line-height: 1.5;
-                    text-align: center;
-                    padding: 30px 10px;
-                    grid-column: 1 / -1;
-                }
+    .dot-calendar-nav button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        padding: 0;
+        border-radius: 9px;
+        border: 1px solid rgba(138, 52, 159, 0.12);
+        background: #fff;
+        color: var(--purple-primary);
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 1.25rem;
+        font-weight: 800;
+        -webkit-tap-highlight-color: transparent;
+    }
 
-                .dot-selected-summary {
-                    display: flex;
-                    flex-wrap: wrap;
-                    gap: 10px;
-                    margin-top: 15px;
-                }
+    .dot-calendar-nav button:hover:not(:disabled) {
+        background: rgba(138, 52, 159, 0.06);
+    }
 
-                .dot-summary-pill {
-                    background: rgba(138,52,159,0.07);
-                    color: var(--purple-primary);
-                    padding: 8px 12px;
-                    border-radius: 20px;
-                    font-size: 0.78rem;
-                    font-weight: 700;
-                }
+    .dot-calendar-nav button:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
 
-                .dot-submit-btn {
-                    width: 100%;
-                    margin-top: 30px;
-                    padding: 16px;
-                    border: none;
-                    border-radius: 11px;
-                    background: var(--purple-primary);
-                    color: #fff;
-                    font-size: 1rem;
-                    font-weight: 800;
-                    cursor: pointer;
-                }
 
-                .dot-submit-btn:hover {
-                    opacity: 0.94;
-                }
+    /* =========================================================
+       CALENDAR WEEKDAYS
+       ========================================================= */
 
-                .dot-submit-btn:disabled {
-                    opacity: 0.55;
-                    cursor: not-allowed;
-                }
+    .dot-calendar-weekdays {
+        display: grid;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        gap: 5px;
+        width: 100%;
+        margin-bottom: 5px;
+    }
 
-                .dot-feedback {
-                    display: none;
-                    margin-top: 18px;
-                    padding: 12px 14px;
-                    border-radius: 9px;
-                    text-align: center;
-                    font-size: 0.88rem;
-                    font-weight: 700;
-                }
+    .dot-calendar-weekday {
+        min-width: 0;
+        text-align: center;
+        color: #777;
+        font-size: 0.68rem;
+        line-height: 1.2;
+        font-weight: 800;
+        padding: 5px 0;
+        text-transform: uppercase;
+    }
 
-                .dot-feedback.error {
-                    display: block;
-                    background: #fff1f2;
-                    color: #d90429;
-                    border: 1px solid #ffd6dc;
-                }
 
-                .dot-feedback.success {
-                    display: block;
-                    background: #f2faed;
-                    color: var(--green-primary);
-                    border: 1px solid #d9efc8;
-                }
+    /* =========================================================
+       CALENDAR DAYS
+       ========================================================= */
 
-                .dot-feedback.info {
-                    display: block;
-                    background: #f5f2f8;
-                    color: var(--purple-primary);
-                    border: 1px solid rgba(138,52,159,0.10);
-                }
+    .dot-calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        gap: 5px;
+        width: 100%;
+    }
 
-                .dot-buffer-note {
-                    margin-top: 12px;
-                    color: #777;
-                    font-size: 0.75rem;
-                    line-height: 1.5;
-                }
+    .dot-calendar-day {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        min-width: 0;
+        min-height: 42px;
+        aspect-ratio: 1 / 1;
+        padding: 0;
+        border: 1px solid transparent;
+        border-radius: 9px;
+        background: #fff;
+        color: #333;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 0.82rem;
+        line-height: 1;
+        font-weight: 700;
+        -webkit-tap-highlight-color: transparent;
+    }
 
-                .dot-availability-note {
-                    margin-top: 12px;
-                    padding: 10px 12px;
-                    background: #fff;
-                    border-radius: 8px;
-                    color: #666;
-                    font-size: 0.76rem;
-                    line-height: 1.5;
-                    border: 1px solid rgba(0,0,0,0.05);
-                }
+    .dot-calendar-day:hover:not(:disabled) {
+        border-color: var(--purple-accent);
+        color: var(--purple-primary);
+    }
 
-                @media (max-width: 768px) {
+    .dot-calendar-day.other-month {
+        color: #bbb;
+        background: transparent;
+    }
 
-                    .dot-scheduler-wrapper {
-                        margin: 20px auto;
-                        padding: 0 12px;
-                    }
+    .dot-calendar-day.today {
+        border-color: var(--purple-accent);
+    }
 
-                    .dot-form-grid {
-                        grid-template-columns: 1fr;
-                        gap: 0;
-                    }
+    .dot-calendar-day.selected {
+        background: var(--purple-primary);
+        color: #fff;
+        border-color: var(--purple-primary);
+    }
 
-                    .dot-calendar-layout {
-                        grid-template-columns: 1fr;
-                    }
+    .dot-calendar-day.unavailable {
+        color: #aaa;
+        background: #f1f1f1;
+        cursor: not-allowed;
+        text-decoration: line-through;
+    }
 
-                    .dot-times-grid {
-                        grid-template-columns: repeat(2, 1fr);
-                    }
-                }
 
-            </style>
+    /* =========================================================
+       TIME SLOTS
+       ========================================================= */
+
+    .dot-times-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        width: 100%;
+    }
+
+    .dot-time-btn {
+        width: 100%;
+        min-width: 0;
+        min-height: 48px;
+        padding: 10px 8px;
+        border: 1px solid rgba(138, 52, 159, 0.15);
+        border-radius: 9px;
+        background: #fff;
+        color: var(--purple-primary);
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 0.85rem;
+        line-height: 1.2;
+        font-weight: 700;
+        -webkit-tap-highlight-color: transparent;
+        transition:
+            background 0.2s,
+            border-color 0.2s,
+            color 0.2s;
+    }
+
+    .dot-time-btn:hover:not(:disabled) {
+        border-color: var(--purple-accent);
+        background: rgba(138, 52, 159, 0.04);
+    }
+
+    .dot-time-btn.selected {
+        background: var(--purple-primary);
+        color: #fff;
+        border-color: var(--purple-primary);
+    }
+
+    .dot-time-btn:disabled {
+        background: #eee;
+        color: #aaa;
+        border-color: #eee;
+        cursor: not-allowed;
+        text-decoration: line-through;
+    }
+
+
+    /* =========================================================
+       NO DATE MESSAGE
+       ========================================================= */
+
+    .dot-no-date {
+        width: 100%;
+        color: #777;
+        font-size: 0.85rem;
+        line-height: 1.5;
+        text-align: center;
+        padding: 30px 10px;
+        grid-column: 1 / -1;
+    }
+
+
+    /* =========================================================
+       SELECTED APPOINTMENT SUMMARY
+       ========================================================= */
+
+    .dot-selected-summary {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        width: 100%;
+        margin-top: 15px;
+    }
+
+    .dot-summary-pill {
+        max-width: 100%;
+        background: rgba(138, 52, 159, 0.07);
+        color: var(--purple-primary);
+        padding: 8px 12px;
+        border-radius: 20px;
+        font-size: 0.78rem;
+        line-height: 1.3;
+        font-weight: 700;
+    }
+
+
+    /* =========================================================
+       NOTES
+       ========================================================= */
+
+    .dot-buffer-note {
+        margin-top: 12px;
+        color: #777;
+        font-size: 0.75rem;
+        line-height: 1.5;
+    }
+
+    .dot-availability-note {
+        width: 100%;
+        margin-top: 12px;
+        padding: 10px 12px;
+        background: #fff;
+        border-radius: 8px;
+        color: #666;
+        font-size: 0.76rem;
+        line-height: 1.5;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+
+    /* =========================================================
+       SUBMIT
+       ========================================================= */
+
+    .dot-submit-btn {
+        display: block;
+        width: 100%;
+        min-height: 52px;
+        margin-top: 30px;
+        padding: 14px 18px;
+        border: none;
+        border-radius: 11px;
+        background: var(--purple-primary);
+        color: #fff;
+        font-family: inherit;
+        font-size: 1rem;
+        line-height: 1.3;
+        font-weight: 800;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .dot-submit-btn:hover:not(:disabled) {
+        opacity: 0.94;
+    }
+
+    .dot-submit-btn:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+    }
+
+
+    /* =========================================================
+       FEEDBACK
+       ========================================================= */
+
+    .dot-feedback {
+        display: none;
+        width: 100%;
+        margin-top: 18px;
+        padding: 12px 14px;
+        border-radius: 9px;
+        text-align: center;
+        font-size: 0.88rem;
+        line-height: 1.5;
+        font-weight: 700;
+    }
+
+    .dot-feedback.error {
+        display: block;
+        background: #fff1f2;
+        color: #d90429;
+        border: 1px solid #ffd6dc;
+    }
+
+    .dot-feedback.success {
+        display: block;
+        background: #f2faed;
+        color: var(--green-primary);
+        border: 1px solid #d9efc8;
+    }
+
+    .dot-feedback.info {
+        display: block;
+        background: #f5f2f8;
+        color: var(--purple-primary);
+        border: 1px solid rgba(138, 52, 159, 0.10);
+    }
+
+
+    /* =========================================================
+       TABLET
+       ========================================================= */
+
+    @media (max-width: 900px) {
+
+        .dot-scheduler-wrapper {
+            margin: 30px auto;
+            padding: 0 16px;
+        }
+
+        .dot-calendar-layout {
+            grid-template-columns: 1fr;
+            gap: 18px;
+        }
+
+        .dot-calendar-panel,
+        .dot-times-panel {
+            padding: 18px;
+        }
+    }
+
+
+    /* =========================================================
+       MOBILE
+       ========================================================= */
+
+    @media (max-width: 768px) {
+
+        .dot-scheduler-wrapper {
+            width: 100%;
+            margin: 20px auto;
+            padding: 0 10px;
+        }
+
+        .dot-scheduler-header {
+            margin-bottom: 22px;
+            padding: 0 6px;
+        }
+
+        .dot-scheduler-header h1 {
+            font-size: clamp(1.55rem, 7vw, 2rem);
+            line-height: 1.2;
+            margin-bottom: 10px;
+        }
+
+        .dot-scheduler-header p {
+            font-size: 0.88rem;
+            line-height: 1.5;
+        }
+
+        .dot-scheduler-card {
+            border-radius: 18px;
+        }
+
+        .dot-scheduler-form {
+            padding: 20px 15px;
+        }
+
+        .dot-form-grid {
+            grid-template-columns: 1fr;
+            gap: 0;
+        }
+
+        .dot-form-field {
+            margin-bottom: 18px;
+        }
+
+        /*
+         * 16px prevents automatic zooming on iPhones
+         * when an input receives focus.
+         */
+        .dot-form-control {
+            min-height: 48px;
+            padding: 12px 13px;
+            font-size: 16px;
+        }
+
+        .dot-calendar-section {
+            margin-top: 5px;
+            padding-top: 25px;
+        }
+
+        .dot-calendar-layout {
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .dot-calendar-panel,
+        .dot-times-panel {
+            padding: 15px;
+            border-radius: 14px;
+        }
+
+        .dot-calendar-header {
+            margin-bottom: 12px;
+        }
+
+        .dot-calendar-header strong {
+            font-size: 0.95rem;
+        }
+
+        .dot-calendar-nav button {
+            width: 42px;
+            height: 42px;
+            min-width: 42px;
+        }
+
+        .dot-calendar-weekdays {
+            gap: 3px;
+        }
+
+        .dot-calendar-grid {
+            gap: 3px;
+        }
+
+        .dot-calendar-day {
+            min-height: 40px;
+            border-radius: 8px;
+            font-size: 0.78rem;
+        }
+
+        .dot-calendar-weekday {
+            font-size: 0.62rem;
+            padding: 4px 0;
+        }
+
+        .dot-times-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .dot-time-btn {
+            min-height: 50px;
+            padding: 10px 6px;
+            font-size: 0.82rem;
+        }
+
+        .dot-section-title {
+            font-size: 1.05rem;
+        }
+
+        .dot-section-description {
+            font-size: 0.82rem;
+            margin-bottom: 16px;
+        }
+
+        .dot-submit-btn {
+            min-height: 54px;
+            margin-top: 25px;
+            font-size: 0.98rem;
+        }
+    }
+
+
+    /* =========================================================
+       SMALL PHONES
+       ========================================================= */
+
+    @media (max-width: 480px) {
+
+        .dot-scheduler-wrapper {
+            margin: 12px auto;
+            padding: 0 7px;
+        }
+
+        .dot-scheduler-header {
+            margin-bottom: 18px;
+        }
+
+        .dot-scheduler-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .dot-scheduler-header p {
+            font-size: 0.82rem;
+        }
+
+        .dot-scheduler-card {
+            border-radius: 15px;
+        }
+
+        .dot-scheduler-form {
+            padding: 17px 12px;
+        }
+
+        .dot-calendar-panel,
+        .dot-times-panel {
+            padding: 12px;
+            border-radius: 12px;
+        }
+
+        .dot-calendar-header {
+            gap: 8px;
+        }
+
+        .dot-calendar-header strong {
+            font-size: 0.9rem;
+        }
+
+        .dot-calendar-nav {
+            gap: 4px;
+        }
+
+        .dot-calendar-nav button {
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+        }
+
+        .dot-calendar-weekdays {
+            gap: 2px;
+        }
+
+        .dot-calendar-grid {
+            gap: 2px;
+        }
+
+        .dot-calendar-day {
+            min-height: 38px;
+            border-radius: 7px;
+            font-size: 0.75rem;
+        }
+
+        .dot-calendar-weekday {
+            font-size: 0.58rem;
+        }
+
+        .dot-times-grid {
+            gap: 7px;
+        }
+
+        .dot-time-btn {
+            min-height: 48px;
+            font-size: 0.78rem;
+        }
+
+        .dot-summary-pill {
+            width: 100%;
+            text-align: center;
+        }
+
+        .dot-buffer-note,
+        .dot-availability-note {
+            font-size: 0.72rem;
+        }
+    }
+
+
+    /* =========================================================
+       VERY SMALL PHONES
+       ========================================================= */
+
+    @media (max-width: 360px) {
+
+        .dot-scheduler-wrapper {
+            padding: 0 5px;
+        }
+
+        .dot-scheduler-form {
+            padding: 15px 10px;
+        }
+
+        .dot-calendar-panel,
+        .dot-times-panel {
+            padding: 10px;
+        }
+
+        .dot-calendar-day {
+            min-height: 35px;
+            font-size: 0.7rem;
+        }
+
+        .dot-calendar-weekday {
+            font-size: 0.52rem;
+        }
+
+        .dot-time-btn {
+            min-height: 46px;
+            font-size: 0.74rem;
+        }
+    }
+
+</style>
+
 
             <div class="dot-scheduler-wrapper">
 
