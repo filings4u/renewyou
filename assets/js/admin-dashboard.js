@@ -17,6 +17,19 @@ document.addEventListener('DOMContentLoaded', () => {
             SUPABASE_ANON_KEY
         );
 
+    /* =========================================================
+       BLOG FEATURED IMAGE STORAGE
+    ========================================================= */
+
+    const BLOG_IMAGE_BUCKET = 'blog-images';
+    const BLOG_IMAGE_MAX_SIZE = 5 * 1024 * 1024;
+    const BLOG_IMAGE_ALLOWED_TYPES = [
+        'image/jpeg',
+        'image/png',
+        'image/webp',
+        'image/gif'
+    ];
+
     const target =
         document.getElementById('admin-dashboard-target');
 
@@ -584,6 +597,347 @@ function showAdminModal(
     );
 }
 
+
+/* =========================================================
+   BRANDED CONFIRMATION MODAL
+   Replaces all native browser confirm() dialogs.
+========================================================= */
+
+function showAdminConfirmModal(
+    message,
+    title = 'Are You Sure?',
+    confirmText = 'Confirm',
+    cancelText = 'Cancel',
+    type = 'warning'
+) {
+
+    return new Promise(
+        resolve => {
+
+            const existing =
+                document.getElementById(
+                    'adminConfirmModal'
+                );
+
+            if (existing) {
+                existing.remove();
+            }
+
+            const overlay =
+                document.createElement('div');
+
+            overlay.id =
+                'adminConfirmModal';
+
+            overlay.setAttribute(
+                'role',
+                'dialog'
+            );
+
+            overlay.setAttribute(
+                'aria-modal',
+                'true'
+            );
+
+            overlay.setAttribute(
+                'aria-labelledby',
+                'adminConfirmModalTitle'
+            );
+
+            overlay.style.cssText = `
+                position:fixed;
+                inset:0;
+                z-index:1000001;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                padding:20px;
+                box-sizing:border-box;
+                background:rgba(37,12,52,.58);
+                backdrop-filter:blur(5px);
+                -webkit-backdrop-filter:blur(5px);
+                opacity:0;
+                visibility:hidden;
+                transition:
+                    opacity .22s ease,
+                    visibility .22s ease;
+            `;
+
+            overlay.innerHTML = `
+                <div
+                    class="admin-confirm-card ${escapeHtml(type)}"
+                    role="document"
+                    style="
+                        position:relative;
+                        width:min(440px,100%);
+                        box-sizing:border-box;
+                        background:#fff;
+                        border-radius:22px;
+                        padding:32px 30px 28px;
+                        text-align:center;
+                        box-shadow:0 25px 70px rgba(62,13,95,.22);
+                        border:1px solid rgba(138,52,159,.08);
+                        transform:translateY(12px) scale(.97);
+                        transition:transform .22s ease;
+                    "
+                >
+
+                    <button
+                        type="button"
+                        id="adminConfirmModalClose"
+                        aria-label="Close"
+                        style="
+                            position:absolute;
+                            top:12px;
+                            right:14px;
+                            width:34px;
+                            height:34px;
+                            border:none;
+                            border-radius:50%;
+                            background:transparent;
+                            color:#888;
+                            font-size:26px;
+                            line-height:1;
+                            cursor:pointer;
+                        "
+                    >
+                        &times;
+                    </button>
+
+                    <div
+                        aria-hidden="true"
+                        style="
+                            width:58px;
+                            height:58px;
+                            margin:0 auto 18px;
+                            display:flex;
+                            align-items:center;
+                            justify-content:center;
+                            border-radius:50%;
+                            background:rgba(247,127,0,.10);
+                            color:#f77f00;
+                            font-size:27px;
+                            font-weight:800;
+                        "
+                    >
+                        !
+                    </div>
+
+                    <h3
+                        id="adminConfirmModalTitle"
+                        style="
+                            margin:0 0 9px;
+                            color:var(--purple-primary,#8a349b);
+                            font-size:1.2rem;
+                            font-weight:800;
+                        "
+                    >
+                        ${escapeHtml(title)}
+                    </h3>
+
+                    <p
+                        style="
+                            margin:0;
+                            color:#666;
+                            font-size:.9rem;
+                            line-height:1.6;
+                            white-space:pre-line;
+                        "
+                    >
+                        ${escapeHtml(message)}
+                    </p>
+
+                    <div
+                        style="
+                            display:grid;
+                            grid-template-columns:1fr 1fr;
+                            gap:10px;
+                            margin-top:24px;
+                        "
+                    >
+
+                        <button
+                            type="button"
+                            id="adminConfirmCancel"
+                            style="
+                                width:100%;
+                                padding:13px 18px;
+                                border:1px solid #ddd;
+                                border-radius:10px;
+                                background:#fff;
+                                color:#666;
+                                font-size:.9rem;
+                                font-weight:800;
+                                cursor:pointer;
+                            "
+                        >
+                            ${escapeHtml(cancelText)}
+                        </button>
+
+                        <button
+                            type="button"
+                            id="adminConfirmProceed"
+                            style="
+                                width:100%;
+                                padding:13px 18px;
+                                border:none;
+                                border-radius:10px;
+                                background:var(--purple-primary,#8a349b);
+                                color:#fff;
+                                font-size:.9rem;
+                                font-weight:800;
+                                cursor:pointer;
+                            "
+                        >
+                            ${escapeHtml(confirmText)}
+                        </button>
+
+                    </div>
+
+                </div>
+            `;
+
+            document.body.appendChild(
+                overlay
+            );
+
+            const card =
+                overlay.querySelector(
+                    '.admin-confirm-card'
+                );
+
+            let settled = false;
+
+            const finish = (
+                result
+            ) => {
+
+                if (settled) {
+                    return;
+                }
+
+                settled = true;
+
+                overlay.style.opacity =
+                    '0';
+
+                overlay.style.visibility =
+                    'hidden';
+
+                if (card) {
+                    card.style.transform =
+                        'translateY(12px) scale(.97)';
+                }
+
+                window.setTimeout(
+                    () => {
+                        overlay.remove();
+                    },
+                    220
+                );
+
+                document.body.style.overflow =
+                    '';
+
+                resolve(result);
+            };
+
+            document
+                .getElementById(
+                    'adminConfirmModalClose'
+                )
+                ?.addEventListener(
+                    'click',
+                    () => finish(false)
+                );
+
+            document
+                .getElementById(
+                    'adminConfirmCancel'
+                )
+                ?.addEventListener(
+                    'click',
+                    () => finish(false)
+                );
+
+            document
+                .getElementById(
+                    'adminConfirmProceed'
+                )
+                ?.addEventListener(
+                    'click',
+                    () => finish(true)
+                );
+
+            overlay.addEventListener(
+                'click',
+                event => {
+
+                    if (
+                        event.target ===
+                        overlay
+                    ) {
+                        finish(false);
+                    }
+
+                }
+            );
+
+            const handleEscape =
+                event => {
+
+                    if (
+                        event.key ===
+                        'Escape'
+                    ) {
+
+                        document.removeEventListener(
+                            'keydown',
+                            handleEscape
+                        );
+
+                        finish(false);
+                    }
+
+                };
+
+            document.addEventListener(
+                'keydown',
+                handleEscape
+            );
+
+            document.body.style.overflow =
+                'hidden';
+
+            requestAnimationFrame(
+                () => {
+
+                    overlay.style.opacity =
+                        '1';
+
+                    overlay.style.visibility =
+                        'visible';
+
+                    if (card) {
+                        card.style.transform =
+                            'translateY(0) scale(1)';
+                    }
+
+                    document
+                        .getElementById(
+                            'adminConfirmCancel'
+                        )
+                        ?.focus();
+
+                }
+            );
+
+        }
+    );
+
+}
+
+
   /* =========================================================
    APPLICATION STATE
 ========================================================= */
@@ -601,6 +955,15 @@ let mailingListSearchQuery = '';
 let wellnessOfferCodes = [];
 
 let wellnessOfferSearchQuery = '';
+
+/* =========================================================
+   BLOG STATE
+========================================================= */
+
+let blogPosts = [];
+let blogSearchQuery = '';
+let blogStatusFilter = 'all';
+let editingBlogPostId = null;
 
 /* =========================================================
    RANDOM POOL STATE
@@ -757,7 +1120,8 @@ async function checkAuthenticationGuard() {
         await Promise.allSettled([
             fetchAppointments(),
             fetchMailingList(),
-            fetchRandomPoolMembers()
+            fetchRandomPoolMembers(),
+            fetchBlogPosts()
         ]);
 
         /*
@@ -1023,7 +1387,8 @@ async function checkAuthenticationGuard() {
 
             await Promise.allSettled([
                 fetchAppointments(),
-                fetchRandomPoolMembers()
+                fetchRandomPoolMembers(),
+                fetchBlogPosts()
             ]);
 
             renderScheduleManager();
@@ -1205,6 +1570,265 @@ function renderDashboardStructure() {
             .filter-tab.active {
                 background:var(--purple-primary)!important;
                 color:#fff!important;
+            }
+
+            /* =====================================================
+               BLOG
+            ===================================================== */
+
+            .blog-admin-stats {
+                display:grid;
+                grid-template-columns:repeat(3,minmax(0,1fr));
+                gap:15px;
+                margin-bottom:20px;
+            }
+
+            .blog-admin-stat {
+                background:#fff;
+                border:1px solid rgba(138,52,159,.08);
+                border-radius:14px;
+                padding:18px;
+                box-shadow:0 4px 15px rgba(0,0,0,.025);
+            }
+
+            .blog-admin-stat span {
+                display:block;
+                font-size:.72rem;
+                font-weight:700;
+                color:#666;
+                text-transform:uppercase;
+            }
+
+            .blog-admin-stat strong {
+                display:block;
+                margin-top:5px;
+                font-size:1.7rem;
+                color:var(--purple-primary);
+            }
+
+            .blog-editor-grid {
+                display:grid;
+                grid-template-columns:minmax(0,1.1fr) minmax(280px,.9fr);
+                gap:20px;
+                align-items:start;
+            }
+
+            .blog-form-field {
+                margin-bottom:15px;
+                min-width:0;
+            }
+
+            .blog-form-field label {
+                display:block;
+                margin-bottom:6px;
+                font-size:.76rem;
+                font-weight:800;
+                color:#444;
+                text-transform:uppercase;
+            }
+
+            .blog-form-field input,
+            .blog-form-field select,
+            .blog-form-field textarea {
+                width:100%;
+                box-sizing:border-box;
+                border:1px solid #ddd;
+                border-radius:10px;
+                background:#fff;
+                padding:11px 13px;
+                font:inherit;
+                outline:none;
+            }
+
+            .blog-form-two-col {
+                display:grid;
+                grid-template-columns:1fr 1fr;
+                gap:12px;
+            }
+
+            .blog-form-status-row {
+                display:grid;
+                grid-template-columns:1fr auto;
+                gap:12px;
+                align-items:end;
+            }
+
+            .blog-form-field textarea {
+                min-height:280px;
+                resize:vertical;
+                line-height:1.6;
+            }
+
+            .blog-form-field input:focus,
+            .blog-form-field select:focus,
+            .blog-form-field textarea:focus {
+                border-color:var(--purple-primary);
+                box-shadow:0 0 0 3px rgba(62,13,95,.08);
+            }
+
+            .blog-image-upload-box {
+                width:100%;
+                box-sizing:border-box;
+                border:1px dashed rgba(138,52,159,.28);
+                border-radius:12px;
+                background:#faf8fc;
+                padding:12px;
+            }
+
+            .blog-image-upload-box input[type="file"] {
+                width:100%;
+                box-sizing:border-box;
+                padding:10px;
+                border:1px solid #ddd;
+                border-radius:10px;
+                background:#fff;
+                font:inherit;
+                cursor:pointer;
+            }
+
+            .blog-image-help {
+                margin:7px 0 0;
+                color:#777;
+                font-size:.72rem;
+                line-height:1.45;
+            }
+
+            .blog-image-preview {
+                margin-top:12px;
+                width:100%;
+                box-sizing:border-box;
+                border:1px solid rgba(138,52,159,.10);
+                border-radius:12px;
+                padding:10px;
+                background:#fff;
+                overflow:hidden;
+            }
+
+            .blog-image-preview img {
+                width:100%;
+                max-width:100%;
+                height:180px;
+                object-fit:cover;
+                border-radius:9px;
+                display:block;
+            }
+
+            .blog-image-preview-actions {
+                display:flex;
+                align-items:center;
+                justify-content:space-between;
+                gap:10px;
+                flex-wrap:wrap;
+                margin-top:9px;
+                min-width:0;
+            }
+
+            .blog-image-preview-actions span {
+                min-width:0;
+                max-width:100%;
+                color:#666;
+                font-size:.75rem;
+                overflow-wrap:anywhere;
+                word-break:break-word;
+            }
+
+            .blog-image-remove-btn {
+                flex:0 0 auto;
+                border:none;
+                border-radius:8px;
+                padding:8px 11px;
+                background:#fff0f2;
+                color:#d90429;
+                font-weight:700;
+                cursor:pointer;
+            }
+
+            .blog-post-admin-card {
+                background:#fff;
+                border:1px solid rgba(138,52,159,.08);
+                border-radius:14px;
+                padding:18px;
+                margin-bottom:12px;
+                box-sizing:border-box;
+                min-width:0;
+                max-width:100%;
+                overflow:hidden;
+            }
+
+            .blog-post-admin-card img {
+                width:100%;
+                height:150px;
+                object-fit:cover;
+                border-radius:10px;
+                display:block;
+                margin-bottom:14px;
+            }
+
+            .blog-post-admin-card h3,
+            .blog-post-admin-card p,
+            .blog-post-admin-card div {
+                min-width:0;
+                max-width:100%;
+                overflow-wrap:anywhere;
+                word-break:break-word;
+            }
+
+            .blog-post-admin-card > div {
+                min-width:0;
+            }
+
+            .blog-post-admin-actions {
+                display:flex;
+                flex-wrap:wrap;
+                gap:8px;
+                margin-top:14px;
+            }
+
+            .blog-admin-button {
+                border:none;
+                border-radius:9px;
+                padding:9px 13px;
+                font-weight:700;
+                cursor:pointer;
+            }
+
+            .blog-admin-button.primary {
+                background:var(--purple-primary);
+                color:#fff;
+            }
+
+            .blog-admin-button.secondary {
+                background:#f1edf4;
+                color:var(--purple-primary);
+            }
+
+            .blog-admin-button.danger {
+                background:#fff0f2;
+                color:#d90429;
+            }
+
+            .blog-admin-button.success {
+                background:#eef8e8;
+                color:#4f940c;
+            }
+
+            @media(max-width:900px) {
+                .blog-image-preview img {
+                    height:150px;
+                }
+
+                .blog-editor-grid {
+                    grid-template-columns:1fr;
+                }
+
+                .blog-admin-stats {
+                    grid-template-columns:1fr;
+                }
+
+                .blog-form-two-col,
+                .blog-form-status-row {
+                    grid-template-columns:1fr;
+                }
             }
 
             /* =====================================================
@@ -2129,6 +2753,14 @@ function renderDashboardStructure() {
 
     <button
         class="admin-page-tab"
+        data-page="blogPage"
+    >
+        📝 Blog
+    </button>
+
+
+    <button
+        class="admin-page-tab"
         data-page="randomPoolPage"
     >
         🎲 Random Pool
@@ -2745,6 +3377,360 @@ function renderDashboardStructure() {
     </div>
 
 </section>
+
+
+
+            <!-- =================================================
+                 BLOG PAGE
+            ================================================= -->
+
+            <section
+                id="blogPage"
+                class="admin-page"
+            >
+
+                <div class="blog-admin-stats">
+
+                    <div class="blog-admin-stat">
+                        <span>Total Posts</span>
+                        <strong id="blogTotalCount">0</strong>
+                    </div>
+
+                    <div class="blog-admin-stat">
+                        <span>Published</span>
+                        <strong id="blogPublishedCount">0</strong>
+                    </div>
+
+                    <div class="blog-admin-stat">
+                        <span>Drafts</span>
+                        <strong id="blogDraftCount">0</strong>
+                    </div>
+
+                </div>
+
+                <div class="blog-editor-grid">
+
+                    <div class="admin-card">
+
+                        <div style="
+                            display:flex;
+                            justify-content:space-between;
+                            align-items:center;
+                            gap:12px;
+                            flex-wrap:wrap;
+                            margin-bottom:18px;
+                        ">
+
+                            <div>
+                                <h2 style="margin:0 0 5px;">
+                                    Create Blog Post
+                                </h2>
+
+                                <p style="
+                                    margin:0;
+                                    color:#666;
+                                    font-size:.85rem;
+                                ">
+                                    Write and publish articles that appear on the public blog page.
+                                </p>
+                            </div>
+
+                            <div style="
+                                display:flex;
+                                gap:8px;
+                                flex-wrap:wrap;
+                            ">
+
+                                <button
+                                    type="button"
+                                    class="blog-admin-button secondary"
+                                    onclick="window.open('blog.html','_blank')"
+                                >
+                                    ↗ View Blog
+                                </button>
+
+                                <button
+                                    type="button"
+                                    id="newBlogPostBtn"
+                                    class="blog-admin-button secondary"
+                                >
+                                    + New Post
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                        <form id="blogPostForm">
+
+                            <div class="blog-form-field">
+                                <label for="blogTitle">
+                                    Post Title
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="blogTitle"
+                                    maxlength="180"
+                                    required
+                                    placeholder="Example: What Employers Should Know About DOT Drug Testing"
+                                />
+                            </div>
+
+                            <div class="blog-form-field">
+                                <label for="blogSlug">
+                                    URL Slug
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="blogSlug"
+                                    maxlength="180"
+                                    placeholder="what-employers-should-know-about-dot-drug-testing"
+                                />
+                            </div>
+
+                            <div class="blog-form-two-col">
+
+                                <div class="blog-form-field">
+                                    <label for="blogCategory">
+                                        Category
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        id="blogCategory"
+                                        maxlength="80"
+                                        placeholder="DOT Compliance"
+                                    />
+                                </div>
+
+                                <div class="blog-form-field">
+                                    <label for="blogAuthor">
+                                        Author
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        id="blogAuthor"
+                                        maxlength="100"
+                                        value="ReNew You Health & Wellness"
+                                    />
+                                </div>
+
+                            </div>
+
+                            <div class="blog-form-field">
+                                <label for="blogImageFile">
+                                    Featured Image
+                                </label>
+
+                                <input
+                                    type="hidden"
+                                    id="blogImageUrl"
+                                />
+
+                                <div class="blog-image-upload-box">
+                                    <input
+                                        type="file"
+                                        id="blogImageFile"
+                                        accept="image/jpeg,image/png,image/webp,image/gif"
+                                    />
+
+                                    <div
+                                        id="blogImagePreview"
+                                        class="blog-image-preview"
+                                        style="display:none;"
+                                    >
+                                        <img
+                                            id="blogImagePreviewImg"
+                                            src=""
+                                            alt="Featured image preview"
+                                        />
+
+                                        <div class="blog-image-preview-actions">
+                                            <span id="blogImagePreviewName">
+                                                Current featured image
+                                            </span>
+
+                                            <button
+                                                type="button"
+                                                id="removeBlogImageBtn"
+                                                class="blog-image-remove-btn"
+                                            >
+                                                Remove Image
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <p class="blog-image-help">
+                                    Upload JPG, PNG, WEBP, or GIF. Maximum file size: 5 MB.
+                                </p>
+                            </div>
+
+                            <div class="blog-form-field">
+                                <label for="blogExcerpt">
+                                    Short Excerpt
+                                </label>
+
+                                <textarea
+                                    id="blogExcerpt"
+                                    maxlength="500"
+                                    style="min-height:100px;"
+                                    placeholder="A short description shown on the blog cards."
+                                ></textarea>
+                            </div>
+
+                            <div class="blog-form-field">
+                                <label for="blogContent">
+                                    Article Content
+                                </label>
+
+                                <textarea
+                                    id="blogContent"
+                                    required
+                                    placeholder="Write your article here. Separate paragraphs with a blank line."
+                                ></textarea>
+                            </div>
+
+                            <div class="blog-form-status-row">
+
+                                <div class="blog-form-field" style="margin:0;">
+                                    <label for="blogStatus">
+                                        Status
+                                    </label>
+
+                                    <select id="blogStatus">
+                                        <option value="draft">
+                                            Draft
+                                        </option>
+
+                                        <option value="published">
+                                            Published
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    id="saveBlogPostBtn"
+                                    class="blog-admin-button primary"
+                                    style="min-height:43px;"
+                                >
+                                    Publish / Save Post
+                                </button>
+
+                            </div>
+
+                            <p
+                                id="blogFormMessage"
+                                style="
+                                    display:none;
+                                    margin:15px 0 0;
+                                    font-size:.85rem;
+                                    font-weight:700;
+                                "
+                            ></p>
+
+                        </form>
+
+                    </div>
+
+                    <div class="admin-card">
+
+                        <div style="
+                            display:flex;
+                            justify-content:space-between;
+                            align-items:center;
+                            gap:10px;
+                            flex-wrap:wrap;
+                            margin-bottom:15px;
+                        ">
+
+                            <div>
+                                <h2 style="margin:0 0 5px;">
+                                    Blog Posts
+                                </h2>
+
+                                <p style="
+                                    margin:0;
+                                    color:#666;
+                                    font-size:.82rem;
+                                ">
+                                    Manage published articles and drafts.
+                                </p>
+                            </div>
+
+                            <button
+                                type="button"
+                                id="refreshBlogPostsBtn"
+                                class="blog-admin-button secondary"
+                            >
+                                ↻ Refresh
+                            </button>
+
+                        </div>
+
+                        <div style="
+                            display:grid;
+                            grid-template-columns:1fr auto;
+                            gap:8px;
+                            margin-bottom:15px;
+                        ">
+
+                            <input
+                                type="text"
+                                id="blogSearch"
+                                placeholder="Search title, category, author..."
+                                style="
+                                    width:100%;
+                                    box-sizing:border-box;
+                                    padding:11px 13px;
+                                    border:1px solid #ddd;
+                                    border-radius:10px;
+                                "
+                            />
+
+                            <select
+                                id="blogStatusFilter"
+                                style="
+                                    padding:11px 12px;
+                                    border:1px solid #ddd;
+                                    border-radius:10px;
+                                    background:#fff;
+                                "
+                            >
+                                <option value="all">
+                                    All
+                                </option>
+
+                                <option value="published">
+                                    Published
+                                </option>
+
+                                <option value="draft">
+                                    Drafts
+                                </option>
+                            </select>
+
+                        </div>
+
+                        <div id="blogPostsTarget">
+                            <div style="
+                                text-align:center;
+                                padding:35px;
+                                color:#666;
+                            ">
+                                Loading blog posts...
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
 
 
             <!-- =================================================
@@ -3460,6 +4446,7 @@ function renderDashboardStructure() {
      * Bind them after the dashboard HTML exists.
      */
     bindRandomPoolEvents();
+    bindBlogEvents();
 }
 
 /* =========================================================
@@ -3574,6 +4561,16 @@ if (
 ) {
 
     fetchRandomPoolMembers();
+
+}
+
+
+if (
+    targetPage ===
+    'blogPage'
+) {
+
+    fetchBlogPosts();
 
 }
 
@@ -9516,11 +10513,22 @@ async function updateRandomPoolMemberStatus(
             : 'deactivate';
 
 
-    if (
-        !window.confirm(
-            `Are you sure you want to ${actionLabel} ${member.employee_name}?`
-        )
-    ) {
+    const confirmed =
+        await showAdminConfirmModal(
+            `Are you sure you want to ${actionLabel} ${member.employee_name}?`,
+            newStatus === 'active'
+                ? 'Reactivate Pool Member'
+                : 'Deactivate Pool Member',
+            newStatus === 'active'
+                ? 'Reactivate'
+                : 'Deactivate',
+            'Cancel',
+            newStatus === 'active'
+                ? 'info'
+                : 'warning'
+        );
+
+    if (!confirmed) {
         return;
     }
 
@@ -10888,6 +11896,1699 @@ function exportMailingListToCsv() {
             downloadLink
         );
     }
+
+
+/* =========================================================
+   BLOG MANAGEMENT
+========================================================= */
+
+function slugifyBlogTitle(
+    value
+) {
+
+    return String(
+        value || ''
+    )
+        .toLowerCase()
+        .trim()
+        .replace(
+            /[^a-z0-9\s-]/g,
+            ''
+        )
+        .replace(
+            /\s+/g,
+            '-'
+        )
+        .replace(
+            /-+/g,
+            '-'
+        )
+        .replace(
+            /^-+|-+$/g,
+            ''
+        );
+
+}
+
+
+function resetBlogPostForm() {
+
+    editingBlogPostId = null;
+
+    const form =
+        document.getElementById(
+            'blogPostForm'
+        );
+
+    if (form) {
+        form.reset();
+    }
+
+    const author =
+        document.getElementById(
+            'blogAuthor'
+        );
+
+    const slug =
+        document.getElementById(
+            'blogSlug'
+        );
+
+    if (slug) {
+        slug.dataset.manual = 'false';
+    }
+
+    if (author) {
+        author.value =
+            'ReNew You Health & Wellness';
+    }
+
+    const imageUrl =
+        document.getElementById(
+            'blogImageUrl'
+        );
+
+    if (imageUrl) {
+        imageUrl.value = '';
+    }
+
+    const imageFile =
+        document.getElementById(
+            'blogImageFile'
+        );
+
+    if (imageFile) {
+        imageFile.value = '';
+    }
+
+    setBlogImagePreview('');
+
+    const status =
+        document.getElementById(
+            'blogStatus'
+        );
+
+    if (status) {
+        status.value =
+            'draft';
+    }
+
+    const button =
+        document.getElementById(
+            'saveBlogPostBtn'
+        );
+
+    if (button) {
+        button.textContent =
+            'Publish / Save Post';
+    }
+
+    const message =
+        document.getElementById(
+            'blogFormMessage'
+        );
+
+    if (message) {
+        message.style.display =
+            'none';
+
+        message.textContent =
+            '';
+    }
+
+}
+
+
+function setBlogFormMessage(
+    message,
+    type = 'info'
+) {
+
+    const element =
+        document.getElementById(
+            'blogFormMessage'
+        );
+
+    if (!element) {
+        return;
+    }
+
+    element.textContent =
+        message;
+
+    element.style.display =
+        'block';
+
+    element.style.color =
+        type === 'error'
+            ? '#d90429'
+            : type === 'success'
+                ? '#4f940c'
+                : 'var(--purple-primary)';
+
+}
+
+
+function populateBlogForm(
+    post
+) {
+
+    editingBlogPostId =
+        post?.id || null;
+
+    const title =
+        document.getElementById(
+            'blogTitle'
+        );
+
+    const slug =
+        document.getElementById(
+            'blogSlug'
+        );
+
+    const category =
+        document.getElementById(
+            'blogCategory'
+        );
+
+    const author =
+        document.getElementById(
+            'blogAuthor'
+        );
+
+    const image =
+        document.getElementById(
+            'blogImageUrl'
+        );
+
+    const imageFile =
+        document.getElementById(
+            'blogImageFile'
+        );
+
+    const excerpt =
+        document.getElementById(
+            'blogExcerpt'
+        );
+
+    const content =
+        document.getElementById(
+            'blogContent'
+        );
+
+    const status =
+        document.getElementById(
+            'blogStatus'
+        );
+
+    if (title) {
+        title.value =
+            post?.title || '';
+    }
+
+    if (slug) {
+        slug.value =
+            post?.slug || '';
+    }
+
+    if (category) {
+        category.value =
+            post?.category || '';
+    }
+
+    if (author) {
+        author.value =
+            post?.author ||
+            'ReNew You Health & Wellness';
+    }
+
+    if (image) {
+        image.value =
+            post?.featured_image_url || '';
+    }
+
+    if (imageFile) {
+        imageFile.value = '';
+    }
+
+    setBlogImagePreview(
+        post?.featured_image_url || '',
+        'Current featured image'
+    );
+
+    if (excerpt) {
+        excerpt.value =
+            post?.excerpt || '';
+    }
+
+    if (content) {
+        content.value =
+            post?.content || '';
+    }
+
+    if (status) {
+        status.value =
+            post?.status === 'published'
+                ? 'published'
+                : 'draft';
+    }
+
+    const button =
+        document.getElementById(
+            'saveBlogPostBtn'
+        );
+
+    if (button) {
+        button.textContent =
+            'Update Blog Post';
+    }
+
+    const form =
+        document.getElementById(
+            'blogPostForm'
+        );
+
+    if (form) {
+        form.scrollIntoView({
+            behavior:'smooth',
+            block:'start'
+        });
+    }
+
+}
+
+
+async function fetchBlogPosts() {
+
+    const target =
+        document.getElementById(
+            'blogPostsTarget'
+        );
+
+    try {
+
+        if (target) {
+
+            target.innerHTML = `
+                <div style="
+                    text-align:center;
+                    padding:35px;
+                    color:#666;
+                ">
+                    Loading blog posts...
+                </div>
+            `;
+
+        }
+
+        const {
+            data,
+            error
+        } = await supabaseClientInstance
+            .from('blog_posts')
+            .select(`
+                id,
+                title,
+                slug,
+                excerpt,
+                content,
+                featured_image_url,
+                category,
+                author,
+                status,
+                published_at,
+                created_at,
+                updated_at
+            `)
+            .order(
+                'created_at',
+                {
+                    ascending:false
+                }
+            );
+
+        if (error) {
+            throw error;
+        }
+
+        blogPosts =
+            Array.isArray(data)
+                ? data
+                : [];
+
+        updateBlogMetrics();
+
+        populateBlogPosts();
+
+        return blogPosts;
+
+    } catch (error) {
+
+        console.error(
+            'Blog post retrieval error:',
+            error
+        );
+
+        blogPosts = [];
+
+        updateBlogMetrics();
+
+        if (target) {
+
+            target.innerHTML = `
+                <div style="
+                    color:#d90429;
+                    font-weight:600;
+                    text-align:center;
+                    padding:25px;
+                    border:1px dashed #d90429;
+                    border-radius:12px;
+                    background:#fff5f6;
+                ">
+                    <strong>
+                        Unable to load blog posts
+                    </strong>
+
+                    <br><br>
+
+                    ${escapeHtml(
+                        error?.message ||
+                        'Unknown database error.'
+                    )}
+                </div>
+            `;
+
+        }
+
+        return [];
+
+    }
+
+}
+
+
+function updateBlogMetrics() {
+
+    const total =
+        blogPosts.length;
+
+    const published =
+        blogPosts.filter(
+            post =>
+                String(
+                    post?.status ||
+                    ''
+                ).toLowerCase() ===
+                'published'
+        ).length;
+
+    const drafts =
+        blogPosts.filter(
+            post =>
+                String(
+                    post?.status ||
+                    ''
+                ).toLowerCase() !==
+                'published'
+        ).length;
+
+    setElementText(
+        'blogTotalCount',
+        total
+    );
+
+    setElementText(
+        'blogPublishedCount',
+        published
+    );
+
+    setElementText(
+        'blogDraftCount',
+        drafts
+    );
+
+}
+
+
+function formatBlogDate(
+    value
+) {
+
+    if (!value) {
+        return '';
+    }
+
+    const date =
+        new Date(value);
+
+    if (Number.isNaN(
+        date.getTime()
+    )) {
+        return '';
+    }
+
+    return date.toLocaleDateString(
+        'en-US',
+        {
+            month:'long',
+            day:'numeric',
+            year:'numeric'
+        }
+    );
+
+}
+
+
+function populateBlogPosts() {
+
+    const target =
+        document.getElementById(
+            'blogPostsTarget'
+        );
+
+    if (!target) {
+        return;
+    }
+
+    const query =
+        String(
+            blogSearchQuery ||
+            ''
+        )
+            .toLowerCase()
+            .trim();
+
+    const status =
+        String(
+            blogStatusFilter ||
+            'all'
+        )
+            .toLowerCase();
+
+    const filtered =
+        blogPosts.filter(
+            post => {
+
+                const haystack = [
+                    post?.title,
+                    post?.category,
+                    post?.author,
+                    post?.slug
+                ]
+                    .map(
+                        value =>
+                            String(
+                                value || ''
+                            )
+                                .toLowerCase()
+                    )
+                    .join(' ');
+
+                const matchesSearch =
+                    !query ||
+                    haystack.includes(
+                        query
+                    );
+
+                const postStatus =
+                    String(
+                        post?.status ||
+                        'draft'
+                    )
+                        .toLowerCase();
+
+                const matchesStatus =
+                    status === 'all' ||
+                    postStatus === status;
+
+                return (
+                    matchesSearch &&
+                    matchesStatus
+                );
+
+            }
+        );
+
+    if (
+        filtered.length === 0
+    ) {
+
+        target.innerHTML = `
+            <div style="
+                text-align:center;
+                padding:35px;
+                color:#666;
+                background:#fafafa;
+                border-radius:12px;
+            ">
+                No blog posts match your filters.
+            </div>
+        `;
+
+        return;
+
+    }
+
+    target.innerHTML =
+        filtered
+            .map(
+                post => {
+
+                    const isPublished =
+                        String(
+                            post?.status ||
+                            ''
+                        )
+                            .toLowerCase() ===
+                        'published';
+
+                    const image =
+                        String(
+                            post?.featured_image_url ||
+                            ''
+                        ).trim();
+
+                    const excerpt =
+                        String(
+                            post?.excerpt ||
+                            ''
+                        ).trim();
+
+                    return `
+                        <article
+                            class="blog-post-admin-card"
+                        >
+
+                            ${
+                                image
+                                    ? `
+                                        <img
+                                            src="${escapeHtml(image)}"
+                                            alt="${escapeHtml(
+                                                post?.title ||
+                                                'Blog featured image'
+                                            )}"
+                                            loading="lazy"
+                                            onerror="this.style.display='none';"
+                                        />
+                                      `
+                                    : ''
+                            }
+
+                            <div style="
+                                display:flex;
+                                justify-content:space-between;
+                                align-items:flex-start;
+                                gap:10px;
+                            ">
+
+                                <div>
+
+                                    <div style="
+                                        font-size:.7rem;
+                                        font-weight:800;
+                                        color:${
+                                            isPublished
+                                                ? '#4f940c'
+                                                : '#777'
+                                        };
+                                        text-transform:uppercase;
+                                        margin-bottom:5px;
+                                    ">
+                                        ${
+                                            isPublished
+                                                ? 'Published'
+                                                : 'Draft'
+                                        }
+                                    </div>
+
+                                    <h3 style="
+                                        margin:0 0 6px;
+                                        color:var(--purple-primary);
+                                        font-size:1.05rem;
+                                    ">
+                                        ${escapeHtml(
+                                            post?.title ||
+                                            'Untitled Post'
+                                        )}
+                                    </h3>
+
+                                    <div style="
+                                        color:#777;
+                                        font-size:.75rem;
+                                    ">
+                                        ${
+                                            escapeHtml(
+                                                post?.category ||
+                                                'General'
+                                            )
+                                        }
+                                        ·
+                                        ${
+                                            escapeHtml(
+                                                post?.author ||
+                                                'ReNew You Health & Wellness'
+                                            )
+                                        }
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <p style="
+                                color:#666;
+                                font-size:.84rem;
+                                line-height:1.5;
+                                margin:12px 0 0;
+                            ">
+                                ${escapeHtml(
+                                    excerpt ||
+                                    String(
+                                        post?.content ||
+                                        ''
+                                    ).slice(
+                                        0,
+                                        180
+                                    )
+                                )}
+                            </p>
+
+                            <div style="
+                                color:#999;
+                                font-size:.72rem;
+                                margin-top:10px;
+                            ">
+                                ${
+                                    isPublished
+                                        ? `Published ${escapeHtml(
+                                            formatBlogDate(
+                                                post?.published_at ||
+                                                post?.created_at
+                                            )
+                                        )}`
+                                        : `Created ${escapeHtml(
+                                            formatBlogDate(
+                                                post?.created_at
+                                            )
+                                        )}`
+                                }
+                            </div>
+
+                            <div class="blog-post-admin-actions">
+
+                                <button
+                                    type="button"
+                                    class="blog-admin-button secondary"
+                                    data-blog-edit="${escapeHtml(
+                                        post?.id ||
+                                        ''
+                                    )}"
+                                >
+                                    Edit
+                                </button>
+
+                                <button
+                                    type="button"
+                                    class="blog-admin-button ${
+                                        isPublished
+                                            ? 'secondary'
+                                            : 'success'
+                                    }"
+                                    data-blog-toggle="${escapeHtml(
+                                        post?.id ||
+                                        ''
+                                    )}"
+                                >
+                                    ${
+                                        isPublished
+                                            ? 'Unpublish'
+                                            : 'Publish'
+                                    }
+                                </button>
+
+                                <button
+                                    type="button"
+                                    class="blog-admin-button danger"
+                                    data-blog-delete="${escapeHtml(
+                                        post?.id ||
+                                        ''
+                                    )}"
+                                >
+                                    Delete
+                                </button>
+
+                            </div>
+
+                        </article>
+                    `;
+
+                }
+            )
+            .join('');
+
+}
+
+
+function setBlogImagePreview(
+    imageUrl,
+    fileName = 'Current featured image'
+) {
+    const preview =
+        document.getElementById(
+            'blogImagePreview'
+        );
+
+    const previewImage =
+        document.getElementById(
+            'blogImagePreviewImg'
+        );
+
+    const previewName =
+        document.getElementById(
+            'blogImagePreviewName'
+        );
+
+    if (!preview || !previewImage) {
+        return;
+    }
+
+    const url =
+        String(
+            imageUrl || ''
+        ).trim();
+
+    if (!url) {
+        preview.style.display = 'none';
+        previewImage.removeAttribute('src');
+
+        if (previewName) {
+            previewName.textContent =
+                'No featured image selected';
+        }
+
+        return;
+    }
+
+    previewImage.src = url;
+
+    if (previewName) {
+        previewName.textContent =
+            fileName ||
+            'Featured image selected';
+    }
+
+    preview.style.display = 'block';
+}
+
+
+function handleBlogImageSelection(
+    event
+) {
+    const file =
+        event?.target?.files?.[0];
+
+    if (!file) {
+        return;
+    }
+
+    if (
+        !BLOG_IMAGE_ALLOWED_TYPES.includes(
+            file.type
+        )
+    ) {
+        event.target.value = '';
+
+        showAdminModal(
+            'Please choose a JPG, PNG, WEBP, or GIF image.',
+            'error',
+            'Unsupported Image'
+        );
+
+        return;
+    }
+
+    if (
+        file.size >
+        BLOG_IMAGE_MAX_SIZE
+    ) {
+        event.target.value = '';
+
+        showAdminModal(
+            'The featured image must be 5 MB or smaller.',
+            'error',
+            'Image Too Large'
+        );
+
+        return;
+    }
+
+    const reader =
+        new FileReader();
+
+    reader.onload =
+        function () {
+            setBlogImagePreview(
+                reader.result,
+                file.name
+            );
+        };
+
+    reader.readAsDataURL(file);
+}
+
+
+async function uploadBlogFeaturedImage(
+    file,
+    slug
+) {
+    if (!file) {
+        return '';
+    }
+
+    if (
+        !BLOG_IMAGE_ALLOWED_TYPES.includes(
+            file.type
+        )
+    ) {
+        throw new Error(
+            'Please choose a JPG, PNG, WEBP, or GIF image.'
+        );
+    }
+
+    if (
+        file.size >
+        BLOG_IMAGE_MAX_SIZE
+    ) {
+        throw new Error(
+            'The featured image must be 5 MB or smaller.'
+        );
+    }
+
+    const extension =
+        (
+            file.name
+                .split('.')
+                .pop() ||
+            'jpg'
+        )
+            .toLowerCase()
+            .replace(
+                /[^a-z0-9]/g,
+                ''
+            ) ||
+        'jpg';
+
+    const safeSlug =
+        String(
+            slug ||
+            'blog-post'
+        )
+            .toLowerCase()
+            .replace(
+                /[^a-z0-9-]+/g,
+                '-'
+            )
+            .replace(
+                /-+/g,
+                '-'
+            )
+            .replace(
+                /^-+|-+$/g,
+                ''
+            ) ||
+        'blog-post';
+
+    const randomPart =
+        window.crypto &&
+        typeof window.crypto.randomUUID ===
+            'function'
+            ? window.crypto.randomUUID()
+            : `${Date.now()}-${Math.random()
+                .toString(36)
+                .slice(2, 10)}`;
+
+    const storagePath =
+        `blog/${safeSlug}-${Date.now()}-${randomPart}.${extension}`;
+
+    const {
+        error: uploadError
+    } =
+        await supabaseClientInstance
+            .storage
+            .from(BLOG_IMAGE_BUCKET)
+            .upload(
+                storagePath,
+                file,
+                {
+                    cacheControl:'3600',
+                    contentType:file.type,
+                    upsert:false
+                }
+            );
+
+    if (uploadError) {
+        throw uploadError;
+    }
+
+    const {
+        data: publicUrlData
+    } =
+        supabaseClientInstance
+            .storage
+            .from(BLOG_IMAGE_BUCKET)
+            .getPublicUrl(
+                storagePath
+            );
+
+    const publicUrl =
+        publicUrlData?.publicUrl ||
+        '';
+
+    if (!publicUrl) {
+        throw new Error(
+            'The image uploaded, but its public URL could not be generated.'
+        );
+    }
+
+    return publicUrl;
+}
+
+
+function bindBlogEvents() {
+
+    const form =
+        document.getElementById(
+            'blogPostForm'
+        );
+
+    if (form) {
+
+        form.addEventListener(
+            'submit',
+            saveBlogPost
+        );
+
+    }
+
+
+    const imageFile =
+        document.getElementById(
+            'blogImageFile'
+        );
+
+    if (imageFile) {
+        imageFile.addEventListener(
+            'change',
+            handleBlogImageSelection
+        );
+    }
+
+    const removeImageButton =
+        document.getElementById(
+            'removeBlogImageBtn'
+        );
+
+    if (removeImageButton) {
+        removeImageButton.addEventListener(
+            'click',
+            () => {
+                const imageUrl =
+                    document.getElementById(
+                        'blogImageUrl'
+                    );
+
+                const fileInput =
+                    document.getElementById(
+                        'blogImageFile'
+                    );
+
+                if (imageUrl) {
+                    imageUrl.value = '';
+                }
+
+                if (fileInput) {
+                    fileInput.value = '';
+                }
+
+                setBlogImagePreview('');
+            }
+        );
+    }
+
+
+    const newButton =
+        document.getElementById(
+            'newBlogPostBtn'
+        );
+
+    if (newButton) {
+
+        newButton.addEventListener(
+            'click',
+            resetBlogPostForm
+        );
+
+    }
+
+
+    const refreshButton =
+        document.getElementById(
+            'refreshBlogPostsBtn'
+        );
+
+    if (refreshButton) {
+
+        refreshButton.addEventListener(
+            'click',
+            fetchBlogPosts
+        );
+
+    }
+
+
+    const search =
+        document.getElementById(
+            'blogSearch'
+        );
+
+    if (search) {
+
+        search.addEventListener(
+            'input',
+            event => {
+
+                blogSearchQuery =
+                    String(
+                        event.target?.value ||
+                        ''
+                    )
+                        .toLowerCase()
+                        .trim();
+
+                populateBlogPosts();
+
+            }
+        );
+
+    }
+
+
+    const statusFilter =
+        document.getElementById(
+            'blogStatusFilter'
+        );
+
+    if (statusFilter) {
+
+        statusFilter.addEventListener(
+            'change',
+            event => {
+
+                blogStatusFilter =
+                    String(
+                        event.target?.value ||
+                        'all'
+                    )
+                        .toLowerCase();
+
+                populateBlogPosts();
+
+            }
+        );
+
+    }
+
+
+    const title =
+        document.getElementById(
+            'blogTitle'
+        );
+
+    const slug =
+        document.getElementById(
+            'blogSlug'
+        );
+
+    if (title && slug) {
+
+        title.addEventListener(
+            'input',
+            () => {
+
+                if (
+                    !editingBlogPostId &&
+                    (
+                        !slug.value ||
+                        slug.dataset.manual !==
+                        'true'
+                    )
+                ) {
+
+                    slug.value =
+                        slugifyBlogTitle(
+                            title.value
+                        );
+
+                }
+
+            }
+        );
+
+        slug.addEventListener(
+            'input',
+            () => {
+
+                slug.dataset.manual =
+                    slug.value
+                        .trim()
+                        ? 'true'
+                        : 'false';
+
+            }
+        );
+
+    }
+
+
+    const target =
+        document.getElementById(
+            'blogPostsTarget'
+        );
+
+    if (target) {
+
+        target.addEventListener(
+            'click',
+            event => {
+
+                const editButton =
+                    event.target.closest(
+                        '[data-blog-edit]'
+                    );
+
+                const toggleButton =
+                    event.target.closest(
+                        '[data-blog-toggle]'
+                    );
+
+                const deleteButton =
+                    event.target.closest(
+                        '[data-blog-delete]'
+                    );
+
+                if (editButton) {
+
+                    const id =
+                        editButton.getAttribute(
+                            'data-blog-edit'
+                        );
+
+                    const post =
+                        blogPosts.find(
+                            item =>
+                                String(
+                                    item?.id
+                                ) ===
+                                String(id)
+                        );
+
+                    if (post) {
+                        populateBlogForm(
+                            post
+                        );
+                    }
+
+                    return;
+
+                }
+
+                if (toggleButton) {
+
+                    const id =
+                        toggleButton.getAttribute(
+                            'data-blog-toggle'
+                        );
+
+                    toggleBlogPostStatus(
+                        id
+                    );
+
+                    return;
+
+                }
+
+                if (deleteButton) {
+
+                    const id =
+                        deleteButton.getAttribute(
+                            'data-blog-delete'
+                        );
+
+                    deleteBlogPost(
+                        id
+                    );
+
+                }
+
+            }
+        );
+
+    }
+
+}
+
+
+async function saveBlogPost(
+    event
+) {
+
+    event.preventDefault();
+
+    const title =
+        String(
+            document.getElementById(
+                'blogTitle'
+            )?.value ||
+            ''
+        ).trim();
+
+    const slug =
+        slugifyBlogTitle(
+            document.getElementById(
+                'blogSlug'
+            )?.value ||
+            title
+        );
+
+    const category =
+        String(
+            document.getElementById(
+                'blogCategory'
+            )?.value ||
+            ''
+        ).trim();
+
+    const author =
+        String(
+            document.getElementById(
+                'blogAuthor'
+            )?.value ||
+            'ReNew You Health & Wellness'
+        ).trim();
+
+    const imageUrl =
+        String(
+            document.getElementById(
+                'blogImageUrl'
+            )?.value ||
+            ''
+        ).trim();
+
+    const imageFileInput =
+        document.getElementById(
+            'blogImageFile'
+        );
+
+    const imageFile =
+        imageFileInput?.files?.[0] ||
+        null;
+
+    const excerpt =
+        String(
+            document.getElementById(
+                'blogExcerpt'
+            )?.value ||
+            ''
+        ).trim();
+
+    const content =
+        String(
+            document.getElementById(
+                'blogContent'
+            )?.value ||
+            ''
+        ).trim();
+
+    const status =
+        String(
+            document.getElementById(
+                'blogStatus'
+            )?.value ||
+            'draft'
+        )
+            .toLowerCase();
+
+    if (!title) {
+
+        setBlogFormMessage(
+            'Please enter a blog post title.',
+            'error'
+        );
+
+        return;
+
+    }
+
+    if (!slug) {
+
+        setBlogFormMessage(
+            'Please enter a valid URL slug.',
+            'error'
+        );
+
+        return;
+
+    }
+
+    if (!content) {
+
+        setBlogFormMessage(
+            'Please enter the article content.',
+            'error'
+        );
+
+        return;
+
+    }
+
+    const button =
+        document.getElementById(
+            'saveBlogPostBtn'
+        );
+
+    const wasEditingBlogPost =
+        Boolean(
+            editingBlogPostId
+        );
+
+    if (button) {
+        button.disabled = true;
+        button.textContent =
+            imageFile
+                ? 'Uploading...'
+                : 'Saving...';
+    }
+
+    try {
+
+        let featuredImageUrl =
+            imageUrl || null;
+
+        if (imageFile) {
+            setBlogFormMessage(
+                'Uploading featured image...',
+                'info'
+            );
+
+            featuredImageUrl =
+                await uploadBlogFeaturedImage(
+                    imageFile,
+                    slug
+                );
+        }
+
+        const payload = {
+            title,
+            slug,
+            category:
+                category || null,
+            author:
+                author ||
+                'ReNew You Health & Wellness',
+            featured_image_url:
+                featuredImageUrl,
+            excerpt:
+                excerpt || null,
+            content,
+            status:
+                status === 'published'
+                    ? 'published'
+                    : 'draft',
+            updated_at:
+                new Date().toISOString()
+        };
+
+        if (
+            payload.status ===
+            'published'
+        ) {
+
+            payload.published_at =
+                editingBlogPostId
+                    ? (
+                        blogPosts.find(
+                            post =>
+                                String(
+                                    post?.id
+                                ) ===
+                                String(
+                                    editingBlogPostId
+                                )
+                        )?.published_at ||
+                        new Date().toISOString()
+                    )
+                    : new Date().toISOString();
+
+        } else {
+
+            payload.published_at =
+                null;
+
+        }
+
+        let response;
+
+        if (editingBlogPostId) {
+
+            response =
+                await supabaseClientInstance
+                    .from('blog_posts')
+                    .update(payload)
+                    .eq(
+                        'id',
+                        editingBlogPostId
+                    );
+
+        } else {
+
+            response =
+                await supabaseClientInstance
+                    .from('blog_posts')
+                    .insert(payload);
+
+        }
+
+        if (response.error) {
+            throw response.error;
+        }
+
+        showAdminModal(
+            wasEditingBlogPost
+                ? 'The blog post has been updated successfully.'
+                : 'The blog post has been saved successfully.',
+            'success',
+            wasEditingBlogPost
+                ? 'Blog Post Updated'
+                : 'Blog Post Saved'
+        );
+
+        resetBlogPostForm();
+
+        await fetchBlogPosts();
+
+    } catch (error) {
+
+        console.error(
+            'Blog post save error:',
+            error
+        );
+
+        setBlogFormMessage(
+            error?.message ||
+            'Unable to save the blog post.',
+            'error'
+        );
+
+    } finally {
+
+        if (button) {
+            button.disabled = false;
+
+            button.textContent =
+                wasEditingBlogPost
+                    ? 'Update Blog Post'
+                    : 'Publish / Save Post';
+        }
+
+    }
+
+}
+
+
+async function toggleBlogPostStatus(
+    postId
+) {
+
+    const post =
+        blogPosts.find(
+            item =>
+                String(
+                    item?.id
+                ) ===
+                String(postId)
+        );
+
+    if (!post) {
+        return;
+    }
+
+    const isPublished =
+        String(
+            post?.status ||
+            ''
+        ).toLowerCase() ===
+        'published';
+
+    const nextStatus =
+        isPublished
+            ? 'draft'
+            : 'published';
+
+    try {
+
+        const updatePayload = {
+            status:
+                nextStatus,
+            updated_at:
+                new Date().toISOString(),
+            published_at:
+                nextStatus === 'published'
+                    ? (
+                        post?.published_at ||
+                        new Date().toISOString()
+                    )
+                    : null
+        };
+
+        const {
+            error
+        } =
+            await supabaseClientInstance
+                .from('blog_posts')
+                .update(updatePayload)
+                .eq(
+                    'id',
+                    postId
+                );
+
+        if (error) {
+            throw error;
+        }
+
+        await fetchBlogPosts();
+
+    } catch (error) {
+
+        console.error(
+            'Blog status update error:',
+            error
+        );
+
+        showAdminModal(
+            error?.message ||
+            'Unable to change the blog post status.',
+            'error',
+            'Blog Update Failed'
+        );
+
+    }
+
+}
+
+
+async function deleteBlogPost(
+    postId
+) {
+
+    const post =
+        blogPosts.find(
+            item =>
+                String(
+                    item?.id
+                ) ===
+                String(postId)
+        );
+
+    if (!post) {
+        return;
+    }
+
+    const confirmed =
+        await showAdminConfirmModal(
+            `Delete "${post.title}"?\n\nThis cannot be undone.`,
+            'Delete Blog Post?',
+            'Delete Post',
+            'Cancel',
+            'warning'
+        );
+
+    if (!confirmed) {
+        return;
+    }
+
+    try {
+
+        const {
+            error
+        } =
+            await supabaseClientInstance
+                .from('blog_posts')
+                .delete()
+                .eq(
+                    'id',
+                    postId
+                );
+
+        if (error) {
+            throw error;
+        }
+
+        if (
+            String(
+                editingBlogPostId
+            ) ===
+            String(postId)
+        ) {
+            resetBlogPostForm();
+        }
+
+        await fetchBlogPosts();
+
+        showAdminModal(
+            'The blog post has been deleted.',
+            'success',
+            'Blog Post Deleted'
+        );
+
+    } catch (error) {
+
+        console.error(
+            'Blog delete error:',
+            error
+        );
+
+        showAdminModal(
+            error?.message ||
+            'Unable to delete the blog post.',
+            'error',
+            'Delete Failed'
+        );
+
+    }
+
+}
+
 
     /* =========================================================
        UTILITY FUNCTIONS

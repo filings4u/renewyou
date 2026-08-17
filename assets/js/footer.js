@@ -1427,8 +1427,8 @@ function renderFooterModule() {
 
 
                             <a
-                                href="https://renewyouhealthwellness.com"
-                                target="_blank"
+                                href="blog.html"
+                                
                                 rel="noopener noreferrer"
                             >
 
@@ -1436,7 +1436,7 @@ function renderFooterModule() {
                                     🌐
                                 </span>
 
-                                Website
+                                ReNew You Blog
 
                             </a>
 
