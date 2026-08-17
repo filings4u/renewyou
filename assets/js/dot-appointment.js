@@ -61,6 +61,39 @@ document.addEventListener('DOMContentLoaded', function () {
     // SCHEDULING SETTINGS
     // =========================================================
 
+    /*
+     * DOT drug and alcohol testing agencies.
+     * These are the six DOT agencies listed by the U.S. DOT
+     * for DOT drug/alcohol testing programs:
+     * FAA, FMCSA, FRA, FTA, PHMSA, and USCG.
+     */
+    var DOT_AGENCIES = [
+        {
+            value: 'FAA',
+            label: 'Federal Aviation Administration (FAA)'
+        },
+        {
+            value: 'FMCSA',
+            label: 'Federal Motor Carrier Safety Administration (FMCSA)'
+        },
+        {
+            value: 'FRA',
+            label: 'Federal Railroad Administration (FRA)'
+        },
+        {
+            value: 'FTA',
+            label: 'Federal Transit Administration (FTA)'
+        },
+        {
+            value: 'PHMSA',
+            label: 'Pipeline and Hazardous Materials Safety Administration (PHMSA)'
+        },
+        {
+            value: 'USCG',
+            label: 'United States Coast Guard (USCG)'
+        }
+    ];
+
     var schedulingSettings = {
 
         /*
@@ -330,6 +363,23 @@ document.addEventListener('DOMContentLoaded', function () {
     .dot-form-control::placeholder {
         color: #999;
     }
+
+    .dot-random-agency-field {
+        display: none;
+        margin-top: 0;
+    }
+
+    .dot-random-agency-field.is-visible {
+        display: block;
+    }
+
+    .dot-random-agency-note {
+        margin-top: 7px;
+        color: #777;
+        font-size: 0.74rem;
+        line-height: 1.45;
+    }
+
 
 
     /* =========================================================
@@ -1129,6 +1179,43 @@ document.addEventListener('DOMContentLoaded', function () {
 
                         </div>
 
+                        <div
+                            class="dot-form-field dot-random-agency-field"
+                            id="dotRandomAgencyField"
+                        >
+
+                            <label class="dot-form-label">
+                                DOT Agency
+                            </label>
+
+                            <select
+                                name="dot_agency"
+                                id="dot_agency"
+                                class="dot-form-control"
+                            >
+
+                                <option value="">
+                                    Select DOT agency
+                                </option>
+
+                                ${DOT_AGENCIES.map(
+                                    function (agency) {
+                                        return `
+                                            <option value="${agency.value}">
+                                                ${agency.label}
+                                            </option>
+                                        `;
+                                    }
+                                ).join('')}
+
+                            </select>
+
+                            <div class="dot-random-agency-note">
+                                Required for Random Pool enrollment. Select the DOT agency that regulates your testing program.
+                            </div>
+
+                        </div>
+
                         <div class="dot-calendar-section">
 
                             <div class="dot-section-title">
@@ -1339,6 +1426,23 @@ document.addEventListener('DOMContentLoaded', function () {
             );
         }
 
+        var testingReasonSelect =
+            document.getElementById(
+                'testing_reason'
+            );
+
+        if (testingReasonSelect) {
+
+            testingReasonSelect.addEventListener(
+                'change',
+                handleTestingReasonChange
+            );
+
+            handleTestingReasonChange();
+
+        }
+
+
         if (form) {
 
             form.addEventListener(
@@ -1347,6 +1451,57 @@ document.addEventListener('DOMContentLoaded', function () {
             );
         }
     }
+
+    // =========================================================
+    // RANDOM POOL / DOT AGENCY UI
+    // =========================================================
+
+    function handleTestingReasonChange() {
+
+        var testingReasonSelect =
+            document.getElementById(
+                'testing_reason'
+            );
+
+        var agencyField =
+            document.getElementById(
+                'dotRandomAgencyField'
+            );
+
+        var agencySelect =
+            document.getElementById(
+                'dot_agency'
+            );
+
+        if (
+            !testingReasonSelect ||
+            !agencyField ||
+            !agencySelect
+        ) {
+            return;
+        }
+
+        var isRandom =
+            testingReasonSelect.value ===
+            'Random-Pool';
+
+        agencyField.classList.toggle(
+            'is-visible',
+            isRandom
+        );
+
+        agencySelect.required =
+            isRandom;
+
+        if (!isRandom) {
+
+            agencySelect.value =
+                '';
+
+        }
+
+    }
+
 
     // =========================================================
     // LOAD SCHEDULING SETTINGS
@@ -2665,6 +2820,13 @@ function isDateUnavailable(
                 ) || ''
             ).trim();
 
+        var dotAgency =
+            String(
+                formData.get(
+                    'dot_agency'
+                ) || ''
+            ).trim();
+
         if (
             !clientName ||
             !cdlNumber ||
@@ -2677,6 +2839,28 @@ function isDateUnavailable(
                 'Please complete all required driver information fields.',
                 'error'
             );
+
+            return;
+        }
+
+        if (
+            testingReason === 'Random-Pool' &&
+            !dotAgency
+        ) {
+
+            setFeedback(
+                'Please select the DOT agency for Random Pool enrollment.',
+                'error'
+            );
+
+            var agencySelect =
+                document.getElementById(
+                    'dot_agency'
+                );
+
+            if (agencySelect) {
+                agencySelect.focus();
+            }
 
             return;
         }
@@ -2771,6 +2955,11 @@ function isDateUnavailable(
             testing_reason:
                 testingReason,
 
+            dot_agency:
+                testingReason === 'Random-Pool'
+                    ? dotAgency
+                    : null,
+
             booking_date:
                 selectedDate,
 
@@ -2844,12 +3033,77 @@ function isDateUnavailable(
                 );
             }
 
+            /*
+             * If the customer selected Random Pool, add them to
+             * the DOT random pool after the appointment succeeds.
+             *
+             * The appointment itself is already safely created by
+             * the submit-dot-appointment Edge Function.
+             */
+            if (
+                testingReason === 'Random-Pool'
+            ) {
+
+                try {
+
+                    var {
+                        error: randomPoolError
+                    } =
+                        await supabaseClient
+                            .from(
+                                'random_pool_members'
+                            )
+                            .insert({
+                                pool_type: 'DOT',
+                                employee_name: clientName,
+                                employee_identifier: null,
+                                cdl_number: cdlNumber,
+                                employer_name: null,
+                                email: clientEmail.toLowerCase(),
+                                phone: clientPhone,
+                                dot_agency: dotAgency,
+                                status: 'active',
+                                drug_eligible: true,
+                                alcohol_eligible: true,
+                                notes: 'Added automatically from customer DOT Random Pool appointment.',
+                                date_added: new Date().toISOString()
+                            });
+
+                    if (randomPoolError) {
+                        throw randomPoolError;
+                    }
+
+                    console.log(
+                        'DOT Random Pool enrollment completed:',
+                        clientName,
+                        dotAgency
+                    );
+
+                } catch (randomPoolError) {
+
+                    /*
+                     * Do not undo the successfully created appointment.
+                     * Surface a console warning so staff can address an
+                     * RLS/policy issue if anonymous inserts are not enabled.
+                     */
+                    console.warn(
+                        'DOT appointment succeeded, but Random Pool enrollment failed:',
+                        randomPoolError
+                    );
+
+                }
+
+            }
+
+
             setFeedback(
                 '✓ Your appointment has been successfully scheduled. Please check your email for confirmation details.',
                 'success'
             );
 
             form.reset();
+
+            handleTestingReasonChange();
 
             selectedDate =
                 '';

@@ -612,6 +612,7 @@ let randomPoolSearchQuery = '';
 let randomPoolLoading = false;
 let editingRandomPoolMemberId = null;
 let randomPoolSettings = [];
+let randomPoolSyncing = false;
 
 let schedulingSettings = {
     id: 'dot_config',
@@ -3453,6 +3454,12 @@ function renderDashboardStructure() {
 
     bindDashboardEvents();
     bindAdminPageNavigation();
+
+    /*
+     * Random Pool controls are rendered dynamically.
+     * Bind them after the dashboard HTML exists.
+     */
+    bindRandomPoolEvents();
 }
 
 /* =========================================================
@@ -3749,7 +3756,9 @@ function isPastAppointmentSlot(
                 event => {
 
                     searchQuery =
-                        event.target.value
+                        String(
+                            event.target?.value || ''
+                        )
                             .toLowerCase()
                             .trim();
 
@@ -3835,7 +3844,9 @@ if (mailingListSearch) {
         event => {
 
             mailingListSearchQuery =
-                event.target.value
+                String(
+                    event.target?.value || ''
+                )
                     .toLowerCase()
                     .trim();
 
@@ -3909,121 +3920,129 @@ if (
 
 /* =========================================================
    RANDOM POOL EVENTS
+   Bound after the dashboard is dynamically rendered.
 ========================================================= */
 
-const randomPoolSearch =
-    document.getElementById(
-        'randomPoolSearch'
-    );
-
-if (randomPoolSearch) {
-
-    randomPoolSearch.addEventListener(
-        'input',
-        event => {
-
-            randomPoolSearchQuery =
-                event.target.value
-                    .toLowerCase()
-                    .trim();
-
-            populateRandomPool();
-
-        }
-    );
-
 }
 
+/* =========================================================
+   RANDOM POOL EVENTS
+   DYNAMIC DASHBOARD BINDINGS
+========================================================= */
 
-const addRandomPoolMemberButton =
-    document.getElementById(
-        'addRandomPoolMemberBtn'
-    );
+function bindRandomPoolEvents() {
 
-if (addRandomPoolMemberButton) {
+    const randomPoolSearch =
+        document.getElementById(
+            'randomPoolSearch'
+        );
 
-    addRandomPoolMemberButton.addEventListener(
-        'click',
-        () => openRandomPoolMemberForm()
-    );
+    if (randomPoolSearch) {
 
-}
+        randomPoolSearch.oninput =
+            event => {
 
+                randomPoolSearchQuery =
+                    String(
+                        event.target?.value || ''
+                    )
+                        .toLowerCase()
+                        .trim();
 
-const refreshRandomPoolButton =
-    document.getElementById(
-        'refreshRandomPoolBtn'
-    );
+                populateRandomPool();
 
-if (refreshRandomPoolButton) {
+            };
 
-    refreshRandomPoolButton.addEventListener(
-        'click',
-        fetchRandomPoolMembers
-    );
-
-}
-
-
-document
-    .querySelectorAll(
-        '[data-random-pool-type]'
-    )
-    .forEach(
-        button => {
-
-            button.addEventListener(
-                'click',
-                () => {
-
-                    const poolType =
-                        button.getAttribute(
-                            'data-random-pool-type'
-                        );
-
-                    if (
-                        poolType !== 'DOT' &&
-                        poolType !== 'NON_DOT'
-                    ) {
-                        return;
-                    }
-
-                    activeRandomPoolType =
-                        poolType;
-
-                    randomPoolSearchQuery =
-                        '';
-
-                    const search =
-                        document.getElementById(
-                            'randomPoolSearch'
-                        );
-
-                    if (search) {
-                        search.value = '';
-                    }
-
-                    document
-                        .querySelectorAll(
-                            '[data-random-pool-type]'
-                        )
-                        .forEach(
-                            tab => {
-                                tab.classList.toggle(
-                                    'active',
-                                    tab === button
-                                );
-                            }
-                        );
-
-                    populateRandomPool();
-
-                }
-            );
-
-        }
-    );
     }
+
+
+    const addRandomPoolMemberButton =
+        document.getElementById(
+            'addRandomPoolMemberBtn'
+        );
+
+    if (addRandomPoolMemberButton) {
+
+        addRandomPoolMemberButton.onclick =
+            () => openRandomPoolMemberForm();
+
+    }
+
+
+    const refreshRandomPoolButton =
+        document.getElementById(
+            'refreshRandomPoolBtn'
+        );
+
+    if (refreshRandomPoolButton) {
+
+        refreshRandomPoolButton.onclick =
+            () => fetchRandomPoolMembers();
+
+    }
+
+
+    document
+        .querySelectorAll(
+            '[data-random-pool-type]'
+        )
+        .forEach(
+            button => {
+
+                button.onclick =
+                    () => {
+
+                        const poolType =
+                            button.getAttribute(
+                                'data-random-pool-type'
+                            );
+
+                        if (
+                            poolType !== 'DOT' &&
+                            poolType !== 'NON_DOT'
+                        ) {
+                            return;
+                        }
+
+                        activeRandomPoolType =
+                            poolType;
+
+                        randomPoolSearchQuery =
+                            '';
+
+                        const search =
+                            document.getElementById(
+                                'randomPoolSearch'
+                            );
+
+                        if (search) {
+                            search.value = '';
+                        }
+
+                        document
+                            .querySelectorAll(
+                                '[data-random-pool-type]'
+                            )
+                            .forEach(
+                                tab => {
+
+                                    tab.classList.toggle(
+                                        'active',
+                                        tab === button
+                                    );
+
+                                }
+                            );
+
+                        populateRandomPool();
+
+                    };
+
+            }
+        );
+
+}
+
 
     /* =========================================================
        LOAD SCHEDULING SETTINGS
@@ -6762,7 +6781,9 @@ function populateWellnessOfferCodes() {
                             );
 
                     const currentTab =
-                        activeFilter
+                        String(
+                            activeFilter || 'All'
+                        )
                             .toLowerCase()
                             .replace(
                                 /[\s_-]/g,
@@ -6771,7 +6792,9 @@ function populateWellnessOfferCodes() {
 
                     const matchesTab =
                         (
-                            activeFilter === 'All' ||
+                            String(
+                                activeFilter || 'All'
+                            ) === 'All' ||
                             databaseReason ===
                                 currentTab
                         );
@@ -7065,13 +7088,14 @@ async function fetchRandomPoolMembers() {
 
     try {
 
+        /*
+         * Load the actual random_pool_members table first.
+         */
         const {
             data,
             error
         } = await supabaseClientInstance
-
             .from('random_pool_members')
-
             .select(`
                 id,
                 pool_type,
@@ -7091,7 +7115,6 @@ async function fetchRandomPoolMembers() {
                 created_at,
                 updated_at
             `)
-
             .order(
                 'employee_name',
                 {
@@ -7099,19 +7122,92 @@ async function fetchRandomPoolMembers() {
                 }
             );
 
-
         if (error) {
             throw error;
         }
 
-
         randomPoolMembers =
             Array.isArray(data)
-                ? data
+                ? data.map(
+                    normalizeRandomPoolMember
+                )
                 : [];
 
 
+        /*
+         * Repair the connection between the public DOT
+         * appointment form and the admin random pool.
+         *
+         * If the public page could not insert into
+         * random_pool_members because of RLS, the appointment
+         * itself still exists in dot_appointments. An
+         * authenticated admin session can safely synchronize
+         * that appointment into the real pool.
+         */
+        await syncRandomPoolAppointments();
+
+
+        /*
+         * Re-read the source of truth after synchronization.
+         */
+        const refreshed =
+            await supabaseClientInstance
+                .from('random_pool_members')
+                .select(`
+                    id,
+                    pool_type,
+                    employee_name,
+                    employee_identifier,
+                    cdl_number,
+                    employer_name,
+                    email,
+                    phone,
+                    dot_agency,
+                    drug_eligible,
+                    alcohol_eligible,
+                    status,
+                    date_added,
+                    date_removed,
+                    notes,
+                    created_at,
+                    updated_at
+                `)
+                .order(
+                    'employee_name',
+                    {
+                        ascending:true
+                    }
+                );
+
+        if (refreshed.error) {
+            throw refreshed.error;
+        }
+
+        randomPoolMembers =
+            Array.isArray(refreshed.data)
+                ? refreshed.data.map(
+                    normalizeRandomPoolMember
+                )
+                : [];
+
+
+        /*
+         * Keep the dashboard cards connected to the appointment
+         * system even if the public appointment insert into
+         * random_pool_members was blocked by RLS.
+         *
+         * The appointment itself is still a valid source for the
+         * Random Pool dashboard. When the admin can write to the
+         * pool table, syncRandomPoolAppointments() creates the
+         * permanent row. When it cannot, this fallback keeps the
+         * member visible in the current dashboard session.
+         */
+        await mergeRandomPoolAppointmentFallbacks();
+
+
         await loadRandomPoolSettings();
+
+        updateRandomPoolMetrics();
 
         populateRandomPool();
 
@@ -7125,7 +7221,6 @@ async function fetchRandomPoolMembers() {
         );
 
         randomPoolMembers = [];
-
 
         if (target) {
 
@@ -7163,6 +7258,704 @@ async function fetchRandomPoolMembers() {
     } finally {
 
         randomPoolLoading = false;
+
+    }
+}
+
+
+/* =========================================================
+   RANDOM POOL APPOINTMENT FALLBACK
+========================================================= */
+
+async function mergeRandomPoolAppointmentFallbacks() {
+
+    try {
+
+        const {
+            data,
+            error
+        } = await supabaseClientInstance
+            .from('dot_appointments')
+            .select(`
+                id,
+                client_name,
+                cdl_number,
+                client_email,
+                client_phone,
+                testing_reason,
+                dot_agency,
+                created_at
+            `)
+            .order(
+                'created_at',
+                {
+                    ascending:true
+                }
+            );
+
+
+        if (error) {
+            throw error;
+        }
+
+
+        const randomAppointments =
+            (
+                Array.isArray(data)
+                    ? data
+                    : []
+            ).filter(
+                appointment => {
+
+                    const reason =
+                        String(
+                            appointment?.testing_reason ||
+                            ''
+                        )
+                            .trim()
+                            .toLowerCase()
+                            .replace(
+                                /[\s_-]+/g,
+                                ''
+                            );
+
+
+                    return [
+                        'random',
+                        'randompool',
+                        'randomtestingpool',
+                        'randomtesting'
+                    ].includes(
+                        reason
+                    );
+
+                }
+            );
+
+
+        for (
+            const appointment
+            of randomAppointments
+        ) {
+
+            const name =
+                String(
+                    appointment?.client_name ||
+                    ''
+                ).trim();
+
+
+            if (!name) {
+                continue;
+            }
+
+
+            const email =
+                String(
+                    appointment?.client_email ||
+                    ''
+                )
+                    .trim()
+                    .toLowerCase();
+
+
+            const cdl =
+                String(
+                    appointment?.cdl_number ||
+                    ''
+                ).trim();
+
+
+            const phone =
+                String(
+                    appointment?.client_phone ||
+                    ''
+                ).trim();
+
+
+            const exists =
+                randomPoolMembers.some(
+                    member => {
+
+                        const memberEmail =
+                            String(
+                                member?.email ||
+                                ''
+                            )
+                                .trim()
+                                .toLowerCase();
+
+
+                        const memberCdl =
+                            String(
+                                member?.cdl_number ||
+                                ''
+                            ).trim();
+
+
+                        const memberName =
+                            String(
+                                member?.employee_name ||
+                                ''
+                            )
+                                .trim()
+                                .toLowerCase();
+
+
+                        const memberPhone =
+                            String(
+                                member?.phone ||
+                                ''
+                            ).trim();
+
+
+                        if (
+                            email &&
+                            memberEmail &&
+                            email === memberEmail
+                        ) {
+                            return true;
+                        }
+
+
+                        if (
+                            cdl &&
+                            memberCdl &&
+                            cdl === memberCdl
+                        ) {
+                            return true;
+                        }
+
+
+                        return (
+                            memberName ===
+                                name
+                                    .toLowerCase() &&
+                            Boolean(phone) &&
+                            Boolean(memberPhone) &&
+                            phone === memberPhone
+                        );
+
+                    }
+                );
+
+
+            if (exists) {
+                continue;
+            }
+
+
+            /*
+             * Virtual fallback row.
+             *
+             * This is intentionally NOT inserted a second time.
+             * It only guarantees that the dashboard reflects the
+             * appointment when the public-to-pool insert was blocked.
+             */
+            randomPoolMembers.push(
+                normalizeRandomPoolMember({
+                    id:
+                        `appointment-fallback-${appointment.id}`,
+
+                    pool_type:
+                        'DOT',
+
+                    employee_name:
+                        name,
+
+                    employee_identifier:
+                        null,
+
+                    cdl_number:
+                        cdl || null,
+
+                    employer_name:
+                        null,
+
+                    email:
+                        email || null,
+
+                    phone:
+                        phone || null,
+
+                    dot_agency:
+                        String(
+                            appointment?.dot_agency ||
+                            ''
+                        ).trim() || null,
+
+                    drug_eligible:
+                        true,
+
+                    alcohol_eligible:
+                        true,
+
+                    status:
+                        'active',
+
+                    date_added:
+                        appointment?.created_at
+                            ? String(
+                                appointment.created_at
+                            ).slice(
+                                0,
+                                10
+                            )
+                            : null,
+
+                    date_removed:
+                        null,
+
+                    notes:
+                        'Displayed from DOT Random Pool appointment. Permanent pool row pending database synchronization.',
+
+                    created_at:
+                        appointment?.created_at ||
+                        null,
+
+                    updated_at:
+                        null
+
+                })
+            );
+
+        }
+
+    } catch (error) {
+
+        /*
+         * Do not break the Random Pool dashboard if the
+         * appointment table cannot be queried.
+         */
+        console.warn(
+            'Random Pool appointment fallback unavailable:',
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   RANDOM POOL DATA NORMALIZATION
+========================================================= */
+
+function normalizeRandomPoolType(
+    value
+) {
+
+    const normalized =
+        String(
+            value || ''
+        )
+            .trim()
+            .toUpperCase()
+            .replace(
+                /[\s-]+/g,
+                '_'
+            );
+
+    if (
+        normalized === 'NONDOT' ||
+        normalized === 'NON_DOT'
+    ) {
+        return 'NON_DOT';
+    }
+
+    return normalized === 'DOT'
+        ? 'DOT'
+        : normalized;
+
+}
+
+
+function normalizeRandomPoolStatus(
+    value
+) {
+
+    const normalized =
+        String(
+            value || 'active'
+        )
+            .trim()
+            .toLowerCase();
+
+    if (
+        normalized === 'inactive' ||
+        normalized === 'removed'
+    ) {
+        return normalized;
+    }
+
+    return 'active';
+
+}
+
+
+function normalizeRandomPoolBoolean(
+    value
+) {
+
+    if (
+        value === true ||
+        value === 1 ||
+        value === '1'
+    ) {
+        return true;
+    }
+
+    return String(
+        value || ''
+    )
+        .trim()
+        .toLowerCase() === 'true';
+
+}
+
+
+function normalizeRandomPoolMember(
+    member
+) {
+
+    return {
+        ...member,
+        pool_type:
+            normalizeRandomPoolType(
+                member?.pool_type
+            ),
+        status:
+            normalizeRandomPoolStatus(
+                member?.status
+            ),
+        drug_eligible:
+            normalizeRandomPoolBoolean(
+                member?.drug_eligible
+            ),
+        alcohol_eligible:
+            normalizeRandomPoolBoolean(
+                member?.alcohol_eligible
+            )
+    };
+
+}
+
+
+/* =========================================================
+   SYNC RANDOM-POOL APPOINTMENTS INTO THE POOL
+========================================================= */
+
+async function syncRandomPoolAppointments() {
+
+    if (randomPoolSyncing) {
+        return;
+    }
+
+    randomPoolSyncing = true;
+
+    try {
+
+        const {
+            data: appointmentRows,
+            error
+        } = await supabaseClientInstance
+            .from('dot_appointments')
+            .select(`
+                id,
+                client_name,
+                cdl_number,
+                client_email,
+                client_phone,
+                testing_reason,
+                dot_agency,
+                created_at
+            `)
+            .order(
+                'created_at',
+                {
+                    ascending:true
+                }
+            );
+
+        if (error) {
+            throw error;
+        }
+
+        const randomAppointments =
+            (
+                Array.isArray(
+                    appointmentRows
+                )
+                    ? appointmentRows
+                    : []
+            ).filter(
+                appointment => {
+
+                    const reason =
+                        String(
+                            appointment.testing_reason ||
+                            ''
+                        )
+                            .trim()
+                            .toLowerCase()
+                            .replace(
+                                /[\s_-]+/g,
+                                ''
+                            );
+
+                    return [
+                        'random',
+                        'randompool',
+                        'randomtestingpool',
+                        'randomtesting'
+                    ].includes(
+                        reason
+                    );
+
+                }
+            );
+
+
+        if (
+            randomAppointments.length === 0
+        ) {
+            return;
+        }
+
+
+        for (
+            const appointment
+            of randomAppointments
+        ) {
+
+            const name =
+                String(
+                    appointment.client_name ||
+                    ''
+                ).trim();
+
+            const cdl =
+                String(
+                    appointment.cdl_number ||
+                    ''
+                ).trim();
+
+            const email =
+                String(
+                    appointment.client_email ||
+                    ''
+                )
+                    .trim()
+                    .toLowerCase();
+
+            const phone =
+                String(
+                    appointment.client_phone ||
+                    ''
+                ).trim();
+
+
+            if (!name) {
+                continue;
+            }
+
+
+            const alreadyExists =
+                randomPoolMembers.some(
+                    member => {
+
+                        const memberEmail =
+                            String(
+                                member.email ||
+                                ''
+                            )
+                                .trim()
+                                .toLowerCase();
+
+                        const memberCdl =
+                            String(
+                                member.cdl_number ||
+                                ''
+                            ).trim();
+
+                        const memberName =
+                            String(
+                                member.employee_name ||
+                                ''
+                            )
+                                .trim()
+                                .toLowerCase();
+
+                        const memberPhone =
+                            String(
+                                member.phone ||
+                                ''
+                            ).trim();
+
+
+                        if (
+                            email &&
+                            memberEmail &&
+                            email === memberEmail
+                        ) {
+                            return true;
+                        }
+
+
+                        if (
+                            cdl &&
+                            memberCdl &&
+                            cdl === memberCdl
+                        ) {
+                            return true;
+                        }
+
+
+                        const normalizedAppointmentName =
+                            String(
+                                name || ''
+                            )
+                                .trim()
+                                .toLowerCase();
+
+                        return (
+                            memberName ===
+                            normalizedAppointmentName &&
+                            Boolean(phone) &&
+                            Boolean(memberPhone) &&
+                            phone === memberPhone
+                        );
+
+                    }
+                );
+
+
+            if (alreadyExists) {
+                continue;
+            }
+
+
+            const {
+                error: insertError
+            } = await supabaseClientInstance
+                .from('random_pool_members')
+                .insert({
+                    pool_type:'DOT',
+                    employee_name:name,
+                    employee_identifier:null,
+                    cdl_number:
+                        cdl || null,
+                    employer_name:null,
+                    email:
+                        email || null,
+                    phone:
+                        phone || null,
+                    dot_agency:
+                        String(
+                            appointment.dot_agency ||
+                            ''
+                        ).trim() || null,
+                    status:'active',
+                    drug_eligible:true,
+                    alcohol_eligible:true,
+                    notes:
+                        'Automatically synced from DOT Random Pool appointment.',
+                    date_added:
+                        appointment.created_at
+                            ? String(
+                                appointment.created_at
+                            ).slice(
+                                0,
+                                10
+                            )
+                            : new Date()
+                                .toISOString()
+                                .slice(
+                                    0,
+                                    10
+                                )
+                });
+
+
+            if (insertError) {
+
+                console.warn(
+                    'Random Pool appointment sync failed:',
+                    {
+                        appointmentId:
+                            appointment.id,
+                        error:
+                            insertError
+                    }
+                );
+
+                continue;
+
+            }
+
+            /*
+             * Add it to the local array immediately so the
+             * metrics can reflect the synchronization during
+             * this refresh cycle as well.
+             */
+            randomPoolMembers.push(
+                normalizeRandomPoolMember({
+                    id:
+                        `appointment-sync-${appointment.id}`,
+                    pool_type:'DOT',
+                    employee_name:name,
+                    employee_identifier:null,
+                    cdl_number:
+                        cdl || null,
+                    employer_name:null,
+                    email:
+                        email || null,
+                    phone:
+                        phone || null,
+                    dot_agency:
+                        String(
+                            appointment.dot_agency ||
+                            ''
+                        ).trim() || null,
+                    status:'active',
+                    drug_eligible:true,
+                    alcohol_eligible:true,
+                    date_added:
+                        appointment.created_at
+                            ? String(
+                                appointment.created_at
+                            ).slice(
+                                0,
+                                10
+                            )
+                            : null,
+                    date_removed:null,
+                    notes:
+                        'Automatically synced from DOT Random Pool appointment.',
+                    created_at:
+                        appointment.created_at ||
+                        null,
+                    updated_at:null
+                })
+            );
+
+        }
+
+    } catch (error) {
+
+        /*
+         * Synchronization failure should never prevent the
+         * authenticated dashboard from displaying the existing
+         * random pool.
+         */
+        console.warn(
+            'Random Pool appointment synchronization unavailable:',
+            error
+        );
+
+    } finally {
+
+        randomPoolSyncing = false;
 
     }
 
@@ -7245,7 +8038,9 @@ function updateRandomPoolMetrics() {
     const members =
         randomPoolMembers.filter(
             member =>
-                member.pool_type ===
+                normalizeRandomPoolType(
+                    member?.pool_type
+                ) ===
                 activeRandomPoolType
         );
 
@@ -7253,28 +8048,36 @@ function updateRandomPoolMetrics() {
     const active =
         members.filter(
             member =>
-                member.status === 'active'
+                normalizeRandomPoolStatus(
+                    member?.status
+                ) === 'active'
         );
 
 
     const drugEligible =
         active.filter(
             member =>
-                member.drug_eligible === true
+                normalizeRandomPoolBoolean(
+                    member?.drug_eligible
+                ) === true
         );
 
 
     const alcoholEligible =
         active.filter(
             member =>
-                member.alcohol_eligible === true
+                normalizeRandomPoolBoolean(
+                    member?.alcohol_eligible
+                ) === true
         );
 
 
     const inactive =
         members.filter(
             member =>
-                member.status !== 'active'
+                normalizeRandomPoolStatus(
+                    member?.status
+                ) !== 'active'
         );
 
 
@@ -7297,7 +8100,6 @@ function updateRandomPoolMetrics() {
         'randomPoolInactiveCount',
         inactive.length
     );
-
 
     setElementText(
         'randomPoolCurrentType',
@@ -7334,7 +8136,11 @@ function updateRandomPoolMetrics() {
         setting?.dot_agency ||
         (
             activeRandomPoolType === 'DOT'
-                ? 'Not configured'
+                ? (
+                    active.length
+                        ? 'Multiple / Member Specific'
+                        : 'Not configured'
+                )
                 : 'N/A'
         )
     );
@@ -7357,7 +8163,9 @@ function populateRandomPool() {
     const poolMembers =
         randomPoolMembers.filter(
             member =>
-                member.pool_type ===
+                normalizeRandomPoolType(
+                    member?.pool_type
+                ) ===
                 activeRandomPoolType
         );
 
@@ -7484,8 +8292,9 @@ function renderRandomPoolMemberCard(
 ) {
 
     const status =
-        member.status ||
-        'active';
+        normalizeRandomPoolStatus(
+            member?.status
+        );
 
 
     const statusStyles =
