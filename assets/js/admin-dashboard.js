@@ -602,6 +602,17 @@ let wellnessOfferCodes = [];
 
 let wellnessOfferSearchQuery = '';
 
+/* =========================================================
+   RANDOM POOL STATE
+========================================================= */
+
+let randomPoolMembers = [];
+let activeRandomPoolType = 'DOT';
+let randomPoolSearchQuery = '';
+let randomPoolLoading = false;
+let editingRandomPoolMemberId = null;
+let randomPoolSettings = [];
+
 let schedulingSettings = {
     id: 'dot_config',
     buffer_minutes: 30,
@@ -744,7 +755,8 @@ async function checkAuthenticationGuard() {
          */
         await Promise.allSettled([
             fetchAppointments(),
-            fetchMailingList()
+            fetchMailingList(),
+            fetchRandomPoolMembers()
         ]);
 
         /*
@@ -1008,9 +1020,13 @@ async function checkAuthenticationGuard() {
 
             await loadSchedulingSystemSettings();
 
-            await fetchAppointments();
+            await Promise.allSettled([
+                fetchAppointments(),
+                fetchRandomPoolMembers()
+            ]);
 
             renderScheduleManager();
+            renderRandomPoolPage();
         });
     }
 
@@ -1189,6 +1205,23 @@ function renderDashboardStructure() {
                 background:var(--purple-primary)!important;
                 color:#fff!important;
             }
+
+            /* =====================================================
+               RANDOM POOL
+            ===================================================== */
+
+            [data-random-member-card] > div:first-child {
+                flex-direction:column;
+            }
+
+            [data-random-member-card] > div:first-child > div:last-child {
+                width:100%;
+            }
+
+            [data-random-member-card] > div:first-child > div:last-child button {
+                flex:1;
+            }
+
 
             /* =====================================================
                SCHEDULE
@@ -2095,6 +2128,14 @@ function renderDashboardStructure() {
 
     <button
         class="admin-page-tab"
+        data-page="randomPoolPage"
+    >
+        🎲 Random Pool
+    </button>
+
+
+    <button
+        class="admin-page-tab"
         data-page="schedulePage"
     >
         📅 Schedule
@@ -2704,6 +2745,478 @@ function renderDashboardStructure() {
 
 </section>
 
+
+            <!-- =================================================
+                 RANDOM POOL PAGE
+            ================================================= -->
+
+            <section
+                id="randomPoolPage"
+                class="admin-page"
+            >
+
+                <div class="admin-card" style="margin-bottom:20px;">
+
+                    <div style="
+                        display:flex;
+                        justify-content:space-between;
+                        align-items:flex-start;
+                        gap:18px;
+                        flex-wrap:wrap;
+                    ">
+
+                        <div>
+                            <h2 style="
+                                margin:0 0 7px 0;
+                                font-size:1.3rem;
+                            ">
+                                🎲 Random Testing Pool
+                            </h2>
+
+                            <p style="
+                                margin:0;
+                                color:#666;
+                                font-size:.88rem;
+                                line-height:1.55;
+                                max-width:760px;
+                            ">
+                                Manage separate DOT and NON-DOT random
+                                testing populations. Add, edit, activate,
+                                or deactivate pool members.
+                            </p>
+                        </div>
+
+                        <button
+                            type="button"
+                            id="addRandomPoolMemberBtn"
+                            class="schedule-action-btn schedule-primary-btn"
+                            style="
+                                min-height:44px;
+                                padding:11px 18px;
+                                white-space:nowrap;
+                            "
+                        >
+                            + Add Pool Member
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="dash-metrics-grid"
+                    style="margin-bottom:20px;"
+                >
+
+                    <div style="
+                        background:#fff;
+                        padding:18px;
+                        border-radius:14px;
+                        border:1px solid rgba(138,52,159,.06);
+                        box-shadow:0 4px 15px rgba(0,0,0,.03);
+                    ">
+                        <span style="
+                            display:block;
+                            font-size:.72rem;
+                            font-weight:700;
+                            color:#666;
+                            text-transform:uppercase;
+                        ">
+                            Active Members
+                        </span>
+
+                        <h3
+                            id="randomPoolActiveCount"
+                            style="
+                                margin:6px 0 0;
+                                font-size:1.7rem;
+                                color:var(--purple-primary);
+                                font-weight:800;
+                            "
+                        >
+                            0
+                        </h3>
+                    </div>
+
+
+                    <div style="
+                        background:#fff;
+                        padding:18px;
+                        border-radius:14px;
+                        border:1px solid rgba(79,148,12,.08);
+                        box-shadow:0 4px 15px rgba(0,0,0,.03);
+                    ">
+                        <span style="
+                            display:block;
+                            font-size:.72rem;
+                            font-weight:700;
+                            color:#666;
+                            text-transform:uppercase;
+                        ">
+                            Drug Eligible
+                        </span>
+
+                        <h3
+                            id="randomPoolDrugCount"
+                            style="
+                                margin:6px 0 0;
+                                font-size:1.7rem;
+                                color:#4f940c;
+                                font-weight:800;
+                            "
+                        >
+                            0
+                        </h3>
+                    </div>
+
+
+                    <div style="
+                        background:#fff;
+                        padding:18px;
+                        border-radius:14px;
+                        border:1px solid rgba(0,119,182,.08);
+                        box-shadow:0 4px 15px rgba(0,0,0,.03);
+                    ">
+                        <span style="
+                            display:block;
+                            font-size:.72rem;
+                            font-weight:700;
+                            color:#666;
+                            text-transform:uppercase;
+                        ">
+                            Alcohol Eligible
+                        </span>
+
+                        <h3
+                            id="randomPoolAlcoholCount"
+                            style="
+                                margin:6px 0 0;
+                                font-size:1.7rem;
+                                color:#0077b6;
+                                font-weight:800;
+                            "
+                        >
+                            0
+                        </h3>
+                    </div>
+
+
+                    <div style="
+                        background:#fff;
+                        padding:18px;
+                        border-radius:14px;
+                        border:1px solid rgba(217,4,41,.08);
+                        box-shadow:0 4px 15px rgba(0,0,0,.03);
+                    ">
+                        <span style="
+                            display:block;
+                            font-size:.72rem;
+                            font-weight:700;
+                            color:#666;
+                            text-transform:uppercase;
+                        ">
+                            Inactive / Removed
+                        </span>
+
+                        <h3
+                            id="randomPoolInactiveCount"
+                            style="
+                                margin:6px 0 0;
+                                font-size:1.7rem;
+                                color:#d90429;
+                                font-weight:800;
+                            "
+                        >
+                            0
+                        </h3>
+                    </div>
+
+                </div>
+
+
+                <div class="admin-card" style="margin-bottom:20px;">
+
+                    <div style="
+                        display:flex;
+                        justify-content:space-between;
+                        align-items:center;
+                        gap:12px;
+                        flex-wrap:wrap;
+                        margin-bottom:15px;
+                    ">
+
+                        <div>
+                            <h3 style="
+                                margin:0 0 5px 0;
+                                font-size:1.05rem;
+                            ">
+                                Pool Type
+                            </h3>
+
+                            <p style="
+                                margin:0;
+                                color:#777;
+                                font-size:.8rem;
+                            ">
+                                DOT and NON-DOT populations remain separate.
+                            </p>
+                        </div>
+
+                        <button
+                            type="button"
+                            id="refreshRandomPoolBtn"
+                            class="schedule-action-btn schedule-neutral-btn"
+                        >
+                            ↻ Refresh
+                        </button>
+
+                    </div>
+
+
+                    <div
+                        id="randomPoolTypeTabs"
+                        style="
+                            display:flex;
+                            gap:8px;
+                            flex-wrap:wrap;
+                        "
+                    >
+
+                        <button
+                            type="button"
+                            class="filter-tab active"
+                            data-random-pool-type="DOT"
+                        >
+                            🚛 DOT Pool
+                        </button>
+
+                        <button
+                            type="button"
+                            class="filter-tab"
+                            data-random-pool-type="NON_DOT"
+                        >
+                            👥 NON-DOT Pool
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <div class="admin-card" style="margin-bottom:20px;">
+
+                    <div style="
+                        display:grid;
+                        grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+                        gap:12px;
+                    ">
+
+                        <div style="
+                            background:#f7f4f9;
+                            border-radius:10px;
+                            padding:13px;
+                        ">
+                            <span style="
+                                display:block;
+                                font-size:.68rem;
+                                font-weight:700;
+                                color:#777;
+                                text-transform:uppercase;
+                                margin-bottom:4px;
+                            ">
+                                Current Pool
+                            </span>
+
+                            <strong
+                                id="randomPoolCurrentType"
+                                style="
+                                    color:var(--purple-primary);
+                                    font-size:.95rem;
+                                "
+                            >
+                                DOT
+                            </strong>
+                        </div>
+
+
+                        <div style="
+                            background:#f7f4f9;
+                            border-radius:10px;
+                            padding:13px;
+                        ">
+                            <span style="
+                                display:block;
+                                font-size:.68rem;
+                                font-weight:700;
+                                color:#777;
+                                text-transform:uppercase;
+                                margin-bottom:4px;
+                            ">
+                                Drug Rate
+                            </span>
+
+                            <strong
+                                id="randomPoolDrugRate"
+                                style="
+                                    color:var(--purple-primary);
+                                    font-size:.95rem;
+                                "
+                            >
+                                —
+                            </strong>
+                        </div>
+
+
+                        <div style="
+                            background:#f7f4f9;
+                            border-radius:10px;
+                            padding:13px;
+                        ">
+                            <span style="
+                                display:block;
+                                font-size:.68rem;
+                                font-weight:700;
+                                color:#777;
+                                text-transform:uppercase;
+                                margin-bottom:4px;
+                            ">
+                                Alcohol Rate
+                            </span>
+
+                            <strong
+                                id="randomPoolAlcoholRate"
+                                style="
+                                    color:var(--purple-primary);
+                                    font-size:.95rem;
+                                "
+                            >
+                                —
+                            </strong>
+                        </div>
+
+
+                        <div style="
+                            background:#f7f4f9;
+                            border-radius:10px;
+                            padding:13px;
+                        ">
+                            <span style="
+                                display:block;
+                                font-size:.68rem;
+                                font-weight:700;
+                                color:#777;
+                                text-transform:uppercase;
+                                margin-bottom:4px;
+                            ">
+                                Agency
+                            </span>
+
+                            <strong
+                                id="randomPoolAgency"
+                                style="
+                                    color:var(--purple-primary);
+                                    font-size:.95rem;
+                                "
+                            >
+                                —
+                            </strong>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="admin-card">
+
+                    <div style="
+                        display:flex;
+                        justify-content:space-between;
+                        align-items:center;
+                        gap:15px;
+                        flex-wrap:wrap;
+                        margin-bottom:18px;
+                    ">
+
+                        <div>
+                            <h2 style="
+                                margin:0 0 5px 0;
+                                font-size:1.15rem;
+                            ">
+                                Pool Members
+                            </h2>
+
+                            <p
+                                id="randomPoolDescription"
+                                style="
+                                    margin:0;
+                                    color:#666;
+                                    font-size:.82rem;
+                                "
+                            >
+                                Active DOT random pool members.
+                            </p>
+                        </div>
+
+                    </div>
+
+
+                    <div style="
+                        position:relative;
+                        width:100%;
+                        margin-bottom:18px;
+                    ">
+
+                        <input
+                            type="text"
+                            id="randomPoolSearch"
+                            style="
+                                width:100%;
+                                padding:12px 16px 12px 40px;
+                                border-radius:10px;
+                                border:1px solid rgba(0,0,0,.08);
+                                font-size:.95rem;
+                                box-sizing:border-box;
+                                background:#fafafa;
+                            "
+                            placeholder="Search name, employer, CDL, email..."
+                        />
+
+                        <div style="
+                            position:absolute;
+                            left:14px;
+                            top:13px;
+                            color:#777;
+                        ">
+                            🔎
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        id="randomPoolTarget"
+                        style="
+                            display:grid;
+                            grid-template-columns:1fr;
+                            gap:10px;
+                        "
+                    >
+                        <div style="
+                            color:#666;
+                            text-align:center;
+                            padding:35px;
+                        ">
+                            Loading random pool...
+                        </div>
+                    </div>
+
+                </div>
+
+            </section>
+
+
             <!-- =================================================
                  SCHEDULE PAGE
             ================================================= -->
@@ -3046,6 +3559,17 @@ if (
 
 }
 
+
+
+if (
+    targetPage ===
+    'randomPoolPage'
+) {
+
+    fetchRandomPoolMembers();
+
+}
+
             }
         );
 
@@ -3350,7 +3874,9 @@ if (
         event => {
 
             wellnessOfferSearchQuery =
-                event.target.value
+                String(
+                    event.target?.value || ''
+                )
                     .toLowerCase()
                     .trim();
 
@@ -3379,6 +3905,124 @@ if (
     );
 
 }
+
+
+/* =========================================================
+   RANDOM POOL EVENTS
+========================================================= */
+
+const randomPoolSearch =
+    document.getElementById(
+        'randomPoolSearch'
+    );
+
+if (randomPoolSearch) {
+
+    randomPoolSearch.addEventListener(
+        'input',
+        event => {
+
+            randomPoolSearchQuery =
+                event.target.value
+                    .toLowerCase()
+                    .trim();
+
+            populateRandomPool();
+
+        }
+    );
+
+}
+
+
+const addRandomPoolMemberButton =
+    document.getElementById(
+        'addRandomPoolMemberBtn'
+    );
+
+if (addRandomPoolMemberButton) {
+
+    addRandomPoolMemberButton.addEventListener(
+        'click',
+        () => openRandomPoolMemberForm()
+    );
+
+}
+
+
+const refreshRandomPoolButton =
+    document.getElementById(
+        'refreshRandomPoolBtn'
+    );
+
+if (refreshRandomPoolButton) {
+
+    refreshRandomPoolButton.addEventListener(
+        'click',
+        fetchRandomPoolMembers
+    );
+
+}
+
+
+document
+    .querySelectorAll(
+        '[data-random-pool-type]'
+    )
+    .forEach(
+        button => {
+
+            button.addEventListener(
+                'click',
+                () => {
+
+                    const poolType =
+                        button.getAttribute(
+                            'data-random-pool-type'
+                        );
+
+                    if (
+                        poolType !== 'DOT' &&
+                        poolType !== 'NON_DOT'
+                    ) {
+                        return;
+                    }
+
+                    activeRandomPoolType =
+                        poolType;
+
+                    randomPoolSearchQuery =
+                        '';
+
+                    const search =
+                        document.getElementById(
+                            'randomPoolSearch'
+                        );
+
+                    if (search) {
+                        search.value = '';
+                    }
+
+                    document
+                        .querySelectorAll(
+                            '[data-random-pool-type]'
+                        )
+                        .forEach(
+                            tab => {
+                                tab.classList.toggle(
+                                    'active',
+                                    tab === button
+                                );
+                            }
+                        );
+
+                    populateRandomPool();
+
+                }
+            );
+
+        }
+    );
     }
 
     /* =========================================================
@@ -3985,7 +4629,9 @@ function populateWellnessOffers() {
 
 
     const search =
-        wellnessOfferSearchQuery
+        String(
+            wellnessOfferSearchQuery || ''
+        )
             .toLowerCase()
             .trim();
 
@@ -4723,14 +5369,343 @@ async function redeemWellnessOffer(
    UNDO WELLNESS REDEMPTION
 ========================================================= */
 
+/* =========================================================
+   WELLNESS REDEMPTION CONFIRMATION POPUP
+========================================================= */
+
+function showWellnessUndoConfirmation() {
+
+    return new Promise(
+        resolve => {
+
+            const existing =
+                document.getElementById(
+                    'wellnessUndoConfirmOverlay'
+                );
+
+            if (existing) {
+                existing.remove();
+            }
+
+
+            const overlay =
+                document.createElement(
+                    'div'
+                );
+
+
+            overlay.id =
+                'wellnessUndoConfirmOverlay';
+
+
+            overlay.setAttribute(
+                'role',
+                'dialog'
+            );
+
+            overlay.setAttribute(
+                'aria-modal',
+                'true'
+            );
+
+            overlay.setAttribute(
+                'aria-labelledby',
+                'wellnessUndoConfirmTitle'
+            );
+
+
+            overlay.style.cssText = `
+                position:fixed;
+                inset:0;
+                z-index:1000000;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                padding:20px;
+                box-sizing:border-box;
+                background:rgba(37,12,52,.58);
+                backdrop-filter:blur(6px);
+            `;
+
+
+            overlay.innerHTML = `
+
+                <div
+                    class="wellness-undo-confirm-card"
+                    style="
+                        width:min(470px,100%);
+                        box-sizing:border-box;
+                        background:#fff;
+                        border-radius:20px;
+                        padding:28px;
+                        box-shadow:0 25px 80px rgba(0,0,0,.25);
+                        text-align:center;
+                        animation:wellnessUndoConfirmIn .18s ease-out;
+                    "
+                >
+
+                    <div style="
+                        width:58px;
+                        height:58px;
+                        margin:0 auto 15px;
+                        border-radius:50%;
+                        display:flex;
+                        align-items:center;
+                        justify-content:center;
+                        background:#f7f4f9;
+                        color:var(--purple-primary,#3E0D5F);
+                        font-size:27px;
+                        font-weight:800;
+                    ">
+                        ↶
+                    </div>
+
+
+                    <h2
+                        id="wellnessUndoConfirmTitle"
+                        style="
+                            margin:0 0 10px;
+                            color:var(--purple-primary,#3E0D5F);
+                            font-size:1.2rem;
+                            font-weight:800;
+                        "
+                    >
+                        Undo Redemption?
+                    </h2>
+
+
+                    <p style="
+                        margin:0 auto;
+                        max-width:380px;
+                        color:#666;
+                        font-size:.92rem;
+                        line-height:1.6;
+                    ">
+                        Are you sure you want to mark this
+                        wellness offer as unused again?
+                    </p>
+
+
+                    <div style="
+                        display:flex;
+                        justify-content:center;
+                        gap:10px;
+                        flex-wrap:wrap;
+                        margin-top:24px;
+                    ">
+
+                        <button
+                            type="button"
+                            id="wellnessUndoConfirmCancel"
+                            style="
+                                min-width:120px;
+                                padding:11px 18px;
+                                border:1px solid #ddd;
+                                border-radius:10px;
+                                background:#fff;
+                                color:#555;
+                                font-weight:700;
+                                font-size:.85rem;
+                                cursor:pointer;
+                            "
+                        >
+                            Cancel
+                        </button>
+
+
+                        <button
+                            type="button"
+                            id="wellnessUndoConfirmYes"
+                            style="
+                                min-width:150px;
+                                padding:11px 18px;
+                                border:none;
+                                border-radius:10px;
+                                background:var(--purple-primary,#3E0D5F);
+                                color:#fff;
+                                font-weight:700;
+                                font-size:.85rem;
+                                cursor:pointer;
+                                box-shadow:0 5px 15px rgba(62,13,95,.18);
+                            "
+                        >
+                            Yes, Undo Redemption
+                        </button>
+
+                    </div>
+
+                </div>
+            `;
+
+
+            if (
+                !document.getElementById(
+                    'wellnessUndoConfirmAnimation'
+                )
+            ) {
+
+                const style =
+                    document.createElement(
+                        'style'
+                    );
+
+                style.id =
+                    'wellnessUndoConfirmAnimation';
+
+                style.textContent = `
+                    @keyframes wellnessUndoConfirmIn {
+                        from {
+                            opacity:0;
+                            transform:translateY(8px) scale(.98);
+                        }
+
+                        to {
+                            opacity:1;
+                            transform:translateY(0) scale(1);
+                        }
+                    }
+
+                    #wellnessUndoConfirmYes:hover {
+                        filter:brightness(1.08);
+                    }
+
+                    #wellnessUndoConfirmCancel:hover {
+                        background:#f7f4f9;
+                    }
+
+                    @media (max-width:480px) {
+                        .wellness-undo-confirm-card {
+                            padding:23px !important;
+                        }
+
+                        #wellnessUndoConfirmCancel,
+                        #wellnessUndoConfirmYes {
+                            width:100%;
+                        }
+                    }
+                `;
+
+                document.head.appendChild(
+                    style
+                );
+
+            }
+
+
+            document.body.appendChild(
+                overlay
+            );
+
+
+            const finish =
+                value => {
+
+                    overlay.remove();
+
+                    document.body.style.overflow =
+                        '';
+
+                    resolve(value);
+
+                };
+
+
+            const cancelButton =
+                overlay.querySelector(
+                    '#wellnessUndoConfirmCancel'
+                );
+
+
+            const confirmButton =
+                overlay.querySelector(
+                    '#wellnessUndoConfirmYes'
+                );
+
+
+            cancelButton?.addEventListener(
+                'click',
+                () => finish(false)
+            );
+
+
+            confirmButton?.addEventListener(
+                'click',
+                () => finish(true)
+            );
+
+
+            overlay.addEventListener(
+                'click',
+                event => {
+
+                    if (
+                        event.target ===
+                        overlay
+                    ) {
+
+                        finish(false);
+
+                    }
+
+                }
+            );
+
+
+            const keyHandler =
+                event => {
+
+                    if (
+                        event.key ===
+                        'Escape'
+                    ) {
+
+                        document.removeEventListener(
+                            'keydown',
+                            keyHandler
+                        );
+
+                        finish(false);
+
+                    }
+
+                };
+
+
+            document.addEventListener(
+                'keydown',
+                keyHandler
+            );
+
+
+            document.body.style.overflow =
+                'hidden';
+
+
+            setTimeout(
+                () => {
+
+                    confirmButton?.focus();
+
+                },
+                50
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   UNDO WELLNESS REDEMPTION
+========================================================= */
+
 async function undoWellnessRedemption(
     offerId
 ) {
 
     const confirmed =
-        window.confirm(
-            'Are you sure you want to mark this wellness offer as unused again?'
-        );
+        await showWellnessUndoConfirmation();
 
 
     if (!confirmed) {
@@ -5064,19 +6039,19 @@ function calculateWellnessOfferMetrics() {
 
 
     setElementText(
-        'wellnessTotalCount',
+        'wellnessOfferTotalCount',
         total
     );
 
 
     setElementText(
-        'wellnessUnusedCount',
+        'wellnessOfferUnusedCount',
         unused
     );
 
 
     setElementText(
-        'wellnessRedeemedCount',
+        'wellnessOfferRedeemedCount',
         redeemed
     );
 
@@ -5397,7 +6372,9 @@ function populateWellnessOfferCodes() {
 
 
     const search =
-        wellnessOfferSearchQuery
+        String(
+            wellnessOfferSearchQuery || ''
+        )
             .toLowerCase()
             .trim();
 
@@ -6059,7 +7036,1771 @@ function populateWellnessOfferCodes() {
        SCHEDULE MANAGER
     ========================================================= */
 
-    function renderScheduleManager() {
+/* =========================================================
+   RANDOM POOL MANAGEMENT
+========================================================= */
+
+async function fetchRandomPoolMembers() {
+
+    const target =
+        document.getElementById(
+            'randomPoolTarget'
+        );
+
+    randomPoolLoading = true;
+
+    if (target) {
+
+        target.innerHTML = `
+            <div style="
+                color:#666;
+                text-align:center;
+                padding:35px;
+            ">
+                Loading random pool members...
+            </div>
+        `;
+
+    }
+
+    try {
+
+        const {
+            data,
+            error
+        } = await supabaseClientInstance
+
+            .from('random_pool_members')
+
+            .select(`
+                id,
+                pool_type,
+                employee_name,
+                employee_identifier,
+                cdl_number,
+                employer_name,
+                email,
+                phone,
+                dot_agency,
+                drug_eligible,
+                alcohol_eligible,
+                status,
+                date_added,
+                date_removed,
+                notes,
+                created_at,
+                updated_at
+            `)
+
+            .order(
+                'employee_name',
+                {
+                    ascending:true
+                }
+            );
+
+
+        if (error) {
+            throw error;
+        }
+
+
+        randomPoolMembers =
+            Array.isArray(data)
+                ? data
+                : [];
+
+
+        await loadRandomPoolSettings();
+
+        populateRandomPool();
+
+        return randomPoolMembers;
+
+    } catch (error) {
+
+        console.error(
+            'Random pool retrieval error:',
+            error
+        );
+
+        randomPoolMembers = [];
+
+
+        if (target) {
+
+            target.innerHTML = `
+                <div style="
+                    color:#d90429;
+                    font-weight:600;
+                    text-align:center;
+                    padding:30px;
+                    border:1px dashed #d90429;
+                    border-radius:12px;
+                    background:#fff5f6;
+                ">
+
+                    <strong>
+                        Unable to load random pool
+                    </strong>
+
+                    <br><br>
+
+                    ${escapeHtml(
+                        error?.message ||
+                        'Unknown database error.'
+                    )}
+
+                </div>
+            `;
+
+        }
+
+        updateRandomPoolMetrics();
+
+        return [];
+
+    } finally {
+
+        randomPoolLoading = false;
+
+    }
+
+}
+
+
+async function loadRandomPoolSettings() {
+
+    try {
+
+        const {
+            data,
+            error
+        } = await supabaseClientInstance
+
+            .from('random_pool_settings')
+
+            .select(`
+                id,
+                pool_type,
+                dot_agency,
+                drug_rate,
+                alcohol_rate,
+                selection_frequency,
+                active,
+                updated_at
+            `)
+
+            .order(
+                'pool_type',
+                {
+                    ascending:true
+                }
+            );
+
+
+        if (error) {
+            throw error;
+        }
+
+
+        randomPoolSettings =
+            Array.isArray(data)
+                ? data
+                : [];
+
+
+    } catch (error) {
+
+        console.error(
+            'Random pool settings retrieval error:',
+            error
+        );
+
+        randomPoolSettings = [];
+
+    }
+
+}
+
+
+function getRandomPoolSetting(
+    poolType
+) {
+
+    return (
+        randomPoolSettings.find(
+            setting =>
+                setting.pool_type ===
+                poolType
+        ) ||
+        null
+    );
+
+}
+
+
+function updateRandomPoolMetrics() {
+
+    const members =
+        randomPoolMembers.filter(
+            member =>
+                member.pool_type ===
+                activeRandomPoolType
+        );
+
+
+    const active =
+        members.filter(
+            member =>
+                member.status === 'active'
+        );
+
+
+    const drugEligible =
+        active.filter(
+            member =>
+                member.drug_eligible === true
+        );
+
+
+    const alcoholEligible =
+        active.filter(
+            member =>
+                member.alcohol_eligible === true
+        );
+
+
+    const inactive =
+        members.filter(
+            member =>
+                member.status !== 'active'
+        );
+
+
+    setElementText(
+        'randomPoolActiveCount',
+        active.length
+    );
+
+    setElementText(
+        'randomPoolDrugCount',
+        drugEligible.length
+    );
+
+    setElementText(
+        'randomPoolAlcoholCount',
+        alcoholEligible.length
+    );
+
+    setElementText(
+        'randomPoolInactiveCount',
+        inactive.length
+    );
+
+
+    setElementText(
+        'randomPoolCurrentType',
+        activeRandomPoolType === 'DOT'
+            ? 'DOT'
+            : 'NON-DOT'
+    );
+
+
+    const setting =
+        getRandomPoolSetting(
+            activeRandomPoolType
+        );
+
+
+    setElementText(
+        'randomPoolDrugRate',
+        setting
+            ? `${Number(setting.drug_rate || 0)}%`
+            : '—'
+    );
+
+
+    setElementText(
+        'randomPoolAlcoholRate',
+        setting
+            ? `${Number(setting.alcohol_rate || 0)}%`
+            : '—'
+    );
+
+
+    setElementText(
+        'randomPoolAgency',
+        setting?.dot_agency ||
+        (
+            activeRandomPoolType === 'DOT'
+                ? 'Not configured'
+                : 'N/A'
+        )
+    );
+
+}
+
+
+function populateRandomPool() {
+
+    const target =
+        document.getElementById(
+            'randomPoolTarget'
+        );
+
+    if (!target) {
+        return;
+    }
+
+
+    const poolMembers =
+        randomPoolMembers.filter(
+            member =>
+                member.pool_type ===
+                activeRandomPoolType
+        );
+
+
+    const filtered =
+        poolMembers.filter(
+            member => {
+
+                if (!randomPoolSearchQuery) {
+                    return true;
+                }
+
+
+                const searchable =
+                    [
+                        member.employee_name,
+                        member.employee_identifier,
+                        member.cdl_number,
+                        member.employer_name,
+                        member.email,
+                        member.phone
+                    ]
+                        .map(
+                            value =>
+                                String(
+                                    value || ''
+                                ).toLowerCase()
+                        )
+                        .join(' ');
+
+
+                return searchable.includes(
+                    randomPoolSearchQuery
+                );
+
+            }
+        );
+
+
+    updateRandomPoolMetrics();
+
+
+    const description =
+        document.getElementById(
+            'randomPoolDescription'
+        );
+
+
+    if (description) {
+
+        description.textContent =
+            activeRandomPoolType === 'DOT'
+                ? 'DOT random pool members.'
+                : 'NON-DOT random pool members.';
+
+    }
+
+
+    if (filtered.length === 0) {
+
+        target.innerHTML = `
+            <div style="
+                background:#fff;
+                border:1px dashed #ddd;
+                border-radius:12px;
+                padding:35px;
+                text-align:center;
+                color:#777;
+            ">
+
+                <div style="
+                    font-size:2rem;
+                    margin-bottom:8px;
+                ">
+                    ${activeRandomPoolType === 'DOT'
+                        ? '🚛'
+                        : '👥'}
+                </div>
+
+                <strong>
+                    No ${activeRandomPoolType === 'DOT'
+                        ? 'DOT'
+                        : 'NON-DOT'} pool members found.
+                </strong>
+
+                <p style="
+                    margin:8px 0 0;
+                    font-size:.82rem;
+                ">
+                    Use “+ Add Pool Member” to add the first person.
+                </p>
+
+            </div>
+        `;
+
+        return;
+
+    }
+
+
+    target.innerHTML =
+        filtered
+            .map(
+                renderRandomPoolMemberCard
+            )
+            .join('');
+
+
+    bindRandomPoolMemberCardEvents();
+
+}
+
+
+function renderRandomPoolPage() {
+
+    updateRandomPoolMetrics();
+    populateRandomPool();
+
+}
+
+
+function renderRandomPoolMemberCard(
+    member
+) {
+
+    const status =
+        member.status ||
+        'active';
+
+
+    const statusStyles =
+        status === 'active'
+            ? {
+                background:'#eef8e8',
+                color:'#4f940c',
+                label:'Active'
+            }
+            : status === 'inactive'
+                ? {
+                    background:'#fff7e8',
+                    color:'#b26a00',
+                    label:'Inactive'
+                }
+                : {
+                    background:'#fff0f2',
+                    color:'#d90429',
+                    label:'Removed'
+                };
+
+
+    return `
+        <div
+            data-random-member-card="${escapeHtml(member.id)}"
+            style="
+                background:#fff;
+                border:1px solid rgba(138,52,159,.08);
+                border-radius:14px;
+                padding:17px;
+                box-shadow:0 4px 15px rgba(0,0,0,.025);
+            "
+        >
+
+            <div style="
+                display:flex;
+                justify-content:space-between;
+                align-items:flex-start;
+                gap:15px;
+                flex-wrap:wrap;
+            ">
+
+                <div style="
+                    min-width:0;
+                    flex:1;
+                ">
+
+                    <div style="
+                        display:flex;
+                        align-items:center;
+                        gap:8px;
+                        flex-wrap:wrap;
+                        margin-bottom:6px;
+                    ">
+
+                        <h3 style="
+                            margin:0;
+                            color:var(--purple-primary);
+                            font-size:1rem;
+                            font-weight:800;
+                        ">
+                            ${escapeHtml(
+                                member.employee_name
+                            )}
+                        </h3>
+
+                        <span style="
+                            display:inline-flex;
+                            padding:4px 8px;
+                            border-radius:999px;
+                            background:${statusStyles.background};
+                            color:${statusStyles.color};
+                            font-size:.66rem;
+                            font-weight:800;
+                            text-transform:uppercase;
+                        ">
+                            ${statusStyles.label}
+                        </span>
+
+                    </div>
+
+
+                    <div style="
+                        display:flex;
+                        gap:8px 18px;
+                        flex-wrap:wrap;
+                        color:#666;
+                        font-size:.78rem;
+                        line-height:1.5;
+                    ">
+
+                        ${
+                            member.employer_name
+                                ? `<span>🏢 <strong>Employer:</strong> ${escapeHtml(member.employer_name)}</span>`
+                                : ''
+                        }
+
+                        ${
+                            member.cdl_number
+                                ? `<span>🪪 <strong>CDL:</strong> ${escapeHtml(member.cdl_number)}</span>`
+                                : ''
+                        }
+
+                        ${
+                            member.employee_identifier
+                                ? `<span>🆔 <strong>ID:</strong> ${escapeHtml(member.employee_identifier)}</span>`
+                                : ''
+                        }
+
+                        ${
+                            member.email
+                                ? `<span>✉️ ${escapeHtml(member.email)}</span>`
+                                : ''
+                        }
+
+                        ${
+                            member.phone
+                                ? `<span>📞 ${escapeHtml(member.phone)}</span>`
+                                : ''
+                        }
+
+                    </div>
+
+                </div>
+
+
+                <div style="
+                    display:flex;
+                    gap:7px;
+                    flex-wrap:wrap;
+                ">
+
+                    <button
+                        type="button"
+                        class="schedule-action-btn schedule-neutral-btn"
+                        data-edit-random-member="${escapeHtml(member.id)}"
+                    >
+                        Edit
+                    </button>
+
+
+                    ${
+                        status === 'active'
+                            ? `
+                                <button
+                                    type="button"
+                                    class="schedule-action-btn"
+                                    style="
+                                        background:#fff0f2;
+                                        color:#d90429;
+                                        border:1px solid rgba(217,4,41,.15);
+                                    "
+                                    data-deactivate-random-member="${escapeHtml(member.id)}"
+                                >
+                                    Deactivate
+                                </button>
+                            `
+                            : `
+                                <button
+                                    type="button"
+                                    class="schedule-action-btn"
+                                    style="
+                                        background:#eef8e8;
+                                        color:#4f940c;
+                                        border:1px solid rgba(79,148,12,.15);
+                                    "
+                                    data-activate-random-member="${escapeHtml(member.id)}"
+                                >
+                                    Activate
+                                </button>
+                            `
+                    }
+
+                </div>
+
+            </div>
+
+
+            <div style="
+                display:grid;
+                grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
+                gap:8px;
+                margin-top:14px;
+            ">
+
+                <div style="
+                    background:#fafafa;
+                    border-radius:9px;
+                    padding:9px;
+                ">
+                    <span style="
+                        display:block;
+                        font-size:.64rem;
+                        color:#777;
+                        text-transform:uppercase;
+                        font-weight:700;
+                    ">
+                        Drug
+                    </span>
+
+                    <strong style="
+                        color:${member.drug_eligible ? '#4f940c' : '#999'};
+                        font-size:.78rem;
+                    ">
+                        ${member.drug_eligible ? 'Eligible' : 'Not Eligible'}
+                    </strong>
+                </div>
+
+
+                <div style="
+                    background:#fafafa;
+                    border-radius:9px;
+                    padding:9px;
+                ">
+                    <span style="
+                        display:block;
+                        font-size:.64rem;
+                        color:#777;
+                        text-transform:uppercase;
+                        font-weight:700;
+                    ">
+                        Alcohol
+                    </span>
+
+                    <strong style="
+                        color:${member.alcohol_eligible ? '#0077b6' : '#999'};
+                        font-size:.78rem;
+                    ">
+                        ${member.alcohol_eligible ? 'Eligible' : 'Not Eligible'}
+                    </strong>
+                </div>
+
+
+                <div style="
+                    background:#fafafa;
+                    border-radius:9px;
+                    padding:9px;
+                ">
+                    <span style="
+                        display:block;
+                        font-size:.64rem;
+                        color:#777;
+                        text-transform:uppercase;
+                        font-weight:700;
+                    ">
+                        Added
+                    </span>
+
+                    <strong style="
+                        color:#555;
+                        font-size:.78rem;
+                    ">
+                        ${escapeHtml(member.date_added || '—')}
+                    </strong>
+                </div>
+
+            </div>
+
+        </div>
+    `;
+
+}
+
+
+function bindRandomPoolMemberCardEvents() {
+
+    document
+        .querySelectorAll(
+            '[data-edit-random-member]'
+        )
+        .forEach(
+            button => {
+
+                button.addEventListener(
+                    'click',
+                    () => openRandomPoolMemberForm(
+                        button.getAttribute(
+                            'data-edit-random-member'
+                        )
+                    )
+                );
+
+            }
+        );
+
+
+    document
+        .querySelectorAll(
+            '[data-deactivate-random-member]'
+        )
+        .forEach(
+            button => {
+
+                button.addEventListener(
+                    'click',
+                    () => updateRandomPoolMemberStatus(
+                        button.getAttribute(
+                            'data-deactivate-random-member'
+                        ),
+                        'inactive'
+                    )
+                );
+
+            }
+        );
+
+
+    document
+        .querySelectorAll(
+            '[data-activate-random-member]'
+        )
+        .forEach(
+            button => {
+
+                button.addEventListener(
+                    'click',
+                    () => updateRandomPoolMemberStatus(
+                        button.getAttribute(
+                            'data-activate-random-member'
+                        ),
+                        'active'
+                    )
+                );
+
+            }
+        );
+
+}
+
+
+function openRandomPoolMemberForm(
+    memberId = null
+) {
+
+    const existingMember =
+        memberId
+            ? randomPoolMembers.find(
+                member =>
+                    member.id ===
+                    memberId
+            )
+            : null;
+
+
+    editingRandomPoolMemberId =
+        existingMember?.id ||
+        null;
+
+
+    const poolType =
+        existingMember?.pool_type ||
+        activeRandomPoolType;
+
+
+    document
+        .getElementById(
+            'randomPoolMemberFormModal'
+        )
+        ?.remove();
+
+
+    const modal =
+        document.createElement(
+            'div'
+        );
+
+
+    modal.id =
+        'randomPoolMemberFormModal';
+
+
+    modal.innerHTML = `
+        <div
+            data-random-form-overlay
+            style="
+                position:fixed;
+                inset:0;
+                z-index:999998;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                padding:16px;
+                background:rgba(37,12,52,.48);
+                backdrop-filter:blur(5px);
+                box-sizing:border-box;
+            "
+        >
+
+            <div
+                role="dialog"
+                aria-modal="true"
+                style="
+                    position:relative;
+                    width:min(620px,100%);
+                    max-height:92vh;
+                    overflow-y:auto;
+                    background:#fff;
+                    border-radius:20px;
+                    padding:25px;
+                    box-sizing:border-box;
+                    box-shadow:0 25px 70px rgba(62,13,95,.22);
+                "
+            >
+
+                <button
+                    type="button"
+                    data-random-form-close
+                    aria-label="Close"
+                    style="
+                        position:absolute;
+                        top:12px;
+                        right:14px;
+                        width:34px;
+                        height:34px;
+                        border:none;
+                        border-radius:50%;
+                        background:#f7f4f9;
+                        color:#666;
+                        font-size:24px;
+                        cursor:pointer;
+                    "
+                >
+                    &times;
+                </button>
+
+
+                <h2 style="
+                    margin:0 38px 6px 0;
+                    color:var(--purple-primary);
+                    font-size:1.25rem;
+                ">
+                    ${existingMember
+                        ? 'Edit Random Pool Member'
+                        : 'Add Random Pool Member'}
+                </h2>
+
+
+                <p style="
+                    margin:0 0 20px;
+                    color:#666;
+                    font-size:.82rem;
+                    line-height:1.5;
+                ">
+                    ${
+                        poolType === 'DOT'
+                            ? 'DOT pool member'
+                            : 'NON-DOT pool member'
+                    }
+                </p>
+
+
+                <form id="randomPoolMemberForm">
+
+                    <div style="
+                        display:grid;
+                        grid-template-columns:1fr 1fr;
+                        gap:12px;
+                    ">
+
+                        <div style="grid-column:1 / -1;">
+                            <label style="
+                                display:block;
+                                margin-bottom:5px;
+                                font-size:.74rem;
+                                font-weight:700;
+                                color:#555;
+                                text-transform:uppercase;
+                            ">
+                                Pool Type
+                            </label>
+
+                            <select
+                                id="randomPoolMemberPoolType"
+                                required
+                                ${existingMember ? 'disabled' : ''}
+                                style="
+                                    width:100%;
+                                    box-sizing:border-box;
+                                    padding:11px;
+                                    border:1px solid #ddd;
+                                    border-radius:9px;
+                                    background:#fff;
+                                    font-weight:600;
+                                "
+                            >
+                                <option
+                                    value="DOT"
+                                    ${poolType === 'DOT' ? 'selected' : ''}
+                                >
+                                    DOT
+                                </option>
+
+                                <option
+                                    value="NON_DOT"
+                                    ${poolType === 'NON_DOT' ? 'selected' : ''}
+                                >
+                                    NON-DOT
+                                </option>
+                            </select>
+                        </div>
+
+
+                        <div style="grid-column:1 / -1;">
+                            <label style="
+                                display:block;
+                                margin-bottom:5px;
+                                font-size:.74rem;
+                                font-weight:700;
+                                color:#555;
+                                text-transform:uppercase;
+                            ">
+                                Employee Name *
+                            </label>
+
+                            <input
+                                type="text"
+                                id="randomPoolMemberName"
+                                required
+                                value="${escapeHtml(existingMember?.employee_name || '')}"
+                                style="
+                                    width:100%;
+                                    box-sizing:border-box;
+                                    padding:11px;
+                                    border:1px solid #ddd;
+                                    border-radius:9px;
+                                "
+                            />
+                        </div>
+
+
+                        <div>
+                            <label style="
+                                display:block;
+                                margin-bottom:5px;
+                                font-size:.74rem;
+                                font-weight:700;
+                                color:#555;
+                                text-transform:uppercase;
+                            ">
+                                Employee / ID #
+                            </label>
+
+                            <input
+                                type="text"
+                                id="randomPoolMemberIdentifier"
+                                value="${escapeHtml(existingMember?.employee_identifier || '')}"
+                                style="
+                                    width:100%;
+                                    box-sizing:border-box;
+                                    padding:11px;
+                                    border:1px solid #ddd;
+                                    border-radius:9px;
+                                "
+                            />
+                        </div>
+
+
+                        <div>
+                            <label style="
+                                display:block;
+                                margin-bottom:5px;
+                                font-size:.74rem;
+                                font-weight:700;
+                                color:#555;
+                                text-transform:uppercase;
+                            ">
+                                CDL Number
+                            </label>
+
+                            <input
+                                type="text"
+                                id="randomPoolMemberCdl"
+                                value="${escapeHtml(existingMember?.cdl_number || '')}"
+                                style="
+                                    width:100%;
+                                    box-sizing:border-box;
+                                    padding:11px;
+                                    border:1px solid #ddd;
+                                    border-radius:9px;
+                                "
+                            />
+                        </div>
+
+
+                        <div style="grid-column:1 / -1;">
+                            <label style="
+                                display:block;
+                                margin-bottom:5px;
+                                font-size:.74rem;
+                                font-weight:700;
+                                color:#555;
+                                text-transform:uppercase;
+                            ">
+                                Employer / Company
+                            </label>
+
+                            <input
+                                type="text"
+                                id="randomPoolMemberEmployer"
+                                value="${escapeHtml(existingMember?.employer_name || '')}"
+                                style="
+                                    width:100%;
+                                    box-sizing:border-box;
+                                    padding:11px;
+                                    border:1px solid #ddd;
+                                    border-radius:9px;
+                                "
+                            />
+                        </div>
+
+
+                        <div>
+                            <label style="
+                                display:block;
+                                margin-bottom:5px;
+                                font-size:.74rem;
+                                font-weight:700;
+                                color:#555;
+                                text-transform:uppercase;
+                            ">
+                                Email
+                            </label>
+
+                            <input
+                                type="email"
+                                id="randomPoolMemberEmail"
+                                value="${escapeHtml(existingMember?.email || '')}"
+                                style="
+                                    width:100%;
+                                    box-sizing:border-box;
+                                    padding:11px;
+                                    border:1px solid #ddd;
+                                    border-radius:9px;
+                                "
+                            />
+                        </div>
+
+
+                        <div>
+                            <label style="
+                                display:block;
+                                margin-bottom:5px;
+                                font-size:.74rem;
+                                font-weight:700;
+                                color:#555;
+                                text-transform:uppercase;
+                            ">
+                                Phone
+                            </label>
+
+                            <input
+                                type="tel"
+                                id="randomPoolMemberPhone"
+                                value="${escapeHtml(existingMember?.phone || '')}"
+                                style="
+                                    width:100%;
+                                    box-sizing:border-box;
+                                    padding:11px;
+                                    border:1px solid #ddd;
+                                    border-radius:9px;
+                                "
+                            />
+                        </div>
+
+
+                        <div>
+                            <label style="
+                                display:block;
+                                margin-bottom:5px;
+                                font-size:.74rem;
+                                font-weight:700;
+                                color:#555;
+                                text-transform:uppercase;
+                            ">
+                                DOT Agency
+                            </label>
+
+                            <input
+                                type="text"
+                                id="randomPoolMemberAgency"
+                                value="${escapeHtml(
+                                    existingMember?.dot_agency ||
+                                    (poolType === 'DOT' ? 'FMCSA' : '')
+                                )}"
+                                style="
+                                    width:100%;
+                                    box-sizing:border-box;
+                                    padding:11px;
+                                    border:1px solid #ddd;
+                                    border-radius:9px;
+                                "
+                            />
+                        </div>
+
+
+                        <div>
+                            <label style="
+                                display:block;
+                                margin-bottom:5px;
+                                font-size:.74rem;
+                                font-weight:700;
+                                color:#555;
+                                text-transform:uppercase;
+                            ">
+                                Status
+                            </label>
+
+                            <select
+                                id="randomPoolMemberStatus"
+                                style="
+                                    width:100%;
+                                    box-sizing:border-box;
+                                    padding:11px;
+                                    border:1px solid #ddd;
+                                    border-radius:9px;
+                                    background:#fff;
+                                "
+                            >
+                                <option
+                                    value="active"
+                                    ${(existingMember?.status || 'active') === 'active' ? 'selected' : ''}
+                                >
+                                    Active
+                                </option>
+
+                                <option
+                                    value="inactive"
+                                    ${existingMember?.status === 'inactive' ? 'selected' : ''}
+                                >
+                                    Inactive
+                                </option>
+
+                                <option
+                                    value="removed"
+                                    ${existingMember?.status === 'removed' ? 'selected' : ''}
+                                >
+                                    Removed
+                                </option>
+                            </select>
+                        </div>
+
+
+                        <div style="
+                            grid-column:1 / -1;
+                            display:flex;
+                            gap:18px;
+                            flex-wrap:wrap;
+                            padding:12px;
+                            background:#f7f4f9;
+                            border-radius:10px;
+                        ">
+
+                            <label style="
+                                display:flex;
+                                align-items:center;
+                                gap:8px;
+                                font-size:.8rem;
+                                font-weight:700;
+                                color:#555;
+                                cursor:pointer;
+                            ">
+                                <input
+                                    type="checkbox"
+                                    id="randomPoolMemberDrug"
+                                    ${existingMember
+                                        ? (existingMember.drug_eligible ? 'checked' : '')
+                                        : 'checked'}
+                                />
+                                Drug Eligible
+                            </label>
+
+
+                            <label style="
+                                display:flex;
+                                align-items:center;
+                                gap:8px;
+                                font-size:.8rem;
+                                font-weight:700;
+                                color:#555;
+                                cursor:pointer;
+                            ">
+                                <input
+                                    type="checkbox"
+                                    id="randomPoolMemberAlcohol"
+                                    ${existingMember?.alcohol_eligible ? 'checked' : ''}
+                                />
+                                Alcohol Eligible
+                            </label>
+
+                        </div>
+
+
+                        <div style="grid-column:1 / -1;">
+                            <label style="
+                                display:block;
+                                margin-bottom:5px;
+                                font-size:.74rem;
+                                font-weight:700;
+                                color:#555;
+                                text-transform:uppercase;
+                            ">
+                                Notes
+                            </label>
+
+                            <textarea
+                                id="randomPoolMemberNotes"
+                                rows="3"
+                                style="
+                                    width:100%;
+                                    box-sizing:border-box;
+                                    padding:11px;
+                                    border:1px solid #ddd;
+                                    border-radius:9px;
+                                    resize:vertical;
+                                    font-family:inherit;
+                                "
+                            >${escapeHtml(existingMember?.notes || '')}</textarea>
+                        </div>
+
+                    </div>
+
+
+                    <div style="
+                        display:flex;
+                        justify-content:flex-end;
+                        gap:9px;
+                        margin-top:20px;
+                        flex-wrap:wrap;
+                    ">
+
+                        <button
+                            type="button"
+                            data-random-form-cancel
+                            class="schedule-action-btn schedule-neutral-btn"
+                        >
+                            Cancel
+                        </button>
+
+                        <button
+                            type="submit"
+                            id="saveRandomPoolMemberBtn"
+                            class="schedule-action-btn schedule-primary-btn"
+                        >
+                            ${existingMember ? 'Save Changes' : 'Add to Pool'}
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+    `;
+
+
+    document.body.appendChild(
+        modal
+    );
+
+
+    const closeForm = () => {
+
+        modal.remove();
+
+        editingRandomPoolMemberId =
+            null;
+
+    };
+
+
+    modal
+        .querySelector(
+            '[data-random-form-close]'
+        )
+        ?.addEventListener(
+            'click',
+            closeForm
+        );
+
+
+    modal
+        .querySelector(
+            '[data-random-form-cancel]'
+        )
+        ?.addEventListener(
+            'click',
+            closeForm
+        );
+
+
+    modal
+        .querySelector(
+            '[data-random-form-overlay]'
+        )
+        ?.addEventListener(
+            'click',
+            event => {
+
+                if (
+                    event.target ===
+                    event.currentTarget
+                ) {
+                    closeForm();
+                }
+
+            }
+        );
+
+
+    modal
+        .querySelector(
+            '#randomPoolMemberForm'
+        )
+        ?.addEventListener(
+            'submit',
+            async event => {
+
+                event.preventDefault();
+
+                await saveRandomPoolMember(
+                    closeForm
+                );
+
+            }
+        );
+
+
+    setTimeout(
+        () => {
+
+            document
+                .getElementById(
+                    'randomPoolMemberName'
+                )
+                ?.focus();
+
+        },
+        50
+    );
+
+}
+
+
+async function saveRandomPoolMember(
+    closeForm
+) {
+
+    const saveButton =
+        document.getElementById(
+            'saveRandomPoolMemberBtn'
+        );
+
+
+    const nameInput =
+        document.getElementById(
+            'randomPoolMemberName'
+        );
+
+
+    const poolTypeInput =
+        document.getElementById(
+            'randomPoolMemberPoolType'
+        );
+
+
+    if (
+        !saveButton ||
+        !nameInput ||
+        !poolTypeInput
+    ) {
+        return;
+    }
+
+
+    const employeeName =
+        nameInput.value.trim();
+
+
+    const poolType =
+        poolTypeInput.value;
+
+
+    if (!employeeName) {
+
+        showAdminModal(
+            'Employee name is required.',
+            'warning',
+            'Missing Employee Name'
+        );
+
+        return;
+
+    }
+
+
+    if (
+        poolType !== 'DOT' &&
+        poolType !== 'NON_DOT'
+    ) {
+
+        showAdminModal(
+            'Please select a valid pool type.',
+            'warning',
+            'Invalid Pool Type'
+        );
+
+        return;
+
+    }
+
+
+    const isEditing =
+        Boolean(
+            editingRandomPoolMemberId
+        );
+
+
+    saveButton.disabled =
+        true;
+
+    saveButton.innerText =
+        'Saving...';
+
+
+    const payload = {
+
+        pool_type:
+            poolType,
+
+        employee_name:
+            employeeName,
+
+        employee_identifier:
+            document.getElementById(
+                'randomPoolMemberIdentifier'
+            )?.value.trim() ||
+            null,
+
+        cdl_number:
+            document.getElementById(
+                'randomPoolMemberCdl'
+            )?.value.trim() ||
+            null,
+
+        employer_name:
+            document.getElementById(
+                'randomPoolMemberEmployer'
+            )?.value.trim() ||
+            null,
+
+        email:
+            String(
+                document.getElementById(
+                    'randomPoolMemberEmail'
+                )?.value || ''
+            ).trim().toLowerCase() ||
+            null,
+
+        phone:
+            document.getElementById(
+                'randomPoolMemberPhone'
+            )?.value.trim() ||
+            null,
+
+        dot_agency:
+            document.getElementById(
+                'randomPoolMemberAgency'
+            )?.value.trim() ||
+            null,
+
+        status:
+            document.getElementById(
+                'randomPoolMemberStatus'
+            )?.value ||
+            'active',
+
+        drug_eligible:
+            document.getElementById(
+                'randomPoolMemberDrug'
+            )?.checked === true,
+
+        alcohol_eligible:
+            document.getElementById(
+                'randomPoolMemberAlcohol'
+            )?.checked === true,
+
+        notes:
+            document.getElementById(
+                'randomPoolMemberNotes'
+            )?.value.trim() ||
+            null,
+
+        updated_at:
+            new Date().toISOString()
+
+    };
+
+
+    try {
+
+        let query;
+
+
+        if (isEditing) {
+
+            query =
+                supabaseClientInstance
+
+                    .from(
+                        'random_pool_members'
+                    )
+
+                    .update(
+                        payload
+                    )
+
+                    .eq(
+                        'id',
+                        editingRandomPoolMemberId
+                    );
+
+        } else {
+
+            query =
+                supabaseClientInstance
+
+                    .from(
+                        'random_pool_members'
+                    )
+
+                    .insert(
+                        payload
+                    );
+
+        }
+
+
+        const {
+            error
+        } = await query;
+
+
+        if (error) {
+            throw error;
+        }
+
+
+        closeForm();
+
+
+        showAdminModal(
+            isEditing
+                ? 'The random pool member has been updated.'
+                : `The employee has been added to the ${poolType === 'DOT' ? 'DOT' : 'NON-DOT'} random pool.`,
+            'success',
+            isEditing
+                ? 'Pool Member Updated'
+                : 'Pool Member Added'
+        );
+
+
+        editingRandomPoolMemberId =
+            null;
+
+
+        await fetchRandomPoolMembers();
+
+
+    } catch (error) {
+
+        console.error(
+            'Random pool member save error:',
+            error
+        );
+
+
+        saveButton.disabled =
+            false;
+
+        saveButton.innerText =
+            isEditing
+                ? 'Save Changes'
+                : 'Add to Pool';
+
+
+        showAdminModal(
+            `Unable to save this pool member:\n\n${error.message}`,
+            'error',
+            'Unable to Save Pool Member'
+        );
+
+    }
+
+}
+
+
+async function updateRandomPoolMemberStatus(
+    memberId,
+    newStatus
+) {
+
+    const member =
+        randomPoolMembers.find(
+            item =>
+                item.id ===
+                memberId
+        );
+
+
+    if (!member) {
+        return;
+    }
+
+
+    const actionLabel =
+        newStatus === 'active'
+            ? 'reactivate'
+            : 'deactivate';
+
+
+    if (
+        !window.confirm(
+            `Are you sure you want to ${actionLabel} ${member.employee_name}?`
+        )
+    ) {
+        return;
+    }
+
+
+    try {
+
+        const updatePayload = {
+
+            status:
+                newStatus,
+
+            date_removed:
+                newStatus === 'active'
+                    ? null
+                    : new Date()
+                        .toISOString()
+                        .slice(
+                            0,
+                            10
+                        ),
+
+            updated_at:
+                new Date().toISOString()
+
+        };
+
+
+        const {
+            error
+        } =
+            await supabaseClientInstance
+
+                .from(
+                    'random_pool_members'
+                )
+
+                .update(
+                    updatePayload
+                )
+
+                .eq(
+                    'id',
+                    memberId
+                );
+
+
+        if (error) {
+            throw error;
+        }
+
+
+        showAdminModal(
+            newStatus === 'active'
+                ? `${member.employee_name} is active in the random pool again.`
+                : `${member.employee_name} has been deactivated.`,
+            'success',
+            newStatus === 'active'
+                ? 'Pool Member Activated'
+                : 'Pool Member Deactivated'
+        );
+
+
+        await fetchRandomPoolMembers();
+
+
+    } catch (error) {
+
+        console.error(
+            'Random pool member status update error:',
+            error
+        );
+
+
+        showAdminModal(
+            `Unable to update this pool member:\n\n${error.message}`,
+            'error',
+            'Unable to Update Pool Member'
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   SCHEDULE MANAGER
+========================================================= */
+
+function renderScheduleManager() {
 
         const manager =
             document.getElementById(
@@ -6522,46 +9263,6 @@ function populateWellnessOfferCodes() {
                 }
             );
         }
-
-        const wellnessOfferSearch =
-    document.getElementById(
-        'wellnessOfferSearch'
-    );
-
-
-if (wellnessOfferSearch) {
-
-    wellnessOfferSearch.addEventListener(
-        'input',
-        event => {
-
-            wellnessOfferSearchQuery =
-                event.target.value
-                    .toLowerCase()
-                    .trim();
-
-
-            populateWellnessOffers();
-
-        }
-    );
-
-}
-
-const refreshWellnessOffersBtn =
-    document.getElementById(
-        'refreshWellnessOffersBtn'
-    );
-
-
-if (refreshWellnessOffersBtn) {
-
-    refreshWellnessOffersBtn.addEventListener(
-        'click',
-        fetchWellnessOfferCodes
-    );
-
-}
 
         const blockDateButton =
             document.getElementById(
