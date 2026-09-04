@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
                 <div class="dot-hero-media">
-                    <img src="images/dot-hero.png" alt="DOT Certified Drug and Alcohol Testing Infrastructure" class="dot-hero-image" />
+                    <img src="images/dot-hero.png" alt="DOT drug and alcohol testing services for employers and commercial drivers in Chicago Heights" class="dot-hero-image" />
                 </div>
             </div>
         </div>

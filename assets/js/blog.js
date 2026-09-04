@@ -867,7 +867,7 @@ function renderBlogArticle(
                                         class="renew-you-blog-article-image"
                                         src="${escapeHtml(image)}"
                                         alt="${escapeHtml(title)}"
-                                    >
+                                     loading="lazy" decoding="async">
                                   `
                                 : ''
                         }

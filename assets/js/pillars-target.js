@@ -79,7 +79,7 @@ function renderCorePillars() {
                 <div class="pillars-row-inner" style="max-width: 1450px; margin: 0 auto; display: flex; flex-wrap: wrap; align-items: center; gap: 80px;"> 
                     <!-- Left Side: Modern Image Area with Clean Border Radius --> 
                     <div class="pillars-image-block" style="flex: 1; min-width: 400px; height: 520px; overflow: hidden; border-radius: 28px; box-shadow: 0 15px 45px rgba(62, 13, 95, 0.05); border: 1px solid rgba(138, 52, 159, 0.08); box-sizing: border-box;"> 
-                        <img src="images/Core-Pillar-01.png" alt="Personalized Care at ReNew You" style="width: 100%; height: 100%; object-fit: cover; display: block;"> 
+                        <img src="images/Core-Pillar-01.png" alt="Personalized Care at ReNew You" style="width: 100%; height: 100%; object-fit: cover; display: block;" loading="lazy" decoding="async"> 
                     </div> 
 
                     <!-- Right Side: Content Area --> 

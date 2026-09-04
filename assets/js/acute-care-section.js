@@ -316,7 +316,7 @@ function renderAcuteCareContent() {
 
     <!-- Right Side: Fully Rounded Avatar Asset Panel -->
     <div class="iv-book-hero-media">
-      <img src="images/martin, a.png" alt="Schedule an acute care consultation with Angela Martin at ReNew You Health & Wellness">
+      <img src="images/martin, a.png" alt="Schedule an acute care consultation with Angela Martin at ReNew You Health & Wellness" loading="lazy" decoding="async">
     </div>
   </div>
 </div>

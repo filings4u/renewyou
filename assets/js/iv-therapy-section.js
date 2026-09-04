@@ -179,8 +179,8 @@ function renderIvTherapyContent() {
       
       <div class="iv-feature-grid">
         <div class="iv-feature-card"><h3>Hydration Support</h3><p>Replenishes essential fluids rapidly and efficiently directly into your circulation system loop.</p></div>
-        <div class="iv-feature-card"><h3>Energy & Metabolism</h3><p>Supports cellular metabolic tracking cycles and baseline stamina tracking scores.</p></div>
-        <div class="iv-feature-card"><h3>Nutrient Replenishment</h3><p>Supplements core biological elements efficiently without relying on intestinal tracking lines.</p></div>
+        <div class="iv-feature-card"><h3>Energy & Metabolism</h3><p>Supports normal energy metabolism and overall wellness.</p></div>
+        <div class="iv-feature-card"><h3>Nutrient Replenishment</h3><p>Supplements selected nutrients through intravenous administration.</p></div>
         <div class="iv-feature-card"><h3>Physical Performance</h3><p>Provides general replenishment and strategic recovery support following intense physical exertion.</p></div>
       </div>
 
@@ -219,9 +219,9 @@ function renderIvTherapyContent() {
       <h2 class="iv-section-heading">What to Expect During Your IV Therapy Visit</h2>
       <div class="iv-feature-grid" style="grid-template-columns: repeat(4, 1fr);">
         <div class="iv-feature-card" style="padding:20px;"><h3>1. Medical Review</h3><p>A healthcare professional will review your medical history, active medications, and safety profiles.</p></div>
-        <div class="iv-feature-card" style="padding:20px;"><h3>2. Selection</h3><p>Your clinician will align the optimal hydration drip blueprint matching your personal eligibility profiles.</p></div>
+        <div class="iv-feature-card" style="padding:20px;"><h3>2. Selection</h3><p>Your clinician will align the appropriate infusion option based on your health history and eligibility.</p></div>
         <div class="iv-feature-card" style="padding:20px;"><h3>3. Infusion</h3><p>A catheter is securely placed and administered comfortably within a professional medical environment.</p></div>
-        <div class="iv-feature-card" style="padding:20px;"><h3>4. Aftercare</h3><p>The line is removed securely and customized maintenance metrics are reviewed by your team.</p></div>
+        <div class="iv-feature-card" style="padding:20px;"><h3>4. Aftercare</h3><p>The line is removed securely and aftercare guidance is reviewed with you before you leave.</p></div>
       </div>
 
       <div class="iv-callout-box" style="background: rgba(43, 182, 115, 0.02); border-left-color: var(--green-secondary);">
@@ -342,7 +342,7 @@ function renderIvTherapyContent() {
 
         <!-- Right Side: Fully Rounded Avatar Asset Panel -->
         <div class="iv-book-hero-media">
-          <img src="images/martin, a.png" alt="Schedule an initial visit with Angela Martin at ReNew You Health & Wellness">
+          <img src="images/martin, a.png" alt="Schedule an initial visit with Angela Martin at ReNew You Health & Wellness" loading="lazy" decoding="async">
         </div>
       </div>
     </div>

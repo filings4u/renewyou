@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="phys-flex-grid">
                 <!-- Main Content Panel -->
                 <div class="phys-main-panel">
-                    <h2 style="color: var(--purple-primary); font-size: 1.4rem; font-weight: 800; margin-top: 0;">Certified Certification Processing</h2>
+                    <h2 style="color: var(--purple-primary); font-size: 1.4rem; font-weight: 800; margin-top: 0;">FMCSA DOT Physical Exams & Medical Certification</h2>
                     <p style="color: #555; line-height: 1.6; font-size: 1.05rem; margin: 0 0 20px 0;">Our clinic provides fully certified DOT physical examinations executed by registered medical examiners. We ensure commercial operators satisfy all federal fitness rules efficiently to lock down valid medical certificates without dispatch interruption loop delays.</p>
                     
                     <!-- 4 Examination Metric Core Requirements Grid Box -->
@@ -81,8 +81,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 <!-- Driver Checklist Sidebar -->
                 <div class="phys-checklist-sidebar">
                     <div>
-                        <h3 style="color: var(--purple-primary); font-size: 1.3rem; font-weight: 800; margin: 0 0 15px 0;">Patient Exam Checklist</h3>
-                        <p style="color: #666; font-size: 0.9rem; line-height: 1.5; margin-bottom: 20px;">Bring these critical tracking documents to keep your physical exam running completely smoothly on the clinic counters:</p>
+                        <h3 style="color: var(--purple-primary); font-size: 1.3rem; font-weight: 800; margin: 0 0 15px 0;">DOT Driver Exam Checklist</h3>
+                        <p style="color: #666; font-size: 0.9rem; line-height: 1.5; margin-bottom: 20px;">Bring these items to help your DOT physical move smoothly and avoid preventable certification delays:</p>
                         <ul style="margin: 0 0 20px 0; padding-left: 20px; color: #444; font-size: 0.95rem; line-height: 2;">
                             <li>Valid Driver's License (CDL)</li>
                             <li>Current Medical Examiner Card (if renewing)</li>

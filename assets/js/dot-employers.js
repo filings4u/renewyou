@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="emp-hero-split">
                     <div class="emp-info-pane">
                         <span style="color: var(--purple-accent); font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px; display: block; margin-bottom: 12px;">Consortium & Fleet Management</span>
-                        <h2 style="color: var(--purple-primary); font-size: clamp(2rem, 4vw, 2.5rem); font-weight: 800; margin: 0 0 20px 0; letter-spacing: -0.6px; line-height: 1.2;">Turnkey DOT Compliance for Smart Employers</h2>
+                        <h2 style="color: var(--purple-primary); font-size: clamp(2rem, 4vw, 2.5rem); font-weight: 800; margin: 0 0 20px 0; letter-spacing: -0.6px; line-height: 1.2;">DOT Drug & Alcohol Testing Programs for Employers</h2>
                         <p style="color: #555; font-size: 1.05rem; line-height: 1.6; margin: 0 0 20px 0;">Streamline your occupational health administration. We partner directly with safety directors, logistics coordinators, and Third-Party Administrators (TPAs) to secure completely airtight, audit-ready testing histories across your workforce.</p>
                         <p style="color: #555; font-size: 1.05rem; line-height: 1.6; margin: 0 0 25px 0;">Our certified testing laboratory staff fully supports multi-agency compliance frameworks ensuring your commercial operations stay on the road without federal intervention or costly downtime penalties.</p>
                         
@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <!-- Bottom Full-Width Section: Audit Preparedness Guide -->
                 <div class="emp-detail-row">
                     <h3 style="margin: 0 0 15px 0; color: var(--purple-primary); font-weight: 800; font-size: 1.3rem;">Audit Preparedness & MIS Data Reports</h3>
-                    <p style="color: #555; line-height: 1.6; font-size: 0.95rem; margin: 0 0 20px 0;">During a Department of Transportation safety audit, inspectors require clean, structured documentation verifying your drug and alcohol testing program history. We provide completely transparent Management Information System (MIS) reports and secure document retention frameworks that give your safety team absolute piece of mind.</p>
+                    <p style="color: #555; line-height: 1.6; font-size: 0.95rem; margin: 0 0 20px 0;">During a Department of Transportation safety audit, inspectors require clean, structured documentation verifying your drug and alcohol testing program history. We provide completely transparent Management Information System (MIS) reports and secure document retention frameworks that give your safety team greater peace of mind.</p>
                     
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; border-top: 1px solid rgba(138,52,159,0.06); padding-top: 25px;">
                         <div>

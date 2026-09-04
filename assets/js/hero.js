@@ -36,31 +36,31 @@ function renderDynamicHero() {
   const heroData = {
     index: {
       badge: "Welcome to ReNew You Health & Wellness",
-      headline: "A New Standard For Local, <br><span style='color: var(--purple-accent);'>Patient-Centered</span> Clinical Care",
-      subheadline: "A patient-centered health and wellness clinic providing compassionate care, personalized wellness support, and convenient medical services for individuals and families.",
+      headline: "Patient-Centered Primary & Wellness Care<br><span style='color: var(--purple-accent);'>in Chicago Heights, IL</span>",
+      subheadline: "ReNew You Health & Wellness provides acute care, medical weight management, IV therapy, wellness services, physicals, testing, and preventive support for adults and families in Chicago Heights and nearby South Suburban communities.",
       image: "images/hero-home.jpg",
       alt: "Angela Y. Martin, APRN, FNP-C providing compassionate care to a patient",
       showButtons: true
     },
     about: {
       badge: "Get To Know Us",
-      headline: "Quality care with a personal touch.",
+      headline: "Nurse Practitioner-Led Care in Chicago Heights",
       subheadline: "ReNew You Health & Wellness is a nurse practitioner-led clinic focused on helping patients feel heard, supported, and confident in their care. Our goal is to provide accessible services that support your health, wellness, prevention, and lifestyle goals. Whether you need help with weight management, routine screenings, acute illness visits, physicals, testing, or wellness injections, our team is here to provide professional care in a welcoming environment.",
       image: "images/about-hero.png",
-      alt: "Our welcoming clinical environment",
+      alt: "ReNew You Health & Wellness clinic team serving Chicago Heights, Illinois",
       showButtons: false
     },
         services: {
       badge: "Clinical & Lifestyle Offerings",
-      headline: "Care designed around your needs.",
-      subheadline: "Explore our comprehensive health management packages. We mix patient-first values with convenient scheduling options.",
-      image: "images/hero-services.jpg",
-      alt: "Wellness care diagnostics equipment",
+      headline: "Medical & Wellness Services in Chicago Heights",
+      subheadline: "Explore acute care, medical weight management, IV therapy, wellness injections, DOT services, physicals, testing, and patient-focused preventive care with convenient scheduling.",
+      image: "images/services-hero.png",
+      alt: "Medical and wellness services at ReNew You Health & Wellness in Chicago Heights",
       showButtons: false
     },
     "weight-management": {
       badge: "Lifestyle Architecture",
-      headline: "Medical Weight Loss<br>Management",
+      headline: "Medical Weight Management<br>in Chicago Heights",
       subheadline: "Personalized Support for a Healthier You. At ReNew You Health & Wellness, we understand that weight management is not one-size-fits-all. Our Medical Weight Loss Management Program provides personalized, provider-guided care designed to help eligible patients work toward realistic and sustainable weight-loss goals.",
       image: "images/weight-management.png",
       alt: "Medical Weight Loss Management Process Overview",
@@ -69,7 +69,7 @@ function renderDynamicHero() {
     },
     "acute-care": {
       badge: "Immediate Clinical Relief",
-      headline: "Same-Day Diagnostic<br>Evaluations & Care",
+      headline: "Same-Day Acute Care<br>in Chicago Heights",
       subheadline: "Prompt evaluation and customized relief treatments for a broad array of common medical symptoms and unexpected illness flare-ups. Get compassionate, professional medical attention when you need it most.",
       image: "images/hero-acute.png",
       alt: "Compassionate same-day diagnostic evaluation and treatment center environment",
@@ -78,8 +78,8 @@ function renderDynamicHero() {
     },
     "iv-therapy": {
       badge: "Revitalize Your Body",
-      headline: "Premium IV Therapy & Hydration Infusions",
-      subheadline: "Replenish fluids, boost metabolic tracking loops, and support cellular energy directly with customized vitamin drips managed by certified healthcare pros.",
+      headline: "IV Therapy & Hydration in Chicago Heights",
+      subheadline: "Receive clinician-guided IV hydration and nutrient infusions in a comfortable medical setting, with treatment selected after an appropriate health and safety review.",
       image: "images/hero-iv.png",
       alt: "Intravenous vitamin infusion process in our clean wellness center",
       showButtons: true,
@@ -87,8 +87,8 @@ function renderDynamicHero() {
     },
     "wellness": {
       badge: "Convenient Health Support",
-      headline: "Targeted Vitamin & Nutrient Injections",
-      subheadline: "Optimize your system with fast, effective injections including Vitamin B12, Lipo B+, and cell-rejuvenating NAD+ tailored to your lifestyle parameters.",
+      headline: "Wellness & Vitamin Injections in Chicago Heights",
+      subheadline: "Explore clinician-guided wellness injections, including available vitamin and nutrient options, with recommendations based on your goals, history, and eligibility.",
       image: "images/hero-injections.jpg",
       alt: "Patient receiving a wellness vitamin injection screening",
       showButtons: true,
@@ -96,36 +96,36 @@ function renderDynamicHero() {
     },
     "dot-physicals": {
       badge: "FMCSA Certified Medical Examiner",
-      headline: "Fast, Certified DOT Physical Examinations",
-      subheadline: "Keep your commercial driver's license clear and active. Walk-in and owner-operator physicals completed quickly to secure your audit-ready medical card.",
-      image: "images/hero-physicals.jpg",
-      alt: "Certified DOT health assessment exam check-in",
+      headline: "DOT Physical Exams in Chicago Heights, IL",
+      subheadline: "Schedule an FMCSA DOT physical for CDL medical certification or renewal. We serve commercial drivers and owner-operators in Chicago Heights and surrounding communities.",
+      image: "images/dot-hero.png",
+      alt: "FMCSA DOT physical exam for commercial drivers in Chicago Heights, Illinois",
       showButtons: true,
       customCta: "dot"
     },
 
     insurance: {
       badge: "Coverage & Billing",
-      headline: "Insurance Networks We Accept",
+      headline: "Accepted Insurance & Patient Coverage",
       subheadline: "We are committed to making exceptional healthcare affordable and highly accessible by working directly with major insurance providers.",
       image: "images/hero-insurance.png",
-      alt: "Health coverage documents and cards",
+      alt: "Health insurance coverage information for ReNew You Health & Wellness patients",
       showButtons: false
     },
     patients: {
       badge: "Patient Checklist",
-      headline: "Before Your Visit",
+      headline: "Patient Information & Visit Preparation",
       subheadline: "We want to make your clinical check-in smooth and worry-free. Please check the preparation list below before visiting our team.",
-      image: "images/hero-patients.jpg",
-      alt: "Patient intake forms on a clipboard",
+      image: "images/hero-patients.png",
+      alt: "Patient forms and visit preparation information for ReNew You Health & Wellness",
       showButtons: false
     },
     contact: {
       badge: "Get In Touch",
-      headline: "Reach out to ReNew You Health & Wellness.",
-      subheadline: "Have questions or want to secure your session? Send us an inquiry below, visit our clinic location, or pick up the phone.",
-      image: "images/hero-contact.jpg",
-      alt: "Clinic consultation desk area",
+      headline: "Contact Our Chicago Heights Clinic",
+      subheadline: "Contact ReNew You Health & Wellness for appointment questions, patient information, service availability, or help preparing for your visit to our Chicago Heights clinic.",
+      image: "images/about-hero.png",
+      alt: "ReNew You Health & Wellness clinic in Chicago Heights, Illinois",
       showButtons: false
     }
   };

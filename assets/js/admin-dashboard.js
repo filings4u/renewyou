@@ -3546,7 +3546,7 @@ function renderDashboardStructure() {
                                             id="blogImagePreviewImg"
                                             src=""
                                             alt="Featured image preview"
-                                        />
+                                        / loading="lazy" decoding="async">
 
                                         <div class="blog-image-preview-actions">
                                             <span id="blogImagePreviewName">

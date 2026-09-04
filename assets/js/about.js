@@ -731,7 +731,7 @@ function renderAboutPageContent() {
         <div class="about-split-grid">
           <!-- Image LEFT -->
           <div class="about-media-frame">
-            <img src="images/martin, a.png" style="box-shadow: 0 8px 25px rgba(62,13,95,0.06); border-radius: 24px;" alt="Angela Y. Martin, MSN, APRN-FPA, FNP-C Profile Portrait">
+            <img src="images/martin, a.png" style="box-shadow: 0 8px 25px rgba(62,13,95,0.06); border-radius: 24px;" alt="Angela Y. Martin, MSN, APRN-FPA, FNP-C at ReNew You Health & Wellness" loading="lazy" decoding="async">
           </div>
           <!-- Text RIGHT -->
           <div class="about-content-frame">
@@ -763,7 +763,7 @@ By combining her business and financial expertise with hands-on healthcare exper
 
             <!-- Image RIGHT -->
             <div class="about-media-frame">
-              <img src="images/newman, l.png" style="box-shadow: 0 8px 25px rgba(62,13,95,0.06); border-radius: 24px;" alt="LaToya Newman, MBA, CPA, BFA Profile Portrait">
+              <img src="images/newman, l.png" style="box-shadow: 0 8px 25px rgba(62,13,95,0.06); border-radius: 24px;" alt="LaToya Newman, MBA, CPA, BFA, ReNew You Health & Wellness leadership" loading="lazy" decoding="async">
             </div>
           </div>
         </section>

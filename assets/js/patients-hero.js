@@ -58,7 +58,7 @@ function renderPatientsHero() {
                     Patient Checklist
                 </span> 
                 <h1 style="font-size: 2.6rem; margin: 15px 0 20px 0; color: var(--purple-primary); font-weight: 800; letter-spacing: -0.5px; line-height: 1.2; max-width: 650px;">
-                    Before Your Visit
+                    Patient Information & Visit Preparation
                 </h1> 
                 <p style="font-size: 1.15rem; color: #555; max-width: 700px; margin: 0; line-height: 1.6;"> 
                     We want to make your clinical check-in smooth and worry-free. Please check the preparation list below before visiting our team.
@@ -68,7 +68,7 @@ function renderPatientsHero() {
             <!-- Right Side: Frame Visual Area --> 
             <div class="patients-hero-image-block" style="flex: 1; min-width: 320px; display: flex; justify-content: center; align-items: center; box-sizing: border-box;"> 
                 <div class="patients-hero-image-card" style="width: 100%; max-width: 550px; height: 440px; border-radius: 28px; overflow: hidden; box-shadow: 0 12px 35px rgba(62,13,95,0.06); border: 1px solid rgba(138,52,159,0.08); box-sizing: border-box;"> 
-                    <img src="images/hero-patients.png" alt="Patient intake check-in checklist forms on clinic table clipboard" style="width: 100%; height: 100%; object-fit: cover; display: block;"> 
+                    <img src="images/hero-patients.png" alt="Patient forms and visit preparation information for ReNew You Health & Wellness in Chicago Heights" style="width: 100%; height: 100%; object-fit: cover; display: block;"> 
                 </div> 
             </div>
 

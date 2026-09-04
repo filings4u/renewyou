@@ -23,7 +23,7 @@ function renderInsuranceHero() {
             <!-- Left Column: Typography Layout -->
             <div class="ins-hero-text-block" style="flex: 1.2; min-width: 320px; text-align: left; box-sizing: border-box;">
                 <span style="background-color: rgba(79, 148, 12, 0.08); color: var(--green-secondary); padding: 6px 16px; border-radius: 20px; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px; display: inline-block;">Coverage & Billing</span>
-                <h1 style="font-size: 2.6rem; margin: 15px 0 20px 0; color: var(--purple-primary); font-weight: 800; letter-spacing: -0.5px; line-height: 1.2; max-width: 650px;">Insurance Networks We Accept</h1>
+                <h1 style="font-size: 2.6rem; margin: 15px 0 20px 0; color: var(--purple-primary); font-weight: 800; letter-spacing: -0.5px; line-height: 1.2; max-width: 650px;">Accepted Insurance & Patient Coverage</h1>
                 <p style="font-size: 1.15rem; color: #555; max-width: 700px; margin: 0; line-height: 1.6;">We are committed to making exceptional healthcare affordable and highly accessible. Our administrative team works directly with major insurance providers to maximize your benefits and minimize your out-of-pocket costs.</p>
             </div>
 
