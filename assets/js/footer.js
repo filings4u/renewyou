@@ -1249,11 +1249,28 @@ function renderFooterModule() {
                             <div class="renew-footer-hours-item">
 
                                 <span class="renew-footer-hours-icon">
-                                    🗓️
+                                    🕒
                                 </span>
 
                                 <span>
-                                    Mon - Fri: 3pm - 7pm
+                                    <strong>Regular Business Hours</strong><br>
+                                    Mon, Wed, Thurs & Fri: 1pm - 5pm<br>
+                                    Tues: 3pm - 7pm<br>
+                                    Sun & Holidays: Closed
+                                </span>
+
+                            </div>
+
+
+                            <div class="renew-footer-hours-item">
+
+                                <span class="renew-footer-hours-icon">
+                                    💻
+                                </span>
+
+                                <span>
+                                    <strong>Telehealth Hours</strong><br>
+                                    Saturday: 9am - 1pm
                                 </span>
 
                             </div>
@@ -1266,20 +1283,8 @@ function renderFooterModule() {
                                 </span>
 
                                 <span>
-                                    Sat: 9am - 1pm
-                                </span>
-
-                            </div>
-
-
-                            <div class="renew-footer-hours-item">
-
-                                <span class="renew-footer-hours-icon">
-                                    🗓️
-                                </span>
-
-                                <span>
-                                    Sundays & Holidays: Closed
+                                    <strong>In-Person Saturday Appointments</strong><br>
+                                    Every 3rd Saturday: 9am - 1pm
                                 </span>
 
                             </div>
