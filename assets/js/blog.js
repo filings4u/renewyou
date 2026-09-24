@@ -2329,7 +2329,7 @@ function updateBlogPageMetadata(
         'twitter:card',
         image
             ? 'summary_large_image'
-            : 'summary'
+            : 'summary_large_image'
     );
 
 
@@ -2344,6 +2344,9 @@ function updateBlogPageMetadata(
             'twitter:image',
             image
         );
+        setBlogMeta('property','og:image:secure_url',image);
+        setBlogMeta('property','og:image:alt',safeTitle);
+        setBlogMeta('name','twitter:image:alt',safeTitle);
     }
 
 
