@@ -17,6 +17,8 @@ document.addEventListener('DOMContentLoaded', () => {
             SUPABASE_ANON_KEY
         );
 
+    window.supabaseClientInstance = supabaseClientInstance;
+
     /* =========================================================
        BLOG FEATURED IMAGE STORAGE
     ========================================================= */
@@ -1110,7 +1112,9 @@ async function checkAuthenticationGuard() {
             .eq('id', session.user.id)
             .maybeSingle();
 
-        if (adminProfileError || !adminProfile || String(adminProfile.role || '').toLowerCase() !== 'admin' || adminProfile.active === false) {
+        const allowedWorkspaceRoles = ['admin', 'manager', 'clinician', 'marketing', 'staff'];
+        const currentWorkspaceRole = String(adminProfile?.role || '').toLowerCase();
+        if (adminProfileError || !adminProfile || !allowedWorkspaceRoles.includes(currentWorkspaceRole) || adminProfile.active === false) {
             await supabaseClientInstance.auth.signOut();
             renderSecureLoginForm();
             const loginError = document.getElementById('loginErrorMsg');
