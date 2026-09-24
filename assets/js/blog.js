@@ -258,7 +258,10 @@ async function loadPublishedBlogPosts() {
                     status,
                     published_at,
                     created_at,
-                    likes_count
+                    likes_count,
+                    seo_title,
+                    seo_description,
+                    updated_at
                 `)
 
                 .eq(
@@ -707,7 +710,10 @@ async function loadBlogArticle(
                     status,
                     published_at,
                     created_at,
-                    likes_count
+                    likes_count,
+                    seo_title,
+                    seo_description,
+                    updated_at
                 `)
 
                 .eq(
@@ -825,11 +831,15 @@ function renderBlogArticle(
 
 
     updateBlogPageMetadata(
-        title,
+        post?.seo_title || title,
+        post?.seo_description ||
         post?.excerpt ||
-        createExcerpt(
-            post?.content
-        )
+        createExcerpt(post?.content),
+        post?.slug || '',
+        image,
+        post?.published_at || '',
+        post?.updated_at || post?.published_at || '',
+        author
     );
 
 
@@ -1895,9 +1905,16 @@ function createExcerpt(
     content
 ) {
 
+    const holder =
+        document.createElement('div');
+
+    holder.innerHTML =
+        formatBlogContent(content);
+
     const text =
         String(
-            content ||
+            holder.textContent ||
+            holder.innerText ||
             ''
         )
             .replace(
@@ -1931,24 +1948,14 @@ function formatBlogContent(
     content
 ) {
 
-    const paragraphs =
+    const source =
         String(
             content ||
             ''
-        )
-            .split(
-                /\n\s*\n/
-            )
-            .map(
-                paragraph =>
-                    paragraph.trim()
-            )
-            .filter(Boolean);
+        ).trim();
 
 
-    if (
-        paragraphs.length === 0
-    ) {
+    if (!source) {
 
         return `
             <p>
@@ -1959,29 +1966,242 @@ function formatBlogContent(
     }
 
 
-    return paragraphs
+    /*
+     * Rich editor content is stored as sanitized HTML.
+     * Legacy posts are plain text, so keep supporting
+     * their paragraph formatting automatically.
+     */
+    if (
+        /<\/?[a-z][\s\S]*>/i.test(
+            source
+        )
+    ) {
+
+        return sanitizeBlogHtml(
+            source
+        );
+
+    }
+
+
+    return source
+        .split(
+            /\n\s*\n/
+        )
         .map(
-            paragraph => {
-
-                const safe =
-                    escapeHtml(
-                        paragraph
-                    )
-                        .replace(
-                            /\n/g,
-                            '<br>'
-                        );
-
-
-                return `
-                    <p>
-                        ${safe}
-                    </p>
-                `;
-
-            }
+            paragraph =>
+                paragraph.trim()
+        )
+        .filter(Boolean)
+        .map(
+            paragraph => `
+                <p>
+                    ${escapeHtml(paragraph).replace(/\n/g,'<br>')}
+                </p>
+            `
         )
         .join('');
+
+}
+
+
+function sanitizeBlogHtml(
+    html
+) {
+
+    const parser =
+        new DOMParser();
+
+    const documentFragment =
+        parser.parseFromString(
+            `<div id="renewYouBlogSafeRoot">${String(html || '')}</div>`,
+            'text/html'
+        );
+
+    const root =
+        documentFragment.getElementById(
+            'renewYouBlogSafeRoot'
+        );
+
+    if (!root) {
+        return '';
+    }
+
+    const allowedTags =
+        new Set([
+            'P','BR','STRONG','B','EM','I','U',
+            'H2','H3','H4','UL','OL','LI',
+            'BLOCKQUOTE','A','SPAN','FONT','DIV','HR'
+        ]);
+
+    const allowedStyles =
+        new Set([
+            'font-family',
+            'font-size',
+            'line-height',
+            'margin-bottom',
+            'text-align'
+        ]);
+
+
+    function cleanNode(
+        node
+    ) {
+
+        Array.from(
+            node.children || []
+        ).forEach(
+            child => {
+
+                cleanNode(child);
+
+                if (
+                    !allowedTags.has(
+                        child.tagName
+                    )
+                ) {
+
+                    child.replaceWith(
+                        ...Array.from(
+                            child.childNodes
+                        )
+                    );
+
+                    return;
+
+                }
+
+
+                Array.from(
+                    child.attributes
+                ).forEach(
+                    attribute => {
+
+                        const name =
+                            attribute.name
+                                .toLowerCase();
+
+                        const allowed =
+                            (
+                                child.tagName === 'A' &&
+                                ['href','target','rel'].includes(name)
+                            ) ||
+                            (
+                                child.tagName === 'FONT' &&
+                                ['face','size'].includes(name)
+                            ) ||
+                            name === 'style' ||
+                            name === 'align';
+
+                        if (!allowed) {
+                            child.removeAttribute(
+                                attribute.name
+                            );
+                        }
+
+                    }
+                );
+
+
+                if (
+                    child.hasAttribute(
+                        'style'
+                    )
+                ) {
+
+                    const safeRules = [];
+
+                    String(
+                        child.getAttribute('style') || ''
+                    )
+                        .split(';')
+                        .forEach(
+                            rule => {
+
+                                const parts =
+                                    rule.split(':');
+
+                                const property =
+                                    String(
+                                        parts.shift() || ''
+                                    )
+                                        .trim()
+                                        .toLowerCase();
+
+                                const value =
+                                    parts
+                                        .join(':')
+                                        .trim();
+
+                                if (
+                                    allowedStyles.has(property) &&
+                                    value &&
+                                    !/url\s*\(/i.test(value) &&
+                                    !/expression\s*\(/i.test(value)
+                                ) {
+
+                                    safeRules.push(
+                                        `${property}:${value}`
+                                    );
+
+                                }
+
+                            }
+                        );
+
+                    if (safeRules.length) {
+                        child.setAttribute(
+                            'style',
+                            safeRules.join(';')
+                        );
+                    } else {
+                        child.removeAttribute(
+                            'style'
+                        );
+                    }
+
+                }
+
+
+                if (
+                    child.tagName === 'A'
+                ) {
+
+                    const href =
+                        String(
+                            child.getAttribute('href') || ''
+                        ).trim();
+
+                    if (
+                        !/^(https?:|mailto:|tel:|\/|#)/i.test(href)
+                    ) {
+                        child.removeAttribute('href');
+                    }
+
+                    if (
+                        child.getAttribute('href')
+                    ) {
+                        child.setAttribute(
+                            'target',
+                            '_blank'
+                        );
+                        child.setAttribute(
+                            'rel',
+                            'noopener noreferrer'
+                        );
+                    }
+
+                }
+
+            }
+        );
+
+    }
+
+
+    cleanNode(root);
+
+    return root.innerHTML;
 
 }
 
@@ -2025,42 +2245,207 @@ function escapeHtml(
 
 function updateBlogPageMetadata(
     title,
-    description
+    description,
+    slug = '',
+    image = '',
+    publishedAt = '',
+    updatedAt = '',
+    author = 'ReNew You Health & Wellness'
 ) {
 
-    document.title =
-        `${title} | ReNew You Health & Wellness`;
+    const safeTitle =
+        String(
+            title ||
+            'ReNew You Health & Wellness Blog'
+        ).trim();
 
-
-    let descriptionMeta =
-        document.querySelector(
-            'meta[name="description"]'
-        );
-
-
-    if (!descriptionMeta) {
-
-        descriptionMeta =
-            document.createElement(
-                'meta'
-            );
-
-        descriptionMeta.name =
-            'description';
-
-        document.head.appendChild(
-            descriptionMeta
-        );
-
-    }
-
-
-    descriptionMeta.setAttribute(
-        'content',
+    const safeDescription =
         String(
             description ||
             'ReNew You Health & Wellness Blog'
         )
+            .replace(/\s+/g,' ')
+            .trim()
+            .slice(0, 320);
+
+    const canonicalUrl =
+        slug
+            ? `https://renewyouhealthwellness.com/blog.html?slug=${encodeURIComponent(slug)}`
+            : 'https://renewyouhealthwellness.com/blog.html';
+
+
+    document.title =
+        safeTitle.includes(
+            'ReNew You Health & Wellness'
+        )
+            ? safeTitle
+            : `${safeTitle} | ReNew You Health & Wellness`;
+
+
+    setBlogMeta(
+        'name',
+        'description',
+        safeDescription
+    );
+
+    setBlogMeta(
+        'property',
+        'og:type',
+        slug ? 'article' : 'website'
+    );
+
+    setBlogMeta(
+        'property',
+        'og:title',
+        safeTitle
+    );
+
+    setBlogMeta(
+        'property',
+        'og:description',
+        safeDescription
+    );
+
+    setBlogMeta(
+        'property',
+        'og:url',
+        canonicalUrl
+    );
+
+    setBlogMeta(
+        'name',
+        'twitter:title',
+        safeTitle
+    );
+
+    setBlogMeta(
+        'name',
+        'twitter:description',
+        safeDescription
+    );
+
+    setBlogMeta(
+        'name',
+        'twitter:card',
+        image
+            ? 'summary_large_image'
+            : 'summary'
+    );
+
+
+    if (image) {
+        setBlogMeta(
+            'property',
+            'og:image',
+            image
+        );
+        setBlogMeta(
+            'name',
+            'twitter:image',
+            image
+        );
+    }
+
+
+    let canonical =
+        document.querySelector(
+            'link[rel="canonical"]'
+        );
+
+    if (!canonical) {
+        canonical =
+            document.createElement(
+                'link'
+            );
+        canonical.rel = 'canonical';
+        document.head.appendChild(
+            canonical
+        );
+    }
+
+    canonical.href = canonicalUrl;
+
+
+    if (slug) {
+
+        let articleSchema =
+            document.getElementById(
+                'renewYouBlogArticleSchema'
+            );
+
+        if (!articleSchema) {
+            articleSchema =
+                document.createElement(
+                    'script'
+                );
+            articleSchema.type =
+                'application/ld+json';
+            articleSchema.id =
+                'renewYouBlogArticleSchema';
+            document.head.appendChild(
+                articleSchema
+            );
+        }
+
+        articleSchema.textContent =
+            JSON.stringify({
+                '@context':'https://schema.org',
+                '@type':'Article',
+                headline:safeTitle,
+                description:safeDescription,
+                url:canonicalUrl,
+                mainEntityOfPage:canonicalUrl,
+                image:image ? [image] : undefined,
+                datePublished:publishedAt || undefined,
+                dateModified:updatedAt || publishedAt || undefined,
+                author:{
+                    '@type':'Organization',
+                    name:String(author || 'ReNew You Health & Wellness')
+                },
+                publisher:{
+                    '@type':'Organization',
+                    name:'ReNew You Health & Wellness',
+                    url:'https://renewyouhealthwellness.com/'
+                }
+            });
+
+    }
+
+}
+
+
+function setBlogMeta(
+    attribute,
+    key,
+    value
+) {
+
+    if (!value) {
+        return;
+    }
+
+    let element =
+        document.querySelector(
+            `meta[${attribute}="${key}"]`
+        );
+
+    if (!element) {
+        element =
+            document.createElement(
+                'meta'
+            );
+        element.setAttribute(
+            attribute,
+            key
+        );
+        document.head.appendChild(
+            element
+        );
+    }
+
+    element.setAttribute(
+        'content',
+        String(value)
     );
 
 }
@@ -2636,6 +3021,54 @@ function injectBlogStyles() {
             line-height:1.85;
             overflow-wrap:anywhere;
             word-break:break-word;
+        }
+
+        .renew-you-blog-article-content h2 {
+            margin:34px 0 14px;
+            color:#3E0D5F;
+            font-size:clamp(1.45rem,2.7vw,1.9rem);
+            line-height:1.25;
+        }
+
+        .renew-you-blog-article-content h3 {
+            margin:28px 0 12px;
+            color:#59306a;
+            font-size:clamp(1.18rem,2.2vw,1.45rem);
+            line-height:1.3;
+        }
+
+        .renew-you-blog-article-content ul,
+        .renew-you-blog-article-content ol {
+            margin:0 0 22px;
+            padding-left:27px;
+            color:#4f4952;
+            line-height:1.8;
+        }
+
+        .renew-you-blog-article-content li {
+            margin-bottom:8px;
+        }
+
+        .renew-you-blog-article-content blockquote {
+            margin:26px 0;
+            padding:17px 21px;
+            border-left:4px solid #8a349b;
+            border-radius:0 10px 10px 0;
+            background:#faf6fb;
+            color:#5d5061;
+            line-height:1.75;
+        }
+
+        .renew-you-blog-article-content a {
+            color:#7d248f;
+            font-weight:700;
+            text-decoration:underline;
+            text-underline-offset:3px;
+        }
+
+        .renew-you-blog-article-content div {
+            margin-bottom:20px;
+            line-height:1.85;
         }
 
         .renew-you-blog-article-content * {
