@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Configure your active Supabase function routing tokens here
-const SUPABASE_PROJECT_URL = "https://lrbimrlbskjweynxlgas.supabase.co";
+const SUPABASE_PROJECT_URL = "https://eybsgwzpisgswmxcwjel.supabase.co";
 const CONTACT_FUNCTION_ENDPOINT = `${SUPABASE_PROJECT_URL}/functions/v1/submit-contact-inquiry`;
 
 /**

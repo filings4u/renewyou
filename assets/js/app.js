@@ -1,6 +1,6 @@
 // --- 1. CONFIGURATION ---
-const SUPABASE_URL = "https://lrbimrlbskjweynxlgas.supabase.co"; 
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxyYmltcmxic2tqd2V5bnhsZ2FzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1MjQ0NTYsImV4cCI6MjA5NDEwMDQ1Nn0.I8fQ6ZjA9oaTqJCF-7Z7vUboXC8zv2cogBv4PC_1ihU"; 
+const SUPABASE_URL = "https://eybsgwzpisgswmxcwjel.supabase.co"; 
+const SUPABASE_ANON_KEY = "sb_publishable_R_kVcbPeNKKDIVQM8l2gZQ_6fUa4weF"; 
 const LAUNCH_DATE_STRING = "December 31, 2026 00:00:00";
 
 // --- 2. INITIALIZATION (Fixed: Renamed variable to avoid naming conflicts) ---

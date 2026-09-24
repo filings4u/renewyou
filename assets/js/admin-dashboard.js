@@ -6,10 +6,10 @@ document.addEventListener('DOMContentLoaded', () => {
     ========================================================= */
 
     const SUPABASE_PROJECT_URL =
-        "https://lrbimrlbskjweynxlgas.supabase.co";
+        "https://eybsgwzpisgswmxcwjel.supabase.co";
 
     const SUPABASE_ANON_KEY =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxyYmltcmxic2tqd2V5bnhsZ2FzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1MjQ0NTYsImV4cCI6MjA5NDEwMDQ1Nn0.I8fQ6ZjA9oaTqJCF-7Z7vUboXC8zv2cogBv4PC_1ihU";
+        "sb_publishable_R_kVcbPeNKKDIVQM8l2gZQ_6fUa4weF";
 
     const supabaseClientInstance =
         window.supabase.createClient(
@@ -1319,6 +1319,23 @@ async function checkAuthenticationGuard() {
                             Sign In to Registry
                         </button>
 
+                        <div style="text-align:center;margin-top:14px;">
+                            <button
+                                type="button"
+                                id="forgotPasswordBtn"
+                                style="
+                                    background:none;
+                                    border:none;
+                                    color:var(--purple-accent);
+                                    font-weight:700;
+                                    cursor:pointer;
+                                    padding:6px 10px;
+                                "
+                            >
+                                Forgot password?
+                            </button>
+                        </div>
+
                         <p
                             id="loginErrorMsg"
                             style="
@@ -1346,6 +1363,39 @@ async function checkAuthenticationGuard() {
 
         const errorMsg =
             document.getElementById('loginErrorMsg');
+
+        const forgotPasswordBtn =
+            document.getElementById('forgotPasswordBtn');
+
+        if (forgotPasswordBtn) {
+            forgotPasswordBtn.addEventListener('click', async () => {
+                const emailInput = document.getElementById('loginEmail');
+                const email = String(emailInput?.value || '').trim();
+
+                if (!email) {
+                    errorMsg.innerText = 'Enter your clinic email first, then select Forgot password.';
+                    errorMsg.style.display = 'block';
+                    return;
+                }
+
+                forgotPasswordBtn.disabled = true;
+                errorMsg.style.display = 'none';
+
+                const redirectTo = `${window.location.origin}/admin-reset-password.html`;
+                const { error } = await supabaseClientInstance.auth.resetPasswordForEmail(email, { redirectTo });
+
+                if (error) {
+                    errorMsg.innerText = error.message;
+                    errorMsg.style.display = 'block';
+                } else {
+                    errorMsg.style.color = '#2e7d32';
+                    errorMsg.innerText = 'Password reset email sent. Check your inbox.';
+                    errorMsg.style.display = 'block';
+                }
+
+                forgotPasswordBtn.disabled = false;
+            });
+        }
 
         loginForm.addEventListener('submit', async (event) => {
 

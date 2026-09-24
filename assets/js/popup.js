@@ -28,7 +28,7 @@ const RENEW_YOU_POPUP_CONFIG = {
      * Supabase Edge Function endpoint.
      */
     edgeFunctionUrl:
-        'https://lrbimrlbskjweynxlgas.supabase.co/functions/v1/send-wellness-offer',
+        'https://eybsgwzpisgswmxcwjel.supabase.co/functions/v1/send-wellness-offer',
 
     /*
      * Delay before popup appears.
@@ -203,7 +203,7 @@ function createRenewYouOfferPopup(
 
     <div class="renew-you-offer-logo-wrap">
         <img
-            src="https://lrbimrlbskjweynxlgas.supabase.co/storage/v1/object/public/public-assets/logo2.png"
+            src="https://renewyouhealthwellness.com/images/logo2.png"
             alt="ReNew You Health & Wellness"
             class="renew-you-offer-logo"
         />
