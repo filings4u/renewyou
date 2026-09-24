@@ -944,6 +944,9 @@ function showAdminConfirmModal(
 
 let appointmentsData = [];
 
+let contactInquiries = [];
+let contactSearchQuery = '';
+
 let mailingListData = [];
 
 let activeFilter = 'All';
@@ -951,6 +954,10 @@ let activeFilter = 'All';
 let searchQuery = '';
 
 let mailingListSearchQuery = '';
+
+let emailCampaigns = [];
+let campaignSearchQuery = '';
+let editingCampaignId = null;
 
 let wellnessOfferCodes = [];
 
@@ -1097,6 +1104,22 @@ async function checkAuthenticationGuard() {
             return;
         }
 
+        const { data: adminProfile, error: adminProfileError } = await supabaseClientInstance
+            .from('admin_profiles')
+            .select('id, email_address, role, active')
+            .eq('id', session.user.id)
+            .maybeSingle();
+
+        if (adminProfileError || !adminProfile || String(adminProfile.role || '').toLowerCase() !== 'admin' || adminProfile.active === false) {
+            await supabaseClientInstance.auth.signOut();
+            renderSecureLoginForm();
+            const loginError = document.getElementById('loginErrorMsg');
+            if (loginError) loginError.textContent = 'This account is not authorized for the ReNew You management workspace.';
+            return;
+        }
+
+        window.RENEW_ADMIN_PROFILE = adminProfile;
+
         /*
          * Build the dashboard first so all target
          * containers exist before database data is loaded.
@@ -1119,7 +1142,9 @@ async function checkAuthenticationGuard() {
          */
         await Promise.allSettled([
             fetchAppointments(),
+            fetchContactInquiries(),
             fetchMailingList(),
+            fetchEmailCampaigns(),
             fetchRandomPoolMembers(),
             fetchBlogPosts()
         ]);
@@ -1431,18 +1456,7 @@ async function checkAuthenticationGuard() {
                 return;
             }
 
-            renderDashboardStructure();
-
-            await loadSchedulingSystemSettings();
-
-            await Promise.allSettled([
-                fetchAppointments(),
-                fetchRandomPoolMembers(),
-                fetchBlogPosts()
-            ]);
-
-            renderScheduleManager();
-            renderRandomPoolPage();
+            await checkAuthenticationGuard();
         });
     }
 
@@ -2699,6 +2713,82 @@ function renderDashboardStructure() {
 
 }
 
+
+            /* =====================================================
+               2026 MANAGEMENT WORKSPACE UPGRADE
+            ===================================================== */
+            body { background:#f5f6fa; }
+            .dash-outer-wrap { max-width:none; margin:0; padding:0 28px 40px 308px; min-height:100vh; }
+            .dash-header-row { min-height:96px; margin:0 0 24px; padding:0; border-bottom:1px solid #e8e5eb; }
+            .dash-title-block h1 { font-size:clamp(1.65rem,3vw,2.25rem); letter-spacing:-.03em; }
+            .admin-page-nav { position:fixed; inset:0 auto 0 0; width:272px; z-index:100; margin:0; padding:112px 16px 24px; border:0; border-radius:0; background:linear-gradient(180deg,#2c0b43 0%,#3e0d5f 52%,#271035 100%); box-shadow:12px 0 34px rgba(35,12,48,.08); display:flex; flex-direction:column; gap:6px; overflow-y:auto; }
+            .admin-page-nav::before { content:'ReNew You'; position:absolute; top:28px; left:24px; right:24px; color:#fff; font-size:1.35rem; font-weight:900; letter-spacing:-.03em; }
+            .admin-page-nav::after { content:'MANAGEMENT WORKSPACE'; position:absolute; top:59px; left:24px; color:#d8c2e0; font-size:.61rem; font-weight:800; letter-spacing:.17em; }
+            .admin-page-tab { width:100%; text-align:left; color:#e9deed; padding:12px 14px; border-radius:10px; font-size:.86rem; }
+            .admin-page-tab:hover { background:rgba(255,255,255,.08); color:#fff; }
+            .admin-page-tab.active { background:#fff; color:#3e0d5f; box-shadow:0 8px 18px rgba(15,3,21,.14); }
+            .admin-card,.setting-inner-card,.dash-control-card { border-color:#ebe7ee; box-shadow:0 10px 30px rgba(35,12,48,.04); }
+            .workspace-page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:20px;}
+            .workspace-page-head h2{margin:3px 0 6px;color:#2f103f;font-size:1.55rem;}
+            .workspace-page-head p{margin:0;color:#6f6874;max-width:760px;line-height:1.55;}
+            .workspace-kicker{font-size:.68rem;font-weight:900;letter-spacing:.15em;color:#8a349b;text-transform:uppercase;}
+            .workspace-btn{border:0;border-radius:10px;padding:11px 16px;font-weight:800;cursor:pointer;font-size:.84rem;transition:.18s ease;}
+            .workspace-btn.primary{background:#3e0d5f;color:#fff;box-shadow:0 8px 18px rgba(62,13,95,.18);}
+            .workspace-btn.secondary{background:#f1eaf4;color:#3e0d5f;}
+            .workspace-btn.ghost{background:#fff;border:1px solid #ddd6e2;color:#4e3f54;}
+            .workspace-btn.small{padding:8px 11px;font-size:.76rem;}
+            .workspace-btn:disabled{opacity:.45;cursor:not-allowed;box-shadow:none;}
+            .campaign-metrics-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:18px;}
+            .workspace-stat{background:#fff;border:1px solid #ebe7ee;border-radius:14px;padding:17px 18px;box-shadow:0 8px 24px rgba(35,12,48,.035);}
+            .workspace-stat span{display:block;color:#7a707f;font-size:.67rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;}
+            .workspace-stat strong{display:block;margin-top:7px;color:#3e0d5f;font-size:1.7rem;}
+            .campaign-layout{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(320px,.75fr);gap:18px;align-items:start;}
+            .workspace-section-title{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:18px;}
+            .workspace-section-title h3{margin:0 0 4px;font-size:1.08rem;}
+            .workspace-section-title p{margin:0;color:#777;font-size:.79rem;line-height:1.45;}
+            .workspace-badge{display:inline-flex;background:#f1eaf4;color:#6e277d;border-radius:999px;padding:6px 10px;font-size:.66rem;font-weight:900;text-transform:uppercase;}
+            .campaign-two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+            .campaign-field{margin-bottom:14px;}
+            .campaign-field label{display:block;margin-bottom:6px;color:#4a4050;font-size:.69rem;font-weight:900;text-transform:uppercase;letter-spacing:.05em;}
+            .campaign-field input,.campaign-field textarea{width:100%;box-sizing:border-box;border:1px solid #ddd6e2;border-radius:10px;background:#fff;padding:11px 12px;font:inherit;color:#2b2030;outline:none;}
+            .campaign-field textarea{resize:vertical;line-height:1.6;min-height:270px;}
+            .campaign-field input:focus,.campaign-field textarea:focus{border-color:#8a349b;box-shadow:0 0 0 3px rgba(138,52,159,.09);}
+            .campaign-field small{display:block;margin-top:6px;color:#847a89;font-size:.7rem;line-height:1.45;}
+            .campaign-actions{display:flex;gap:9px;flex-wrap:wrap;align-items:center;}
+            .workspace-inline-message{margin-top:14px;padding:11px 13px;border-radius:10px;font-size:.8rem;font-weight:700;}
+            .workspace-inline-message.success{display:block!important;background:#eef8e8;color:#3d790a;}
+            .workspace-inline-message.error{display:block!important;background:#fff0f2;color:#b00020;}
+            .workspace-search{width:100%;box-sizing:border-box;border:1px solid #ddd6e2;border-radius:10px;padding:11px 12px;margin-bottom:12px;outline:none;}
+            .campaign-history-list{display:grid;gap:10px;max-height:690px;overflow:auto;}
+            .campaign-history-item{border:1px solid #eee8f1;border-radius:12px;padding:13px;background:#fff;}
+            .campaign-history-item h4{margin:0;color:#351545;font-size:.9rem;}
+            .campaign-history-item p{margin:5px 0;color:#786e7d;font-size:.74rem;line-height:1.45;}
+            .campaign-history-meta{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px;}
+            .campaign-history-meta span{font-size:.64rem;font-weight:800;padding:5px 7px;border-radius:999px;background:#f5f1f7;color:#66586c;}
+            .campaign-history-actions{display:flex;gap:7px;margin-top:10px;}
+            .workspace-empty{color:#777;text-align:center;padding:28px 10px;}
+            .contact-inbox-list{display:grid;gap:12px;}
+            .contact-inquiry-card{border:1px solid #ece6ef;border-radius:14px;background:#fff;padding:17px;}
+            .contact-inquiry-top{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;flex-wrap:wrap;}
+            .contact-inquiry-card h3{margin:0 0 4px;color:#351545;font-size:1rem;}
+            .contact-inquiry-meta{display:flex;gap:8px;flex-wrap:wrap;color:#756a7a;font-size:.74rem;}
+            .contact-inquiry-message{margin:14px 0;padding:13px 14px;border-radius:10px;background:#faf8fb;color:#504557;line-height:1.58;font-size:.86rem;}
+            .contact-inquiry-controls{display:grid;grid-template-columns:180px 1fr auto;gap:10px;align-items:end;}
+            .contact-inquiry-controls label{display:block;margin-bottom:5px;font-size:.64rem;font-weight:900;color:#65586b;text-transform:uppercase;}
+            .contact-inquiry-controls select,.contact-inquiry-controls textarea{width:100%;box-sizing:border-box;border:1px solid #ddd6e2;border-radius:9px;padding:9px 10px;font:inherit;background:#fff;}
+            .contact-inquiry-controls textarea{min-height:72px;resize:vertical;}
+            .campaign-preview-modal{position:fixed;inset:0;z-index:99999;background:rgba(25,8,34,.62);display:none;align-items:center;justify-content:center;padding:20px;}
+            .campaign-preview-modal.active{display:flex;}
+            .campaign-preview-dialog{position:relative;width:min(760px,100%);height:min(82vh,850px);background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 30px 90px rgba(0,0,0,.28);display:grid;grid-template-rows:auto 1fr;}
+            .campaign-preview-close{position:absolute;right:14px;top:13px;width:36px;height:36px;border:0;border-radius:50%;background:#f2edf4;color:#3e0d5f;font-size:23px;cursor:pointer;z-index:2;}
+            .campaign-preview-meta{padding:17px 58px 14px 20px;border-bottom:1px solid #eee8f1;display:flex;flex-direction:column;gap:4px;}
+            .campaign-preview-meta span{font-size:.62rem;font-weight:900;color:#8a349b;letter-spacing:.14em;}
+            .campaign-preview-meta strong{color:#2f103f;}
+            .campaign-preview-dialog iframe{width:100%;height:100%;border:0;background:#fff;}
+            @media(max-width:1050px){.campaign-layout{grid-template-columns:1fr}.campaign-metrics-grid{grid-template-columns:1fr 1fr}.contact-inquiry-controls{grid-template-columns:1fr}}
+            @media(max-width:850px){.dash-outer-wrap{padding:18px 12px 30px}.admin-page-nav{position:static;width:auto;padding:7px;margin-bottom:18px;border-radius:14px;background:#fff;display:flex;flex-direction:row;overflow-x:auto;box-shadow:none;border:1px solid #eee8f1}.admin-page-nav::before,.admin-page-nav::after{display:none}.admin-page-tab{width:auto;color:#555}.admin-page-tab:hover{background:#f7f4f9;color:#3e0d5f}.admin-page-tab.active{background:#3e0d5f;color:#fff}.dash-header-row{min-height:auto;padding:8px 0 16px}.campaign-two-col{grid-template-columns:1fr}}
+            @media(max-width:560px){.campaign-metrics-grid{grid-template-columns:1fr 1fr}.workspace-page-head{flex-direction:column}.workspace-page-head .workspace-btn{width:100%}.campaign-actions .workspace-btn{width:100%}}
+
         </style>
 
         <div class="dash-outer-wrap">
@@ -2712,11 +2802,11 @@ function renderDashboardStructure() {
                 <div class="dash-title-block">
 
                     <h1>
-                        DOT Screening Registry
+                        ReNew You Management Workspace
                     </h1>
 
                     <p>
-                        Appointment registry and scheduling control center.
+                        Clinic operations, communications, content, scheduling, and compliance tools in one secure workspace.
                     </p>
 
                 </div>
@@ -2776,6 +2866,13 @@ function renderDashboardStructure() {
         📊 Dashboard
     </button>
 
+    <button
+        class="admin-page-tab"
+        data-page="contactInboxPage"
+    >
+        💬 Contact Inbox
+    </button>
+
 
     <button
         class="admin-page-tab"
@@ -2789,7 +2886,14 @@ function renderDashboardStructure() {
         class="admin-page-tab"
         data-page="mailingListPage"
     >
-        📧 Mailing List
+        👥 Subscribers
+    </button>
+
+    <button
+        class="admin-page-tab"
+        data-page="campaignsPage"
+    >
+        ✉️ Email Campaigns
     </button>
 
 
@@ -2913,6 +3017,30 @@ function renderDashboardStructure() {
 
                 </div>
 
+            </section>
+
+            <!-- =================================================
+                 CONTACT INBOX PAGE
+            ================================================= -->
+            <section id="contactInboxPage" class="admin-page">
+                <div class="workspace-page-head">
+                    <div>
+                        <span class="workspace-kicker">Customer Care</span>
+                        <h2>Contact Inbox</h2>
+                        <p>Review website inquiries, track follow-up status, and keep internal notes.</p>
+                    </div>
+                    <button type="button" id="refreshContactInboxBtn" class="workspace-btn ghost">↻ Refresh Inbox</button>
+                </div>
+                <div class="campaign-metrics-grid">
+                    <div class="workspace-stat"><span>Total Inquiries</span><strong id="contactTotalCount">0</strong></div>
+                    <div class="workspace-stat"><span>New</span><strong id="contactNewCount">0</strong></div>
+                    <div class="workspace-stat"><span>In Progress</span><strong id="contactProgressCount">0</strong></div>
+                    <div class="workspace-stat"><span>Resolved</span><strong id="contactResolvedCount">0</strong></div>
+                </div>
+                <div class="admin-card">
+                    <input type="search" id="contactInboxSearch" class="workspace-search" placeholder="Search name, email, phone, or message...">
+                    <div id="contactInboxTarget" class="contact-inbox-list"><p class="workspace-empty">Loading contact inquiries...</p></div>
+                </div>
             </section>
 
             <!-- =================================================
@@ -3168,6 +3296,69 @@ function renderDashboardStructure() {
 
     </div>
 
+</section>
+
+
+<!-- =================================================
+     EMAIL CAMPAIGNS PAGE
+================================================= -->
+<section id="campaignsPage" class="admin-page">
+    <div class="workspace-page-head">
+        <div>
+            <span class="workspace-kicker">Communications</span>
+            <h2>Email Campaigns</h2>
+            <p>Create branded email blasts for active mailing-list subscribers. Unsubscribed contacts are automatically excluded.</p>
+        </div>
+        <button type="button" id="newCampaignBtn" class="workspace-btn secondary">+ New Campaign</button>
+    </div>
+
+    <div class="campaign-metrics-grid">
+        <div class="workspace-stat"><span>Active Subscribers</span><strong id="campaignActiveSubscriberCount">0</strong></div>
+        <div class="workspace-stat"><span>Campaigns</span><strong id="campaignTotalCount">0</strong></div>
+        <div class="workspace-stat"><span>Sent</span><strong id="campaignSentCount">0</strong></div>
+        <div class="workspace-stat"><span>Unsubscribed</span><strong id="campaignUnsubscribedCount">0</strong></div>
+    </div>
+
+    <div class="campaign-layout">
+        <div class="admin-card campaign-composer-card">
+            <div class="workspace-section-title">
+                <div><h3 id="campaignComposerTitle">Create Campaign</h3><p>Messages are sent individually through Resend and include an unsubscribe link.</p></div>
+                <span id="campaignDraftBadge" class="workspace-badge">Draft</span>
+            </div>
+            <form id="campaignForm">
+                <div class="campaign-two-col">
+                    <div class="campaign-field"><label for="campaignName">Internal Campaign Name</label><input id="campaignName" type="text" maxlength="160" required placeholder="September wellness update"></div>
+                    <div class="campaign-field"><label for="campaignSubject">Email Subject</label><input id="campaignSubject" type="text" maxlength="180" required placeholder="A healthier fall starts here"></div>
+                </div>
+                <div class="campaign-field"><label for="campaignPreheader">Preheader</label><input id="campaignPreheader" type="text" maxlength="220" placeholder="Short preview text shown beside the subject line"></div>
+                <div class="campaign-two-col">
+                    <div class="campaign-field"><label for="campaignFromName">From Name</label><input id="campaignFromName" type="text" value="ReNew You Health & Wellness"></div>
+                    <div class="campaign-field"><label for="campaignReplyTo">Reply-To</label><input id="campaignReplyTo" type="email" value="info@renewyouhealthwellness.com"></div>
+                </div>
+                <div class="campaign-field"><label for="campaignContent">Email Content</label><textarea id="campaignContent" rows="16" required placeholder="Write the body of your email here..."></textarea><small>Use plain text or simple HTML. The ReNew You branded wrapper and unsubscribe footer are added automatically by the send system.</small></div>
+                <div class="campaign-actions">
+                    <button type="submit" id="saveCampaignBtn" class="workspace-btn secondary">Save Draft</button>
+                    <button type="button" id="previewCampaignBtn" class="workspace-btn ghost">Preview</button>
+                    <button type="button" id="sendCampaignBtn" class="workspace-btn primary" disabled>Send to Active Subscribers</button>
+                </div>
+                <div id="campaignFormMessage" class="workspace-inline-message" style="display:none"></div>
+            </form>
+        </div>
+
+        <div class="admin-card campaign-history-card">
+            <div class="workspace-section-title"><div><h3>Campaign History</h3><p>Drafts and completed sends.</p></div><button type="button" id="refreshCampaignsBtn" class="workspace-btn ghost small">↻ Refresh</button></div>
+            <input type="search" id="campaignSearch" class="workspace-search" placeholder="Search campaigns...">
+            <div id="campaignHistoryTarget" class="campaign-history-list"><p class="workspace-empty">Loading campaigns...</p></div>
+        </div>
+    </div>
+
+    <div id="campaignPreviewModal" class="campaign-preview-modal" aria-hidden="true">
+        <div class="campaign-preview-dialog">
+            <button type="button" id="closeCampaignPreview" class="campaign-preview-close" aria-label="Close">×</button>
+            <div class="campaign-preview-meta"><span>EMAIL PREVIEW</span><strong id="campaignPreviewSubject">Subject</strong></div>
+            <iframe id="campaignPreviewFrame" title="Campaign preview" sandbox></iframe>
+        </div>
+    </div>
 </section>
 
 
@@ -4586,10 +4777,28 @@ if (
 
 if (
     targetPage ===
+    'contactInboxPage'
+) {
+
+    fetchContactInquiries();
+
+}
+
+if (
+    targetPage ===
     'appointmentsPage'
 ) {
 
     fetchAppointments();
+
+}
+
+if (
+    targetPage ===
+    'campaignsPage'
+) {
+
+    fetchEmailCampaigns();
 
 }
 
@@ -7001,7 +7210,7 @@ async function fetchMailingList() {
             .from('Renew You Health Leads')
 
             .select(
-                'id, email, created_at'
+                'id, email, created_at, is_subscribed, unsubscribed_at, updated_at, source, unsubscribe_token'
             )
 
             .order(
@@ -7035,6 +7244,8 @@ async function fetchMailingList() {
         calculateMailingListMetrics();
 
         populateMailingList();
+
+        updateCampaignMetrics();
 
         return mailingListData;
 
@@ -7217,7 +7428,7 @@ function calculateMailingListMetrics() {
 
     setElementText(
         'mailingListCount',
-        mailingListData.length
+        mailingListData.filter(subscriber => subscriber.is_subscribed !== false).length
     );
 
 }
@@ -7386,13 +7597,13 @@ function populateMailingList() {
 
                             <span style="
                                 display:block;
-                                color:#777;
+                                color:${subscriber.is_subscribed === false ? '#b00020' : '#4f940c'};
                                 font-size:.65rem;
-                                font-weight:700;
+                                font-weight:800;
                                 text-transform:uppercase;
                                 margin-bottom:3px;
                             ">
-                                Subscribed
+                                ${subscriber.is_subscribed === false ? 'Unsubscribed' : 'Subscribed'}
                             </span>
 
                             <strong style="
@@ -13638,6 +13849,267 @@ async function deleteBlogPost(
     }
 
 }
+
+
+
+    /* =========================================================
+       CONTACT INBOX
+    ========================================================= */
+
+    async function fetchContactInquiries() {
+        try {
+            const { data, error } = await supabaseClientInstance
+                .from('contact_inquiries')
+                .select('id, created_at, full_name, phone_number, email_address, message_content, status, admin_notes, updated_at')
+                .order('created_at', { ascending: false });
+            if (error) throw error;
+            contactInquiries = Array.isArray(data) ? data : [];
+            populateContactInbox();
+            updateContactMetrics();
+            bindContactInboxEvents();
+            return contactInquiries;
+        } catch (error) {
+            console.error('Contact inbox error:', error);
+            const target = document.getElementById('contactInboxTarget');
+            if (target) target.innerHTML = `<p class="workspace-empty">Unable to load contact inquiries.</p>`;
+            return [];
+        }
+    }
+
+    function updateContactMetrics() {
+        setElementText('contactTotalCount', contactInquiries.length);
+        setElementText('contactNewCount', contactInquiries.filter(item => (item.status || 'new') === 'new').length);
+        setElementText('contactProgressCount', contactInquiries.filter(item => item.status === 'in_progress').length);
+        setElementText('contactResolvedCount', contactInquiries.filter(item => item.status === 'resolved').length);
+    }
+
+    function bindContactInboxEvents() {
+        const refresh = document.getElementById('refreshContactInboxBtn');
+        if (refresh && !refresh.dataset.bound) { refresh.dataset.bound='1'; refresh.addEventListener('click', fetchContactInquiries); }
+        const search = document.getElementById('contactInboxSearch');
+        if (search && !search.dataset.bound) { search.dataset.bound='1'; search.addEventListener('input', () => { contactSearchQuery = search.value.trim().toLowerCase(); populateContactInbox(); }); }
+    }
+
+    function populateContactInbox() {
+        const target = document.getElementById('contactInboxTarget');
+        if (!target) return;
+        const filtered = contactInquiries.filter(item => {
+            if (!contactSearchQuery) return true;
+            return [item.full_name,item.email_address,item.phone_number,item.message_content,item.status].some(v => String(v||'').toLowerCase().includes(contactSearchQuery));
+        });
+        if (!filtered.length) { target.innerHTML='<p class="workspace-empty">No contact inquiries match this view.</p>'; return; }
+        target.innerHTML = filtered.map(item => {
+            const when=item.created_at?new Date(item.created_at).toLocaleString():'—';
+            const status=item.status||'new';
+            return `<article class="contact-inquiry-card" data-contact-id="${escapeHtml(item.id)}"><div class="contact-inquiry-top"><div><h3>${escapeHtml(item.full_name||'Website visitor')}</h3><div class="contact-inquiry-meta"><span>${escapeHtml(item.email_address||'No email')}</span><span>•</span><span>${escapeHtml(item.phone_number||'No phone')}</span><span>•</span><span>${escapeHtml(when)}</span></div></div><span class="workspace-badge">${escapeHtml(status.replace('_',' '))}</span></div><div class="contact-inquiry-message">${escapeHtml(item.message_content||'No message supplied.')}</div><div class="contact-inquiry-controls"><div><label>Status</label><select data-contact-status><option value="new" ${status==='new'?'selected':''}>New</option><option value="in_progress" ${status==='in_progress'?'selected':''}>In Progress</option><option value="resolved" ${status==='resolved'?'selected':''}>Resolved</option></select></div><div><label>Internal Notes</label><textarea data-contact-notes placeholder="Follow-up notes...">${escapeHtml(item.admin_notes||'')}</textarea></div><button type="button" class="workspace-btn secondary" data-save-contact>Save</button></div></article>`;
+        }).join('');
+        target.querySelectorAll('[data-save-contact]').forEach(btn=>btn.addEventListener('click', async()=>{
+            const card=btn.closest('[data-contact-id]'); if(!card)return;
+            btn.disabled=true; const old=btn.textContent; btn.textContent='Saving...';
+            try{
+                const id=card.dataset.contactId;
+                const status=card.querySelector('[data-contact-status]')?.value||'new';
+                const notes=card.querySelector('[data-contact-notes]')?.value||'';
+                const {error}=await supabaseClientInstance.from('contact_inquiries').update({status,admin_notes:notes,updated_at:new Date().toISOString()}).eq('id',id);
+                if(error)throw error;
+                await fetchContactInquiries();
+                showAdminModal('Contact inquiry updated.','success','Inbox Updated');
+            }catch(error){showAdminModal(error?.message||'Unable to update inquiry.','error','Update Failed');}
+            finally{btn.disabled=false;btn.textContent=old;}
+        }));
+    }
+
+    /* =========================================================
+       EMAIL CAMPAIGN WORKSPACE
+    ========================================================= */
+
+    function campaignHtmlFromContent(content, preheader = '') {
+        const raw = String(content || '').trim();
+        const looksLikeHtml = /<\/?[a-z][\s\S]*>/i.test(raw);
+        const body = looksLikeHtml ? raw : escapeHtml(raw).replace(/\n/g, '<br>');
+        const preview = escapeHtml(preheader || '');
+        return `<!doctype html><html><body style="margin:0;background:#f7f4f8;font-family:Arial,Helvetica,sans-serif;color:#342338"><div style="display:none;max-height:0;overflow:hidden;opacity:0">${preview}</div><table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f4f8;padding:34px 15px"><tr><td align="center"><table width="100%" cellpadding="0" cellspacing="0" style="max-width:640px;background:#fff;border-radius:18px;overflow:hidden"><tr><td style="background:#3E0D5F;padding:26px;text-align:center"><img src="https://renewyouhealthwellness.com/images/logo2.png" width="190" alt="ReNew You Health & Wellness" style="max-width:100%;height:auto;background:#fff;border-radius:12px;padding:9px 16px"></td></tr><tr><td style="padding:36px 34px;line-height:1.7;color:#554a59">${body}</td></tr><tr><td style="background:#3E0D5F;padding:20px;text-align:center;color:#d9cde0;font-size:11px;line-height:1.6">ReNew You Health & Wellness<br>500 Ashland Ave., Suite 101 · Chicago Heights, IL 60411<br>(708) 329-2155</td></tr></table></td></tr></table></body></html>`;
+    }
+
+    async function fetchEmailCampaigns() {
+        try {
+            const { data, error } = await supabaseClientInstance
+                .from('email_campaigns')
+                .select('*')
+                .order('created_at', { ascending: false });
+            if (error) throw error;
+            emailCampaigns = Array.isArray(data) ? data : [];
+            populateEmailCampaigns();
+            await updateCampaignMetrics();
+            bindCampaignEvents();
+        } catch (error) {
+            console.error('Campaign load error:', error);
+            const target = document.getElementById('campaignHistoryTarget');
+            if (target) target.innerHTML = `<p class="workspace-empty">Unable to load campaigns.</p>`;
+        }
+    }
+
+    async function updateCampaignMetrics() {
+        const activeSubscribers = mailingListData.filter(item => item.is_subscribed !== false).length;
+        const unsubscribed = mailingListData.filter(item => item.is_subscribed === false).length;
+        setElementText('campaignActiveSubscriberCount', activeSubscribers);
+        setElementText('campaignUnsubscribedCount', unsubscribed);
+        setElementText('campaignTotalCount', emailCampaigns.length);
+        setElementText('campaignSentCount', emailCampaigns.filter(item => item.status === 'sent').length);
+    }
+
+    function bindCampaignEvents() {
+        const form = document.getElementById('campaignForm');
+        if (form && !form.dataset.bound) {
+            form.dataset.bound = '1';
+            form.addEventListener('submit', saveEmailCampaign);
+        }
+        const newBtn = document.getElementById('newCampaignBtn');
+        if (newBtn && !newBtn.dataset.bound) { newBtn.dataset.bound='1'; newBtn.addEventListener('click', resetCampaignForm); }
+        const refreshBtn = document.getElementById('refreshCampaignsBtn');
+        if (refreshBtn && !refreshBtn.dataset.bound) { refreshBtn.dataset.bound='1'; refreshBtn.addEventListener('click', fetchEmailCampaigns); }
+        const sendBtn = document.getElementById('sendCampaignBtn');
+        if (sendBtn && !sendBtn.dataset.bound) { sendBtn.dataset.bound='1'; sendBtn.addEventListener('click', sendEmailCampaign); }
+        const previewBtn = document.getElementById('previewCampaignBtn');
+        if (previewBtn && !previewBtn.dataset.bound) { previewBtn.dataset.bound='1'; previewBtn.addEventListener('click', previewEmailCampaign); }
+        const closeBtn = document.getElementById('closeCampaignPreview');
+        if (closeBtn && !closeBtn.dataset.bound) { closeBtn.dataset.bound='1'; closeBtn.addEventListener('click', closeCampaignPreview); }
+        const modal = document.getElementById('campaignPreviewModal');
+        if (modal && !modal.dataset.bound) { modal.dataset.bound='1'; modal.addEventListener('click', e => { if (e.target === modal) closeCampaignPreview(); }); }
+        const search = document.getElementById('campaignSearch');
+        if (search && !search.dataset.bound) { search.dataset.bound='1'; search.addEventListener('input', () => { campaignSearchQuery = search.value.trim().toLowerCase(); populateEmailCampaigns(); }); }
+    }
+
+    function campaignFormValues() {
+        return {
+            name: document.getElementById('campaignName')?.value?.trim() || '',
+            subject: document.getElementById('campaignSubject')?.value?.trim() || '',
+            preheader: document.getElementById('campaignPreheader')?.value?.trim() || '',
+            from_name: document.getElementById('campaignFromName')?.value?.trim() || 'ReNew You Health & Wellness',
+            from_email: 'no-reply@renewyouhealthwellness.com',
+            reply_to: document.getElementById('campaignReplyTo')?.value?.trim() || 'info@renewyouhealthwellness.com',
+            html_content: campaignHtmlFromContent(document.getElementById('campaignContent')?.value || '', document.getElementById('campaignPreheader')?.value || '')
+        };
+    }
+
+    async function saveEmailCampaign(event) {
+        if (event) event.preventDefault();
+        const values = campaignFormValues();
+        const rawContent = document.getElementById('campaignContent')?.value?.trim() || '';
+        if (!values.name || !values.subject || !rawContent) {
+            setCampaignMessage('Campaign name, subject, and content are required.', 'error');
+            return null;
+        }
+        const btn = document.getElementById('saveCampaignBtn');
+        if (btn) { btn.disabled=true; btn.textContent='Saving...'; }
+        try {
+            let result;
+            if (editingCampaignId) {
+                result = await supabaseClientInstance.from('email_campaigns').update({ ...values, updated_at:new Date().toISOString() }).eq('id', editingCampaignId).select('*').single();
+            } else {
+                const { data: { user } } = await supabaseClientInstance.auth.getUser();
+                result = await supabaseClientInstance.from('email_campaigns').insert({ ...values, created_by:user?.id || null }).select('*').single();
+            }
+            if (result.error) throw result.error;
+            editingCampaignId = result.data.id;
+            document.getElementById('campaignComposerTitle').textContent = 'Edit Campaign';
+            document.getElementById('campaignDraftBadge').textContent = String(result.data.status || 'draft').toUpperCase();
+            document.getElementById('sendCampaignBtn').disabled = result.data.status === 'sent';
+            setCampaignMessage('Campaign draft saved.', 'success');
+            await fetchEmailCampaigns();
+            return result.data;
+        } catch (error) {
+            console.error(error);
+            setCampaignMessage(error?.message || 'Unable to save campaign.', 'error');
+            return null;
+        } finally {
+            if (btn) { btn.disabled=false; btn.textContent='Save Draft'; }
+        }
+    }
+
+    function setCampaignMessage(message, type) {
+        const box = document.getElementById('campaignFormMessage');
+        if (!box) return;
+        box.className = `workspace-inline-message ${type || ''}`;
+        box.textContent = message;
+        box.style.display = 'block';
+    }
+
+    function resetCampaignForm() {
+        editingCampaignId = null;
+        document.getElementById('campaignForm')?.reset();
+        const fromName = document.getElementById('campaignFromName'); if (fromName) fromName.value='ReNew You Health & Wellness';
+        const reply = document.getElementById('campaignReplyTo'); if (reply) reply.value='info@renewyouhealthwellness.com';
+        const title = document.getElementById('campaignComposerTitle'); if (title) title.textContent='Create Campaign';
+        const badge = document.getElementById('campaignDraftBadge'); if (badge) badge.textContent='Draft';
+        const send = document.getElementById('sendCampaignBtn'); if (send) send.disabled=true;
+        const msg = document.getElementById('campaignFormMessage'); if (msg) msg.style.display='none';
+    }
+
+    function editEmailCampaign(id) {
+        const campaign = emailCampaigns.find(item => String(item.id) === String(id));
+        if (!campaign) return;
+        editingCampaignId = campaign.id;
+        const set=(id,value)=>{const el=document.getElementById(id);if(el)el.value=value||'';};
+        set('campaignName',campaign.name); set('campaignSubject',campaign.subject); set('campaignPreheader',campaign.preheader); set('campaignFromName',campaign.from_name); set('campaignReplyTo',campaign.reply_to);
+        const contentEl=document.getElementById('campaignContent'); if(contentEl){
+            let content=String(campaign.html_content||'');
+            const match=content.match(/<tr><td style="padding:36px 34px;line-height:1\.7;color:#554a59">([\s\S]*?)<\/td><\/tr>/i);
+            contentEl.value=match?match[1].replace(/<br\s*\/?\s*>/gi,'\n').replace(/<[^>]*>/g,'').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&'):content;
+        }
+        document.getElementById('campaignComposerTitle').textContent='Edit Campaign';
+        document.getElementById('campaignDraftBadge').textContent=String(campaign.status||'draft').toUpperCase();
+        document.getElementById('sendCampaignBtn').disabled=campaign.status==='sent';
+        document.getElementById('campaignsPage')?.scrollIntoView({behavior:'smooth',block:'start'});
+    }
+
+    function populateEmailCampaigns() {
+        const target=document.getElementById('campaignHistoryTarget');
+        if(!target) return;
+        const list=emailCampaigns.filter(c=>!campaignSearchQuery || String(c.name||'').toLowerCase().includes(campaignSearchQuery) || String(c.subject||'').toLowerCase().includes(campaignSearchQuery));
+        if(!list.length){target.innerHTML='<p class="workspace-empty">No campaigns found.</p>';return;}
+        target.innerHTML=list.map(c=>{
+            const date=c.sent_at||c.created_at; const when=date?new Date(date).toLocaleString():'—';
+            return `<article class="campaign-history-item"><h4>${escapeHtml(c.name||'Untitled campaign')}</h4><p>${escapeHtml(c.subject||'No subject')}</p><div class="campaign-history-meta"><span>${escapeHtml(String(c.status||'draft').toUpperCase())}</span><span>${escapeHtml(when)}</span><span>${Number(c.sent_count||0)} sent</span>${Number(c.failed_count||0)?`<span>${Number(c.failed_count)} failed</span>`:''}</div><div class="campaign-history-actions"><button type="button" class="workspace-btn ghost small" data-edit-campaign="${escapeHtml(c.id)}">Open</button></div></article>`;
+        }).join('');
+        target.querySelectorAll('[data-edit-campaign]').forEach(btn=>btn.addEventListener('click',()=>editEmailCampaign(btn.dataset.editCampaign)));
+    }
+
+    function previewEmailCampaign() {
+        const values=campaignFormValues();
+        document.getElementById('campaignPreviewSubject').textContent=values.subject||'Campaign preview';
+        const frame=document.getElementById('campaignPreviewFrame');
+        if(frame) frame.srcdoc=values.html_content||'<p style="font-family:Arial;padding:30px">Start writing your campaign to preview it.</p>';
+        const modal=document.getElementById('campaignPreviewModal');
+        if(modal){modal.classList.add('active');modal.setAttribute('aria-hidden','false');}
+    }
+
+    function closeCampaignPreview(){const modal=document.getElementById('campaignPreviewModal');if(modal){modal.classList.remove('active');modal.setAttribute('aria-hidden','true');}}
+
+    async function sendEmailCampaign() {
+        let campaign = editingCampaignId ? emailCampaigns.find(item=>String(item.id)===String(editingCampaignId)) : null;
+        if (!campaign || campaign.status === 'sent') campaign = await saveEmailCampaign();
+        else {
+            const saved = await saveEmailCampaign();
+            if (saved) campaign = saved;
+        }
+        if (!campaign) return;
+        const activeCount = mailingListData.filter(item=>item.is_subscribed!==false).length;
+        if (!activeCount) { setCampaignMessage('There are no active subscribers.', 'error'); return; }
+        const confirmed = await showAdminConfirmModal(`Send this campaign to ${activeCount} active subscriber${activeCount===1?'':'s'}?\n\nThis action sends real email and cannot be undone.`, 'Send Email Campaign?', 'Send Campaign', 'Cancel', 'warning');
+        if (!confirmed) return;
+        const btn=document.getElementById('sendCampaignBtn'); if(btn){btn.disabled=true;btn.textContent='Sending...';}
+        try{
+            const { data:{session} }=await supabaseClientInstance.auth.getSession();
+            const response=await fetch(`${SUPABASE_PROJECT_URL}/functions/v1/send-email-campaign`,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${session?.access_token||''}`,'apikey':SUPABASE_ANON_KEY},body:JSON.stringify({campaign_id:campaign.id})});
+            const result=await response.json().catch(()=>({}));
+            if(!response.ok) throw new Error(result.error||'Campaign send failed.');
+            setCampaignMessage(`Campaign sent: ${result.sent_count||0} delivered to Resend${result.failed_count?`, ${result.failed_count} failed`:''}.`,'success');
+            showAdminModal(`Campaign sent to ${result.sent_count||0} subscriber${Number(result.sent_count||0)===1?'':'s'}.`,'success','Campaign Sent');
+            await Promise.all([fetchEmailCampaigns(),fetchMailingList()]);
+        }catch(error){console.error(error);setCampaignMessage(error?.message||'Unable to send campaign.','error');showAdminModal(error?.message||'Unable to send campaign.','error','Campaign Failed');}
+        finally{if(btn){btn.disabled=false;btn.textContent='Send to Active Subscribers';}}
+    }
 
 
     /* =========================================================

@@ -71,78 +71,65 @@ function renderSubscribeModule() {
     `; 
 } 
 
-/** 
- * Handles newsletter frontend form validation and database insertion mapping using SDK
- */ 
-function setupNewsletterForm() { 
-    const form = document.getElementById('homeNewsletterForm'); 
-    const msgBox = document.getElementById('newsletterMessage'); 
-    if (!form || !msgBox) return; 
-    
-    form.addEventListener('submit', async (e) => { 
-        e.preventDefault(); 
-        const emailInput = document.getElementById('newsletterEmail'); 
-        const submitBtn = document.getElementById('newsletterSubmitBtn'); 
-        if (!emailInput || !submitBtn) return; 
-        
-        const emailValue = emailInput.value.trim(); 
-        if (emailValue === "") return; 
-        
-        // Visual loading state 
-        submitBtn.disabled = true; 
-        submitBtn.innerText = "Connecting..."; 
-        
-        // Credentials parsed from initial request
-        const SUPABASE_URL = 'https://eybsgwzpisgswmxcwjel.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_R_kVcbPeNKKDIVQM8l2gZQ_6fUa4weF'; 
+/**
+ * Handles newsletter validation and the ReNew You subscription endpoint.
+ * The Edge Function supports new subscriptions, re-subscriptions, and the
+ * branded welcome email while keeping server credentials off the website.
+ */
+function setupNewsletterForm() {
+    const form = document.getElementById('homeNewsletterForm');
+    const msgBox = document.getElementById('newsletterMessage');
+    if (!form || !msgBox) return;
 
-        // Wait brief moment if script CDN is still finishing initializing
-        if (typeof supabase === 'undefined') {
-            await new Promise(resolve => setTimeout(resolve, 500));
-        }
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const emailInput = document.getElementById('newsletterEmail');
+        const submitBtn = document.getElementById('newsletterSubmitBtn');
+        if (!emailInput || !submitBtn) return;
 
-        try { 
-            // Initialize connection engine client
-            const _supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const emailValue = emailInput.value.trim().toLowerCase();
+        if (!emailValue) return;
 
-            // Execute insert mapping using the exact case-sensitive table name string
-            const { error } = await _supabaseClient
-                .from('Renew You Health Leads')
-                .insert([{ email: emailValue }]);
-            
-            // Reveal notification box
-            msgBox.style.display = "block"; 
-            
-            if (error) {
-                // Catch unique constraint violation error (code 23505)
-                if (error.code === '23505') {
-                    msgBox.style.backgroundColor = "rgba(138, 52, 159, 0.06)"; 
-                    msgBox.style.color = "var(--purple-accent)"; 
-                    msgBox.style.border = "1px solid rgba(138, 52, 159, 0.15)"; 
-                    msgBox.innerText = "This email address is already subscribed to our network."; 
-                } else {
-                    throw error;
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'Connecting...';
+        msgBox.style.display = 'none';
+
+        try {
+            const response = await fetch(
+                'https://eybsgwzpisgswmxcwjel.supabase.co/functions/v1/newsletter-subscribe',
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: emailValue })
                 }
-            } else { 
-                // Success State 
-                msgBox.style.backgroundColor = "rgba(79, 148, 12, 0.08)"; 
-                msgBox.style.color = "var(--green-secondary)"; 
-                msgBox.style.border = "1px solid rgba(79, 148, 12, 0.15)"; 
-                msgBox.innerText = "✓ Welcome! You have been successfully added to our clinical wellness network."; 
-                form.reset(); 
-            } 
-        } catch (error) { 
-            // General Network/Server Fallback Error State 
-            msgBox.style.display = "block"; 
-            msgBox.style.backgroundColor = "rgba(255, 0, 0, 0.05)"; 
-            msgBox.style.color = "#cc0000"; 
-            msgBox.style.border = "1px solid rgba(255, 0, 0, 0.1)"; 
-            msgBox.innerText = "⚠️ Connection error. Please try again or contact support."; 
-            console.error("Database Error:", error); 
-        } finally { 
-            // Reset button visual state 
-            submitBtn.disabled = false; 
-            submitBtn.innerText = "Subscribe Now"; 
-        } 
-    }); 
+            );
+
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(result.error || 'Unable to subscribe right now.');
+
+            msgBox.style.display = 'block';
+            msgBox.style.backgroundColor = result.already_subscribed
+                ? 'rgba(138, 52, 159, 0.06)'
+                : 'rgba(79, 148, 12, 0.08)';
+            msgBox.style.color = result.already_subscribed
+                ? 'var(--purple-accent)'
+                : 'var(--green-secondary)';
+            msgBox.style.border = result.already_subscribed
+                ? '1px solid rgba(138, 52, 159, 0.15)'
+                : '1px solid rgba(79, 148, 12, 0.15)';
+            msgBox.innerText = result.message || '✓ You are subscribed.';
+
+            if (!result.already_subscribed) form.reset();
+        } catch (error) {
+            msgBox.style.display = 'block';
+            msgBox.style.backgroundColor = 'rgba(255, 0, 0, 0.05)';
+            msgBox.style.color = '#cc0000';
+            msgBox.style.border = '1px solid rgba(255, 0, 0, 0.1)';
+            msgBox.innerText = error?.message || '⚠️ Connection error. Please try again or contact support.';
+            console.error('Newsletter subscription error:', error);
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerText = 'Subscribe Now';
+        }
+    });
 }

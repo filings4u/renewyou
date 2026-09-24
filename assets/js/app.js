@@ -25,18 +25,19 @@ form.addEventListener('submit', async (e) => {
     formMessage.innerText = "";
 
     try {
-        // Using our renamed distinct database client instance
-        const { error } = await supabaseClient
-            .from('Renew You Health Leads')
-            .insert([{ email: emailValue }]);
-
-        if (error) {
-            if (error.code === '23505') throw new Error("This email is already registered!");
-            throw error;
-        }
+        const response = await fetch(
+            `${SUPABASE_URL}/functions/v1/newsletter-subscribe`,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: emailValue })
+            }
+        );
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(result.error || 'Unable to subscribe right now.');
 
         // Handle Success State
-        formMessage.innerText = "Thank you! We will notify you when we launch.";
+        formMessage.innerText = result.message || "Thank you! We will notify you when we launch.";
         formMessage.classList.add('success');
         form.reset();
 
