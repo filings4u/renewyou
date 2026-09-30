@@ -524,13 +524,19 @@
         updateAllPreviews();
     }
 
-    function insertLink() {
+    async function insertLink() {
         restoreSelection();
-        const url = window.prompt('Enter the link URL (https://...)');
+        const url = await window.showAdminPromptModal?.({
+            title: 'Add Link',
+            message: 'Enter a complete website, email, or telephone link.',
+            label: 'Link URL',
+            placeholder: 'https://example.com',
+            confirmText: 'Add Link'
+        });
         if (!url) return;
         const trimmed = url.trim();
         if (!/^https?:\/\//i.test(trimmed) && !/^mailto:/i.test(trimmed) && !/^tel:/i.test(trimmed)) {
-            alert('Please enter a complete http:// or https:// URL, email link, or telephone link.');
+            window.showAdminModal?.('Please enter a complete http:// or https:// URL, email link, or telephone link.', 'error', 'Invalid Link');
             return;
         }
         runCommand('createLink', trimmed);
@@ -540,12 +546,12 @@
         const file = event.target.files?.[0];
         if (!file) return;
         if (!IMAGE_TYPES.includes(file.type)) {
-            alert('Please choose a JPG, PNG, WEBP, or GIF image.');
+            window.showAdminModal?.('Please choose a JPG, PNG, WEBP, or GIF image.', 'error', 'Invalid Image');
             event.target.value = '';
             return;
         }
         if (file.size > MAX_IMAGE_SIZE) {
-            alert('The featured image must be 5 MB or smaller.');
+            window.showAdminModal?.('The featured image must be 5 MB or smaller.', 'error', 'Image Too Large');
             event.target.value = '';
             return;
         }
@@ -815,14 +821,16 @@
     }
 
     async function deletePost(post) {
-        if (!window.confirm(`Delete “${post.title}”?\n\nThis cannot be undone.`)) return;
+        const confirmed = await window.showAdminConfirmModal?.(`Delete “${post.title}”?\n\nThis cannot be undone.`, 'Delete Blog Post?', 'Delete Post', 'Cancel', 'warning');
+        if (!confirmed) return;
         try {
             const { error } = await client.from('blog_posts').delete().eq('id', post.id);
             if (error) throw error;
             if (String(currentPostId) === String(post.id)) newPost();
             await loadPosts();
+            window.showAdminModal?.('The blog post was deleted successfully.', 'success', 'Post Deleted');
         } catch (error) {
-            alert(error?.message || 'Unable to delete the post.');
+            window.showAdminModal?.(error?.message || 'Unable to delete the post.', 'error', 'Delete Failed');
         }
     }
 

@@ -241,7 +241,8 @@
     const btn = ev.currentTarget;
     const activate = btn.dataset.active === 'true';
     const verb = activate ? 'activate' : 'deactivate';
-    if (!window.confirm(`Are you sure you want to ${verb} this employee's workspace access?`)) return;
+    const confirmed = await window.showAdminConfirmModal?.(`Are you sure you want to ${verb} this employee's workspace access?`, `${activate ? 'Activate' : 'Deactivate'} Employee?`, activate ? 'Activate Employee' : 'Deactivate Employee', 'Cancel', 'warning');
+    if (!confirmed) return;
     btn.disabled = true;
     try {
       const data = await callManageEmployees({ action:'set_active', id:btn.dataset.id, active:activate, role:btn.dataset.role });

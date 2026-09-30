@@ -5125,13 +5125,8 @@ const importMailingListButton = document.getElementById('importMailingListBtn');
 const importMailingListFile = document.getElementById('importMailingListFile');
 const deleteUnsubscribedButton = document.getElementById('deleteUnsubscribedBtn');
 
-if (importMailingListButton && importMailingListFile) {
-    importMailingListButton.addEventListener('click', () => importMailingListFile.click());
-    importMailingListFile.addEventListener('change', async () => {
-        const file = importMailingListFile.files?.[0];
-        if (file) await importSubscribersFromFile(file);
-        importMailingListFile.value = '';
-    });
+if (importMailingListButton) {
+    importMailingListButton.addEventListener('click', openSubscriberImportModal);
 }
 if (deleteUnsubscribedButton) deleteUnsubscribedButton.addEventListener('click', deleteAllUnsubscribed);
 if (!canManageSubscribers()) {
@@ -7223,7 +7218,7 @@ async function fetchMailingList() {
             .from('Renew You Health Leads')
 
             .select(
-                'id, email, created_at, is_subscribed, unsubscribed_at, updated_at, source, unsubscribe_token'
+                'id, email, first_name, last_name, phone, created_at, is_subscribed, unsubscribed_at, updated_at, source, unsubscribe_token'
             )
 
             .order(
@@ -7649,6 +7644,59 @@ function populateMailingList() {
 }
 
 /* =========================================================
+   BRANDED TEXT INPUT MODAL
+   Replaces native browser prompt() dialogs.
+========================================================= */
+function showAdminPromptModal({
+    title = 'Enter Information',
+    message = '',
+    label = '',
+    value = '',
+    placeholder = '',
+    confirmText = 'Save',
+    cancelText = 'Cancel',
+    type = 'text'
+} = {}) {
+    return new Promise(resolve => {
+        document.getElementById('adminPromptModal')?.remove();
+        const overlay = document.createElement('div');
+        overlay.id = 'adminPromptModal';
+        overlay.setAttribute('role', 'dialog');
+        overlay.setAttribute('aria-modal', 'true');
+        overlay.style.cssText = 'position:fixed;inset:0;z-index:1000002;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;background:rgba(37,12,52,.58);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);';
+        overlay.innerHTML = `
+            <div style="position:relative;width:min(500px,100%);background:#fff;border-radius:22px;padding:30px;box-shadow:0 25px 70px rgba(62,13,95,.22);border:1px solid rgba(138,52,159,.08);box-sizing:border-box;">
+                <button type="button" data-prompt-close aria-label="Close" style="position:absolute;top:12px;right:14px;width:34px;height:34px;border:0;border-radius:50%;background:transparent;color:#888;font-size:26px;cursor:pointer;">&times;</button>
+                <div style="width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 0 16px;background:#f4ebf7;color:var(--purple-primary,#8a349b);font-size:24px;font-weight:900;">✦</div>
+                <h3 style="margin:0 0 7px;color:var(--purple-primary,#8a349b);font-size:1.2rem;">${escapeHtml(title)}</h3>
+                ${message ? `<p style="margin:0 0 18px;color:#6f6474;line-height:1.55;font-size:.9rem;">${escapeHtml(message)}</p>` : ''}
+                ${label ? `<label for="adminPromptInput" style="display:block;margin:0 0 7px;color:#4d3656;font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;">${escapeHtml(label)}</label>` : ''}
+                <input id="adminPromptInput" type="${escapeHtml(type)}" value="${escapeHtml(value)}" placeholder="${escapeHtml(placeholder)}" style="width:100%;box-sizing:border-box;padding:13px 14px;border:1px solid #dacfe0;border-radius:11px;background:#fff;color:#2d1a34;font:inherit;outline:none;">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px;">
+                    <button type="button" data-prompt-cancel style="padding:13px 18px;border:1px solid #ddd;border-radius:10px;background:#fff;color:#666;font-weight:800;cursor:pointer;">${escapeHtml(cancelText)}</button>
+                    <button type="button" data-prompt-save style="padding:13px 18px;border:0;border-radius:10px;background:var(--purple-primary,#8a349b);color:#fff;font-weight:800;cursor:pointer;">${escapeHtml(confirmText)}</button>
+                </div>
+            </div>`;
+        document.body.appendChild(overlay);
+        document.body.style.overflow = 'hidden';
+        const input = overlay.querySelector('#adminPromptInput');
+        let settled = false;
+        const finish = result => { if (settled) return; settled = true; overlay.remove(); document.body.style.overflow = ''; resolve(result); };
+        overlay.querySelector('[data-prompt-close]')?.addEventListener('click', () => finish(null));
+        overlay.querySelector('[data-prompt-cancel]')?.addEventListener('click', () => finish(null));
+        overlay.querySelector('[data-prompt-save]')?.addEventListener('click', () => finish(input?.value ?? ''));
+        overlay.addEventListener('click', event => { if (event.target === overlay) finish(null); });
+        input?.addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); finish(input.value); } if (event.key === 'Escape') finish(null); });
+        setTimeout(() => { input?.focus(); input?.select(); }, 30);
+    });
+}
+
+window.showAdminModal = showAdminModal;
+window.showAdminConfirmModal = showAdminConfirmModal;
+window.showAdminPromptModal = showAdminPromptModal;
+
+
+/* =========================================================
    SUBSCRIBER MANAGEMENT
 ========================================================= */
 
@@ -7686,28 +7734,51 @@ function bindSubscriberRowActions() {
 async function editSubscriber(id) {
     const subscriber = mailingListData.find(item => String(item.id) === String(id));
     if (!subscriber) return;
-    const email = window.prompt('Subscriber email address:', subscriber.email || '');
-    if (email === null) return;
-    const normalizedEmail = String(email).trim().toLowerCase();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
-        showAdminModal('Enter a valid email address.', 'error', 'Invalid Email');
-        return;
-    }
-    const statusAnswer = window.prompt('Status: type subscribed or unsubscribed', subscriber.is_subscribed === false ? 'unsubscribed' : 'subscribed');
-    if (statusAnswer === null) return;
-    const status = String(statusAnswer).trim().toLowerCase();
-    if (!['subscribed', 'unsubscribed'].includes(status)) {
-        showAdminModal('Status must be subscribed or unsubscribed.', 'error', 'Invalid Status');
-        return;
-    }
-    try {
-        await callManageSubscribers({ action:'update', id, email:normalizedEmail, is_subscribed:status === 'subscribed' });
-        showAdminModal('Subscriber updated successfully.', 'success', 'Subscriber Updated');
-        await fetchMailingList();
-        await updateCampaignMetrics();
-    } catch (error) {
-        showAdminModal(error?.message || 'Unable to update subscriber.', 'error', 'Update Failed');
-    }
+    document.getElementById('subscriberEditModal')?.remove();
+    const overlay = document.createElement('div');
+    overlay.id = 'subscriberEditModal';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:1000002;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;background:rgba(37,12,52,.58);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);';
+    overlay.innerHTML = `
+        <form data-subscriber-edit-form style="position:relative;width:min(560px,100%);background:#fff;border-radius:22px;padding:30px;box-shadow:0 25px 70px rgba(62,13,95,.22);border:1px solid rgba(138,52,159,.08);box-sizing:border-box;">
+            <button type="button" data-edit-close aria-label="Close" style="position:absolute;top:12px;right:14px;width:34px;height:34px;border:0;border-radius:50%;background:transparent;color:#888;font-size:26px;cursor:pointer;">&times;</button>
+            <h3 style="margin:0 0 6px;color:var(--purple-primary,#8a349b);font-size:1.25rem;">Edit Subscriber</h3>
+            <p style="margin:0 0 20px;color:#6f6474;font-size:.9rem;">Update the subscriber details and email status.</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+                <label style="grid-column:1/-1;display:grid;gap:7px;font-size:.78rem;font-weight:800;color:#4d3656;text-transform:uppercase;letter-spacing:.04em;">Email<input name="email" type="email" required value="${escapeHtml(subscriber.email || '')}" style="padding:12px 13px;border:1px solid #dacfe0;border-radius:10px;font:inherit;text-transform:none;letter-spacing:0;"></label>
+                <label style="display:grid;gap:7px;font-size:.78rem;font-weight:800;color:#4d3656;text-transform:uppercase;letter-spacing:.04em;">First Name<input name="first_name" value="${escapeHtml(subscriber.first_name || '')}" style="padding:12px 13px;border:1px solid #dacfe0;border-radius:10px;font:inherit;text-transform:none;letter-spacing:0;"></label>
+                <label style="display:grid;gap:7px;font-size:.78rem;font-weight:800;color:#4d3656;text-transform:uppercase;letter-spacing:.04em;">Last Name<input name="last_name" value="${escapeHtml(subscriber.last_name || '')}" style="padding:12px 13px;border:1px solid #dacfe0;border-radius:10px;font:inherit;text-transform:none;letter-spacing:0;"></label>
+                <label style="display:grid;gap:7px;font-size:.78rem;font-weight:800;color:#4d3656;text-transform:uppercase;letter-spacing:.04em;">Phone<input name="phone" value="${escapeHtml(subscriber.phone || '')}" style="padding:12px 13px;border:1px solid #dacfe0;border-radius:10px;font:inherit;text-transform:none;letter-spacing:0;"></label>
+                <label style="display:grid;gap:7px;font-size:.78rem;font-weight:800;color:#4d3656;text-transform:uppercase;letter-spacing:.04em;">Status<select name="status" style="padding:12px 13px;border:1px solid #dacfe0;border-radius:10px;background:#fff;font:inherit;text-transform:none;letter-spacing:0;"><option value="subscribed" ${subscriber.is_subscribed === false ? '' : 'selected'}>Subscribed</option><option value="unsubscribed" ${subscriber.is_subscribed === false ? 'selected' : ''}>Unsubscribed</option></select></label>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:22px;">
+                <button type="button" data-edit-cancel style="padding:13px;border:1px solid #ddd;border-radius:10px;background:#fff;color:#666;font-weight:800;cursor:pointer;">Cancel</button>
+                <button type="submit" style="padding:13px;border:0;border-radius:10px;background:var(--purple-primary,#8a349b);color:#fff;font-weight:800;cursor:pointer;">Save Subscriber</button>
+            </div>
+        </form>`;
+    document.body.appendChild(overlay);
+    document.body.style.overflow = 'hidden';
+    const close = () => { overlay.remove(); document.body.style.overflow = ''; };
+    overlay.querySelector('[data-edit-close]')?.addEventListener('click', close);
+    overlay.querySelector('[data-edit-cancel]')?.addEventListener('click', close);
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    overlay.querySelector('[data-subscriber-edit-form]')?.addEventListener('submit', async event => {
+        event.preventDefault();
+        const form = new FormData(event.currentTarget);
+        const email = String(form.get('email') || '').trim().toLowerCase();
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showAdminModal('Enter a valid email address.', 'error', 'Invalid Email'); return; }
+        const submit = event.currentTarget.querySelector('button[type="submit"]');
+        if (submit) { submit.disabled = true; submit.textContent = 'Saving...'; }
+        try {
+            await callManageSubscribers({ action:'update', id, email, first_name:String(form.get('first_name')||'').trim(), last_name:String(form.get('last_name')||'').trim(), phone:String(form.get('phone')||'').trim(), is_subscribed:form.get('status') === 'subscribed' });
+            close();
+            showAdminModal('Subscriber updated successfully.', 'success', 'Subscriber Updated');
+            await fetchMailingList();
+            await updateCampaignMetrics();
+        } catch (error) {
+            showAdminModal(error?.message || 'Unable to update subscriber.', 'error', 'Update Failed');
+            if (submit) { submit.disabled = false; submit.textContent = 'Save Subscriber'; }
+        }
+    });
 }
 
 async function deleteSubscriber(id) {
@@ -7744,7 +7815,10 @@ function parseSubscriberCsv(text) {
     if (!rows.length) return [];
     const headers = rows[0].map(value => String(value || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '_'));
     const emailIndex = headers.findIndex(h => ['email','email_address','subscriber_email'].includes(h));
-    if (emailIndex === -1) throw new Error('CSV must include an email or email_address column.');
+    if (emailIndex === -1) throw new Error('CSV must include an email column. First name, last name, and phone are optional.');
+    const firstNameIndex = headers.findIndex(h => ['first_name','firstname','first'].includes(h));
+    const lastNameIndex = headers.findIndex(h => ['last_name','lastname','last'].includes(h));
+    const phoneIndex = headers.findIndex(h => ['phone','phone_number','telephone','mobile'].includes(h));
     const statusIndex = headers.findIndex(h => ['status','is_subscribed','subscribed'].includes(h));
     const sourceIndex = headers.findIndex(h => h === 'source');
     const seen = new Set();
@@ -7754,28 +7828,111 @@ function parseSubscriberCsv(text) {
         seen.add(email);
         const rawStatus = statusIndex >= 0 ? String(values[statusIndex] || '').trim().toLowerCase() : '';
         const isSubscribed = !['false','0','no','unsubscribed','opted_out','opted-out'].includes(rawStatus);
-        return { email, is_subscribed:isSubscribed, source:sourceIndex >= 0 ? String(values[sourceIndex] || '').trim() : 'csv_import' };
+        return {
+            email,
+            first_name:firstNameIndex >= 0 ? String(values[firstNameIndex] || '').trim() : '',
+            last_name:lastNameIndex >= 0 ? String(values[lastNameIndex] || '').trim() : '',
+            phone:phoneIndex >= 0 ? String(values[phoneIndex] || '').trim() : '',
+            is_subscribed:isSubscribed,
+            source:sourceIndex >= 0 ? String(values[sourceIndex] || '').trim() : 'csv_import'
+        };
     }).filter(Boolean);
 }
 
-async function importSubscribersFromFile(file) {
-    if (!file) return;
-    try {
-        const subscribers = parseSubscriberCsv(await file.text());
-        if (!subscribers.length) throw new Error('No valid subscriber email addresses were found in the CSV.');
-        const confirmed = await showAdminConfirmModal(`Import ${subscribers.length} subscriber${subscribers.length === 1 ? '' : 's'}? Existing unsubscribed contacts will stay unsubscribed.`, 'Import Subscribers?', 'Import Subscribers', 'Cancel', 'warning');
-        if (!confirmed) return;
-        let inserted = 0, updated = 0, skipped = 0;
-        for (let i = 0; i < subscribers.length; i += 250) {
-            const result = await callManageSubscribers({ action:'import', subscribers:subscribers.slice(i, i + 250) });
-            inserted += Number(result.inserted || 0); updated += Number(result.updated || 0); skipped += Number(result.skipped || 0);
-        }
-        showAdminModal(`Import complete. ${inserted} added, ${updated} updated, ${skipped} skipped.`, 'success', 'Subscribers Imported');
-        await fetchMailingList();
-        await updateCampaignMetrics();
-    } catch (error) {
-        showAdminModal(error?.message || 'Unable to import subscribers.', 'error', 'Import Failed');
+function parsePastedSubscriberEmails(text) {
+    const seen = new Set();
+    return String(text || '')
+        .split(/\r?\n/)
+        .map(value => value.trim().toLowerCase())
+        .filter(email => {
+            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || seen.has(email)) return false;
+            seen.add(email);
+            return true;
+        })
+        .map(email => ({ email, is_subscribed:true, source:'manual_paste' }));
+}
+
+async function importSubscriberBatch(subscribers) {
+    if (!Array.isArray(subscribers) || !subscribers.length) throw new Error('No valid subscriber email addresses were found.');
+    let inserted = 0, updated = 0, skipped = 0;
+    for (let i = 0; i < subscribers.length; i += 250) {
+        const result = await callManageSubscribers({ action:'import', subscribers:subscribers.slice(i, i + 250) });
+        inserted += Number(result.inserted || 0);
+        updated += Number(result.updated || 0);
+        skipped += Number(result.skipped || 0);
     }
+    showAdminModal(`Import complete. ${inserted} added, ${updated} updated, ${skipped} skipped.`, 'success', 'Subscribers Imported');
+    await fetchMailingList();
+    await updateCampaignMetrics();
+}
+
+function openSubscriberImportModal() {
+    const existing = document.getElementById('subscriberImportModal');
+    if (existing) existing.remove();
+    const overlay = document.createElement('div');
+    overlay.id = 'subscriberImportModal';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(24,8,34,.55);z-index:100000;display:flex;align-items:center;justify-content:center;padding:24px;';
+    overlay.innerHTML = `
+        <div style="width:min(680px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:18px;box-shadow:0 24px 80px rgba(0,0,0,.25);padding:24px;">
+            <div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:18px;">
+                <div><h3 style="margin:0 0 6px;color:var(--purple-primary);">Import Subscribers</h3><p style="margin:0;color:#666;font-size:.9rem;">Email is the only required field. First name, last name, and phone are optional.</p></div>
+                <button type="button" data-close-import style="border:0;background:#f4eef7;width:36px;height:36px;border-radius:50%;font-size:20px;cursor:pointer;">×</button>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+                <button type="button" data-import-tab="csv" style="padding:12px;border-radius:10px;border:1px solid var(--purple-primary);background:var(--purple-primary);color:#fff;font-weight:700;cursor:pointer;">Upload CSV</button>
+                <button type="button" data-import-tab="paste" style="padding:12px;border-radius:10px;border:1px solid #d8c5df;background:#fff;color:var(--purple-primary);font-weight:700;cursor:pointer;">Paste Emails</button>
+            </div>
+            <div data-import-panel="csv">
+                <div style="border:1px dashed #cdb5d6;border-radius:14px;padding:24px;text-align:center;background:#fcf9fd;">
+                    <p style="margin:0 0 8px;font-weight:700;">Choose a CSV file</p>
+                    <p style="margin:0 0 14px;color:#666;font-size:.85rem;">Required column: <strong>email</strong><br>Optional: first_name, last_name, phone</p>
+                    <input type="file" data-import-file accept=".csv,text/csv" style="max-width:100%;">
+                </div>
+                <button type="button" data-upload-csv style="margin-top:16px;width:100%;padding:13px;border:0;border-radius:10px;background:var(--green-primary);color:#fff;font-weight:800;cursor:pointer;">Upload Subscribers</button>
+            </div>
+            <div data-import-panel="paste" hidden>
+                <label style="display:block;font-weight:700;margin-bottom:8px;">Paste email addresses</label>
+                <textarea data-paste-emails rows="12" placeholder="jane@example.com&#10;john@example.com&#10;customer@example.com" style="width:100%;box-sizing:border-box;padding:14px;border:1px solid #d9d1dd;border-radius:12px;resize:vertical;font:inherit;"></textarea>
+                <p style="margin:8px 0 0;color:#777;font-size:.82rem;">Enter one email address per line. Duplicate and invalid addresses are ignored.</p>
+                <button type="button" data-upload-paste style="margin-top:16px;width:100%;padding:13px;border:0;border-radius:10px;background:var(--green-primary);color:#fff;font-weight:800;cursor:pointer;">Upload Emails</button>
+            </div>
+        </div>`;
+    document.body.appendChild(overlay);
+    const close = () => overlay.remove();
+    overlay.querySelector('[data-close-import]').addEventListener('click', close);
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    const tabs = overlay.querySelectorAll('[data-import-tab]');
+    tabs.forEach(button => button.addEventListener('click', () => {
+        const name = button.dataset.importTab;
+        overlay.querySelectorAll('[data-import-panel]').forEach(panel => panel.hidden = panel.dataset.importPanel !== name);
+        tabs.forEach(tab => {
+            const active = tab === button;
+            tab.style.background = active ? 'var(--purple-primary)' : '#fff';
+            tab.style.color = active ? '#fff' : 'var(--purple-primary)';
+        });
+    }));
+    overlay.querySelector('[data-upload-csv]').addEventListener('click', async () => {
+        try {
+            const file = overlay.querySelector('[data-import-file]').files?.[0];
+            if (!file) throw new Error('Choose a CSV file first.');
+            const subscribers = parseSubscriberCsv(await file.text());
+            if (!subscribers.length) throw new Error('No valid subscriber email addresses were found in the CSV.');
+            close();
+            await importSubscriberBatch(subscribers);
+        } catch (error) {
+            showAdminModal(error?.message || 'Unable to import subscribers.', 'error', 'Import Failed');
+        }
+    });
+    overlay.querySelector('[data-upload-paste]').addEventListener('click', async () => {
+        try {
+            const subscribers = parsePastedSubscriberEmails(overlay.querySelector('[data-paste-emails]').value);
+            if (!subscribers.length) throw new Error('Enter at least one valid email address, one per line.');
+            close();
+            await importSubscriberBatch(subscribers);
+        } catch (error) {
+            showAdminModal(error?.message || 'Unable to import subscribers.', 'error', 'Import Failed');
+        }
+    });
 }
 
 async function deleteAllUnsubscribed() {

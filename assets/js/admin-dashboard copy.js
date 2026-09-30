@@ -279,7 +279,7 @@ document.addEventListener('DOMContentLoaded', () => {
   async function saveBufferRuleConfig() {
     const value = parseInt(document.getElementById('bufferSettingSelect').value);
     const { error } = await supabaseClientInstance.from('scheduling_settings').update({ buffer_minutes: value }).eq('id', 'dot_config');
-    alert(error ? `Error saving config: ${error.message}` : "Buffer window parameters active across booking forms.");
+    window.showAdminModal?.(error ? `Error saving config: ${error.message}` : "Buffer window parameters active across booking forms.", error ? "error" : "success", error ? "Save Failed" : "Settings Saved");
   }
 
   /**
@@ -298,7 +298,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const { error } = await supabaseClientInstance.from('scheduling_settings').update({ blocked_slots: currentBlocked }).eq('id', 'dot_config');
-    if (error) alert(`Failed to block slot timeline: ${error.message}`);
+    if (error) window.showAdminModal?.(`Failed to block slot timeline: ${error.message}`, "error", "Update Failed");
   }
   /**
    * Executes asynchronous direct REST calls to database endpoints safely
@@ -414,7 +414,7 @@ document.addEventListener('DOMContentLoaded', () => {
    */
   function exportRegistryToCsv() {
     if (appointmentsData.length === 0) {
-      alert("No appointment entries available to export.");
+      window.showAdminModal?.("No appointment entries available to export.", "info", "Nothing to Export");
       return;
     }
     const headers = ["Driver Name", "CDL String", "Email Context", "Phone Number", "DOT Category", "Target Date", "Target Window"];
