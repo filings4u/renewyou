@@ -3231,21 +3231,12 @@ function renderDashboardStructure() {
 
             </div>
 
-            <button
-                type="button"
-                id="exportMailingListBtn"
-                style="
-                    background:#fff;
-                    color:var(--green-primary);
-                    border:1px solid var(--green-primary);
-                    padding:10px 18px;
-                    border-radius:10px;
-                    font-weight:700;
-                    cursor:pointer;
-                "
-            >
-                📊 Export Subscribers
-            </button>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+                <input type="file" id="importMailingListFile" accept=".csv,text/csv" hidden>
+                <button type="button" id="importMailingListBtn" style="background:var(--purple-primary);color:#fff;border:1px solid var(--purple-primary);padding:10px 18px;border-radius:10px;font-weight:700;cursor:pointer;">⬆️ Import Subscribers</button>
+                <button type="button" id="exportMailingListBtn" style="background:#fff;color:var(--green-primary);border:1px solid var(--green-primary);padding:10px 18px;border-radius:10px;font-weight:700;cursor:pointer;">📊 Export Subscribers</button>
+                <button type="button" id="deleteUnsubscribedBtn" style="background:#fff5f6;color:#a51f32;border:1px solid #edc8ce;padding:10px 18px;border-radius:10px;font-weight:700;cursor:pointer;">🗑 Delete Unsubscribed</button>
+            </div>
 
         </div>
 
@@ -5128,6 +5119,24 @@ if (exportMailingListButton) {
         'click',
         exportMailingListToCsv
     );
+}
+
+const importMailingListButton = document.getElementById('importMailingListBtn');
+const importMailingListFile = document.getElementById('importMailingListFile');
+const deleteUnsubscribedButton = document.getElementById('deleteUnsubscribedBtn');
+
+if (importMailingListButton && importMailingListFile) {
+    importMailingListButton.addEventListener('click', () => importMailingListFile.click());
+    importMailingListFile.addEventListener('change', async () => {
+        const file = importMailingListFile.files?.[0];
+        if (file) await importSubscribersFromFile(file);
+        importMailingListFile.value = '';
+    });
+}
+if (deleteUnsubscribedButton) deleteUnsubscribedButton.addEventListener('click', deleteAllUnsubscribed);
+if (!canManageSubscribers()) {
+    if (importMailingListButton) importMailingListButton.style.display = 'none';
+    if (deleteUnsubscribedButton) deleteUnsubscribedButton.style.display = 'none';
 }
 
 const wellnessOfferSearch =
@@ -7624,6 +7633,10 @@ function populateMailingList() {
                             ">
                                 ${escapeHtml(createdTime)}
                             </span>
+                            <div style="display:flex;gap:7px;justify-content:flex-end;margin-top:9px;flex-wrap:wrap;">
+                                <button type="button" data-subscriber-action="edit" data-subscriber-id="${escapeHtml(subscriber.id)}" style="border:1px solid #d9cde0;background:#fff;color:var(--purple-primary);border-radius:8px;padding:6px 9px;font-weight:800;cursor:pointer;font-size:.72rem;">Edit</button>
+                                <button type="button" data-subscriber-action="delete" data-subscriber-id="${escapeHtml(subscriber.id)}" style="border:1px solid #edc8ce;background:#fff5f6;color:#a51f32;border-radius:8px;padding:6px 9px;font-weight:800;cursor:pointer;font-size:.72rem;">Delete</button>
+                            </div>
 
                         </div>
 
@@ -7631,6 +7644,153 @@ function populateMailingList() {
                 `;
             }
         ).join('');
+
+    bindSubscriberRowActions();
+}
+
+/* =========================================================
+   SUBSCRIBER MANAGEMENT
+========================================================= */
+
+function currentSubscriberAdminRole() {
+    return String(window.RENEW_ADMIN_PROFILE?.role || '').toLowerCase();
+}
+
+function canManageSubscribers() {
+    return ['admin', 'manager', 'marketing'].includes(currentSubscriberAdminRole());
+}
+
+async function callManageSubscribers(body) {
+    if (!canManageSubscribers()) throw new Error('Your workspace role has read-only subscriber access.');
+    const { data, error } = await supabaseClientInstance.functions.invoke('manage-subscribers', { body });
+    if (error) throw error;
+    if (data?.error) throw new Error(data.error);
+    return data || {};
+}
+
+function bindSubscriberRowActions() {
+    document.querySelectorAll('[data-subscriber-action="edit"]').forEach(button => {
+        if (button.dataset.bound) return;
+        button.dataset.bound = '1';
+        if (!canManageSubscribers()) { button.style.display = 'none'; return; }
+        button.addEventListener('click', () => editSubscriber(button.dataset.subscriberId));
+    });
+    document.querySelectorAll('[data-subscriber-action="delete"]').forEach(button => {
+        if (button.dataset.bound) return;
+        button.dataset.bound = '1';
+        if (!canManageSubscribers()) { button.style.display = 'none'; return; }
+        button.addEventListener('click', () => deleteSubscriber(button.dataset.subscriberId));
+    });
+}
+
+async function editSubscriber(id) {
+    const subscriber = mailingListData.find(item => String(item.id) === String(id));
+    if (!subscriber) return;
+    const email = window.prompt('Subscriber email address:', subscriber.email || '');
+    if (email === null) return;
+    const normalizedEmail = String(email).trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+        showAdminModal('Enter a valid email address.', 'error', 'Invalid Email');
+        return;
+    }
+    const statusAnswer = window.prompt('Status: type subscribed or unsubscribed', subscriber.is_subscribed === false ? 'unsubscribed' : 'subscribed');
+    if (statusAnswer === null) return;
+    const status = String(statusAnswer).trim().toLowerCase();
+    if (!['subscribed', 'unsubscribed'].includes(status)) {
+        showAdminModal('Status must be subscribed or unsubscribed.', 'error', 'Invalid Status');
+        return;
+    }
+    try {
+        await callManageSubscribers({ action:'update', id, email:normalizedEmail, is_subscribed:status === 'subscribed' });
+        showAdminModal('Subscriber updated successfully.', 'success', 'Subscriber Updated');
+        await fetchMailingList();
+        await updateCampaignMetrics();
+    } catch (error) {
+        showAdminModal(error?.message || 'Unable to update subscriber.', 'error', 'Update Failed');
+    }
+}
+
+async function deleteSubscriber(id) {
+    const subscriber = mailingListData.find(item => String(item.id) === String(id));
+    if (!subscriber) return;
+    const confirmed = await showAdminConfirmModal(`Delete ${subscriber.email || 'this subscriber'} permanently?`, 'Delete Subscriber?', 'Delete Subscriber', 'Cancel', 'warning');
+    if (!confirmed) return;
+    try {
+        await callManageSubscribers({ action:'delete', id });
+        showAdminModal('Subscriber deleted.', 'success', 'Subscriber Deleted');
+        await fetchMailingList();
+        await updateCampaignMetrics();
+    } catch (error) {
+        showAdminModal(error?.message || 'Unable to delete subscriber.', 'error', 'Delete Failed');
+    }
+}
+
+function parseSubscriberCsv(text) {
+    const rows = [];
+    let row = [], field = '', quoted = false;
+    const input = String(text || '').replace(/^\uFEFF/, '');
+    for (let i = 0; i < input.length; i++) {
+        const ch = input[i];
+        if (quoted) {
+            if (ch === '"' && input[i + 1] === '"') { field += '"'; i++; }
+            else if (ch === '"') quoted = false;
+            else field += ch;
+        } else if (ch === '"') quoted = true;
+        else if (ch === ',') { row.push(field); field = ''; }
+        else if (ch === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
+        else if (ch !== '\r') field += ch;
+    }
+    if (field || row.length) { row.push(field); rows.push(row); }
+    if (!rows.length) return [];
+    const headers = rows[0].map(value => String(value || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '_'));
+    const emailIndex = headers.findIndex(h => ['email','email_address','subscriber_email'].includes(h));
+    if (emailIndex === -1) throw new Error('CSV must include an email or email_address column.');
+    const statusIndex = headers.findIndex(h => ['status','is_subscribed','subscribed'].includes(h));
+    const sourceIndex = headers.findIndex(h => h === 'source');
+    const seen = new Set();
+    return rows.slice(1).map(values => {
+        const email = String(values[emailIndex] || '').trim().toLowerCase();
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || seen.has(email)) return null;
+        seen.add(email);
+        const rawStatus = statusIndex >= 0 ? String(values[statusIndex] || '').trim().toLowerCase() : '';
+        const isSubscribed = !['false','0','no','unsubscribed','opted_out','opted-out'].includes(rawStatus);
+        return { email, is_subscribed:isSubscribed, source:sourceIndex >= 0 ? String(values[sourceIndex] || '').trim() : 'csv_import' };
+    }).filter(Boolean);
+}
+
+async function importSubscribersFromFile(file) {
+    if (!file) return;
+    try {
+        const subscribers = parseSubscriberCsv(await file.text());
+        if (!subscribers.length) throw new Error('No valid subscriber email addresses were found in the CSV.');
+        const confirmed = await showAdminConfirmModal(`Import ${subscribers.length} subscriber${subscribers.length === 1 ? '' : 's'}? Existing unsubscribed contacts will stay unsubscribed.`, 'Import Subscribers?', 'Import Subscribers', 'Cancel', 'warning');
+        if (!confirmed) return;
+        let inserted = 0, updated = 0, skipped = 0;
+        for (let i = 0; i < subscribers.length; i += 250) {
+            const result = await callManageSubscribers({ action:'import', subscribers:subscribers.slice(i, i + 250) });
+            inserted += Number(result.inserted || 0); updated += Number(result.updated || 0); skipped += Number(result.skipped || 0);
+        }
+        showAdminModal(`Import complete. ${inserted} added, ${updated} updated, ${skipped} skipped.`, 'success', 'Subscribers Imported');
+        await fetchMailingList();
+        await updateCampaignMetrics();
+    } catch (error) {
+        showAdminModal(error?.message || 'Unable to import subscribers.', 'error', 'Import Failed');
+    }
+}
+
+async function deleteAllUnsubscribed() {
+    const count = mailingListData.filter(item => item.is_subscribed === false).length;
+    if (!count) { showAdminModal('There are no unsubscribed contacts to delete.', 'info', 'Nothing to Delete'); return; }
+    const confirmed = await showAdminConfirmModal(`Permanently delete ${count} unsubscribed subscriber${count === 1 ? '' : 's'}? This cannot be undone.`, 'Delete Unsubscribed?', 'Delete Unsubscribed', 'Cancel', 'warning');
+    if (!confirmed) return;
+    try {
+        const result = await callManageSubscribers({ action:'delete_unsubscribed' });
+        showAdminModal(`${Number(result.deleted || 0)} unsubscribed contact${Number(result.deleted || 0) === 1 ? '' : 's'} deleted.`, 'success', 'Cleanup Complete');
+        await fetchMailingList();
+        await updateCampaignMetrics();
+    } catch (error) {
+        showAdminModal(error?.message || 'Unable to delete unsubscribed subscribers.', 'error', 'Delete Failed');
+    }
 }
 
 /* =========================================================
