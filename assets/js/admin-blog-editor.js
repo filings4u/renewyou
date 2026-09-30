@@ -44,8 +44,16 @@
         if (initialized) return;
         initialized = true;
 
-        if (!window.supabase || typeof window.supabase.createClient !== 'function') return;
-        client = window.supabase.createClient(PROJECT_URL, PUBLISHABLE_KEY);
+        // Reuse the single Supabase client created by admin-dashboard.js.
+        // Creating another GoTrueClient with the same storage key can cause
+        // concurrent auth/session behavior and triggers a Supabase warning.
+        if (window.supabaseClientInstance) {
+            client = window.supabaseClientInstance;
+        } else {
+            if (!window.supabase || typeof window.supabase.createClient !== 'function') return;
+            client = window.supabase.createClient(PROJECT_URL, PUBLISHABLE_KEY);
+            window.supabaseClientInstance = client;
+        }
 
         const authorized = await verifyAdmin();
         if (!authorized) return;
