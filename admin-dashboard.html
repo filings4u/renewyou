@@ -35,6 +35,32 @@
             margin: 0;
             padding: 0;
         }
+
+        /* Admin-only control isolation: public-site button CSS must not affect modal controls. */
+        .admin-dashboard-page .campaign-preview-close,
+        .admin-dashboard-page .admin-modal-close,
+        .admin-dashboard-page [data-prompt-close],
+        .admin-dashboard-page [data-edit-close],
+        .admin-dashboard-page [data-close-import] {
+            padding: 0 !important;
+            min-width: 0 !important;
+            min-height: 0 !important;
+            box-shadow: none !important;
+            transform: none !important;
+            line-height: 1 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+
+        .admin-dashboard-page .campaign-preview-close:hover,
+        .admin-dashboard-page .admin-modal-close:hover,
+        .admin-dashboard-page [data-prompt-close]:hover,
+        .admin-dashboard-page [data-edit-close]:hover,
+        .admin-dashboard-page [data-close-import]:hover {
+            transform: none !important;
+            box-shadow: none !important;
+        }
     </style>
 
     <!-- SOCIAL SHARE META START -->
@@ -59,7 +85,7 @@
     <!-- SOCIAL SHARE META END -->
 
 </head>
-<body>
+<body class="admin-dashboard-page">
     <div id="admin-dashboard-target"></div>
     <script src="assets/js/admin-dashboard.js"></script>
     <script src="assets/js/admin-blog-editor.js"></script>
