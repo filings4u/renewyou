@@ -127,7 +127,7 @@
             box-shadow: 0 0 10px rgba(138, 52, 159, 0.1);
         }
 
-        button {
+        .form-container button {
             background: linear-gradient(135deg, var(--purple-primary), var(--purple-accent));
             color: var(--bg-white);
             border: none;
@@ -140,13 +140,13 @@
             box-shadow: 0 4px 15px rgba(62, 13, 95, 0.2);
         }
 
-        button:hover {
+        .form-container button:hover {
             background: linear-gradient(135deg, var(--green-secondary), var(--green-primary));
             box-shadow: 0 4px 15px rgba(79, 148, 12, 0.2);
             transform: translateY(-2px);
         }
 
-        button:disabled {
+        .form-container button:disabled {
             opacity: 0.6;
             cursor: not-allowed;
         }

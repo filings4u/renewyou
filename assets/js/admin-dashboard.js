@@ -2759,10 +2759,17 @@ function renderDashboardStructure() {
             .campaign-two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
             .campaign-field{margin-bottom:14px;}
             .campaign-field label{display:block;margin-bottom:6px;color:#4a4050;font-size:.69rem;font-weight:900;text-transform:uppercase;letter-spacing:.05em;}
-            .campaign-field input,.campaign-field textarea{width:100%;box-sizing:border-box;border:1px solid #ddd6e2;border-radius:10px;background:#fff;padding:11px 12px;font:inherit;color:#2b2030;outline:none;}
+            .campaign-field input,.campaign-field textarea,.campaign-field select{width:100%;box-sizing:border-box;border:1px solid #ddd6e2;border-radius:10px;background:#fff;padding:11px 12px;font:inherit;color:#2b2030;outline:none;}
             .campaign-field textarea{resize:vertical;line-height:1.6;min-height:270px;}
-            .campaign-field input:focus,.campaign-field textarea:focus{border-color:#8a349b;box-shadow:0 0 0 3px rgba(138,52,159,.09);}
+            .campaign-field input:focus,.campaign-field textarea:focus,.campaign-field select:focus{border-color:#8a349b;box-shadow:0 0 0 3px rgba(138,52,159,.09);}
             .campaign-field small{display:block;margin-top:6px;color:#847a89;font-size:.7rem;line-height:1.45;}
+            .campaign-send-options{display:grid;grid-template-columns:minmax(220px,320px) 1fr;gap:14px;align-items:end;margin:4px 0 16px;padding:14px;border:1px solid #e8e0eb;border-radius:12px;background:#fbf9fc;}
+            .campaign-send-options .campaign-field{margin:0;}
+            .campaign-recipient-input-wrap{display:flex;align-items:center;gap:8px;}
+            .campaign-recipient-input-wrap input{max-width:150px;font-weight:800;color:#3e0d5f;}
+            .campaign-recipient-input-wrap span{font-size:.78rem;font-weight:800;color:#716676;}
+            .campaign-send-options-note{font-size:.74rem;line-height:1.5;color:#746a79;padding-bottom:3px;}
+            .campaign-send-options-note strong{color:#3e0d5f;}
             .campaign-actions{display:flex;gap:9px;flex-wrap:wrap;align-items:center;}
             .workspace-inline-message{margin-top:14px;padding:11px 13px;border-radius:10px;font-size:.8rem;font-weight:700;}
             .workspace-inline-message.success{display:block!important;background:#eef8e8;color:#3d790a;}
@@ -2815,7 +2822,7 @@ function renderDashboardStructure() {
             .campaign-insert-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:10px;}
             @media(max-width:1050px){.campaign-layout{grid-template-columns:1fr}.campaign-metrics-grid{grid-template-columns:1fr 1fr}.contact-inquiry-controls{grid-template-columns:1fr}}
             @media(max-width:850px){.dash-outer-wrap{padding:18px 12px 30px}.admin-page-nav{position:static;width:auto;padding:7px;margin-bottom:18px;border-radius:14px;background:#fff;display:flex;flex-direction:row;overflow-x:auto;box-shadow:none;border:1px solid #eee8f1}.admin-page-nav::before,.admin-page-nav::after{display:none}.admin-page-tab{width:auto;color:#555}.admin-page-tab:hover{background:#f7f4f9;color:#3e0d5f}.admin-page-tab.active{background:#3e0d5f;color:#fff}.dash-header-row{min-height:auto;padding:8px 0 16px}.campaign-two-col{grid-template-columns:1fr}}
-            @media(max-width:560px){.campaign-metrics-grid{grid-template-columns:1fr 1fr}.workspace-page-head{flex-direction:column}.workspace-page-head .workspace-btn{width:100%}.campaign-actions .workspace-btn{width:100%}}
+            @media(max-width:560px){.campaign-metrics-grid{grid-template-columns:1fr 1fr}.campaign-send-options{grid-template-columns:1fr}.workspace-page-head{flex-direction:column}.workspace-page-head .workspace-btn{width:100%}.campaign-actions .workspace-btn{width:100%}}
 
         </style>
 
@@ -3392,10 +3399,21 @@ function renderDashboardStructure() {
                     </div>
                     <div class="campaign-auto-footer-note"><span>✓</span><div><strong>Unsubscribe protection is automatic.</strong><small>Every recipient gets a unique unsubscribe link and Resend one-click unsubscribe headers. You do not need to add it manually.</small></div></div>
                 </div>
+                <div class="campaign-send-options">
+                    <div class="campaign-field">
+                        <label for="campaignRecipientCount">Recipients This Send</label>
+                        <div class="campaign-recipient-input-wrap">
+                            <input id="campaignRecipientCount" type="number" min="1" max="1000" step="1" value="1000" inputmode="numeric">
+                            <span>people</span>
+                        </div>
+                        <small>Choose between 1 and 1,000 recipients for this send.</small>
+                    </div>
+                    <div class="campaign-send-options-note"><strong>Daily limit: 1,000 emails.</strong><br>The system sends to eligible active subscribers who have not already received this campaign. If you already sent emails today, the remaining daily allowance is applied automatically.</div>
+                </div>
                 <div class="campaign-actions">
                     <button type="submit" id="saveCampaignBtn" class="workspace-btn secondary">Save Draft</button>
                     <button type="button" id="previewCampaignBtn" class="workspace-btn ghost">Preview</button>
-                    <button type="button" id="sendCampaignBtn" class="workspace-btn primary" disabled>Send to Active Subscribers</button>
+                    <button type="button" id="sendCampaignBtn" class="workspace-btn primary" disabled>Send Campaign</button>
                 </div>
                 <div id="campaignFormMessage" class="workspace-inline-message" style="display:none"></div>
             </form>
@@ -14713,14 +14731,34 @@ async function deleteBlogPost(
             if (saved) campaign = saved;
         }
         if (!campaign) return;
+
         const activeCount = mailingListData.filter(item=>item.is_subscribed!==false).length;
         if (!activeCount) { setCampaignMessage('There are no active subscribers.', 'error'); return; }
-        const confirmed = await showAdminConfirmModal(`This campaign will send to as many eligible subscribers as today's 1,000-email daily limit allows. If the campaign has more recipients, you can continue it on a later day.\n\nEvery email automatically includes the unique unsubscribe link.`, 'Send Email Campaign?', 'Send Campaign', 'Cancel', 'warning');
+
+        const countInput = document.getElementById('campaignRecipientCount');
+        const requestedCount = Math.floor(Number(countInput?.value || 0));
+        if (!Number.isFinite(requestedCount) || requestedCount < 1 || requestedCount > 1000) {
+            const message='Choose a recipient count between 1 and 1,000.';
+            setCampaignMessage(message,'error');
+            showAdminModal(message,'error','Recipient Count Required');
+            countInput?.focus();
+            return;
+        }
+
+        const effectiveCount = Math.min(requestedCount, activeCount);
+        const confirmed = await showAdminConfirmModal(`Send this campaign to up to ${effectiveCount.toLocaleString()} eligible subscriber${effectiveCount===1?'':'s'}?\n\nThe 1,000-email daily limit still applies, and every email automatically includes the unique unsubscribe link.`, 'Send Email Campaign?', `Send to ${effectiveCount.toLocaleString()}`, 'Cancel', 'warning');
         if (!confirmed) return;
-        const btn=document.getElementById('sendCampaignBtn'); if(btn){btn.disabled=true;btn.textContent='Sending...';}
+
+        const btn=document.getElementById('sendCampaignBtn');
+        if(btn){btn.disabled=true;btn.textContent='Sending...';}
+        if(countInput) countInput.disabled=true;
         try{
             const { data:{session} }=await supabaseClientInstance.auth.getSession();
-            const response=await fetch(`${SUPABASE_PROJECT_URL}/functions/v1/send-email-campaign`,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${session?.access_token||''}`,'apikey':SUPABASE_ANON_KEY},body:JSON.stringify({campaign_id:campaign.id})});
+            const response=await fetch(`${SUPABASE_PROJECT_URL}/functions/v1/send-email-campaign`,{
+                method:'POST',
+                headers:{'Content-Type':'application/json','Authorization':`Bearer ${session?.access_token||''}`,'apikey':SUPABASE_ANON_KEY},
+                body:JSON.stringify({campaign_id:campaign.id,recipient_count:requestedCount})
+            });
             const result=await response.json().catch(()=>({}));
             if(!response.ok) throw new Error(result.error||'Campaign send failed.');
             const sentNow=Number(result.sent_count||0);
@@ -14728,13 +14766,19 @@ async function deleteBlogPost(
             const quotaRemaining=Number(result.daily_remaining_after||0);
             const complete=Boolean(result.complete);
             const message=complete
-                ? `Campaign complete: ${sentNow} email${sentNow===1?'':'s'} sent in this run.`
-                : `${sentNow} email${sentNow===1?'':'s'} sent in this run. ${remaining.toLocaleString()} campaign recipient${remaining===1?'':'s'} remain. Daily allowance remaining: ${quotaRemaining.toLocaleString()}.`;
+                ? `Campaign complete: ${sentNow.toLocaleString()} email${sentNow===1?'':'s'} sent in this run.`
+                : `${sentNow.toLocaleString()} email${sentNow===1?'':'s'} sent in this run. ${remaining.toLocaleString()} campaign recipient${remaining===1?'':'s'} remain. Daily allowance remaining: ${quotaRemaining.toLocaleString()}.`;
             setCampaignMessage(message,'success');
-            showAdminModal(message,'success', complete ? 'Campaign Complete' : 'Daily Send Complete');
+            showAdminModal(message,'success', complete ? 'Campaign Complete' : 'Campaign Send Complete');
             await Promise.all([fetchEmailCampaigns(),fetchMailingList()]);
-        }catch(error){console.error(error);setCampaignMessage(error?.message||'Unable to send campaign.','error');showAdminModal(error?.message||'Unable to send campaign.','error','Campaign Failed');}
-        finally{if(btn){btn.disabled=false;btn.textContent='Send to Active Subscribers';}}
+        }catch(error){
+            console.error(error);
+            setCampaignMessage(error?.message||'Unable to send campaign.','error');
+            showAdminModal(error?.message||'Unable to send campaign.','error','Campaign Failed');
+        } finally {
+            if(btn){btn.disabled=false;btn.textContent='Send Campaign';}
+            if(countInput) countInput.disabled=false;
+        }
     }
 
 
