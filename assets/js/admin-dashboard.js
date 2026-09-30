@@ -956,10 +956,14 @@ let activeFilter = 'All';
 let searchQuery = '';
 
 let mailingListSearchQuery = '';
+let mailingListPage = 1;
+const MAILING_LIST_PAGE_SIZE = 100;
 
 let emailCampaigns = [];
 let campaignSearchQuery = '';
 let editingCampaignId = null;
+let campaignEditorSavedRange = null;
+let campaignInsertMode = 'link';
 
 let wellnessOfferCodes = [];
 
@@ -2751,6 +2755,7 @@ function renderDashboardStructure() {
             .workspace-section-title h3{margin:0 0 4px;font-size:1.08rem;}
             .workspace-section-title p{margin:0;color:#777;font-size:.79rem;line-height:1.45;}
             .workspace-badge{display:inline-flex;background:#f1eaf4;color:#6e277d;border-radius:999px;padding:6px 10px;font-size:.66rem;font-weight:900;text-transform:uppercase;}
+            .campaign-badge-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.campaign-limit-badge{background:#eef8e8;color:#3d790a;}
             .campaign-two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
             .campaign-field{margin-bottom:14px;}
             .campaign-field label{display:block;margin-bottom:6px;color:#4a4050;font-size:.69rem;font-weight:900;text-transform:uppercase;letter-spacing:.05em;}
@@ -2789,6 +2794,25 @@ function renderDashboardStructure() {
             .campaign-preview-meta span{font-size:.62rem;font-weight:900;color:#8a349b;letter-spacing:.14em;}
             .campaign-preview-meta strong{color:#2f103f;}
             .campaign-preview-dialog iframe{width:100%;height:100%;border:0;background:#fff;}
+            .campaign-editor-shell{border:1px solid #ddd6e2;border-radius:12px;background:#fff;overflow:hidden;transition:.18s ease;}
+            .campaign-editor-shell:focus-within{border-color:#8a349b;box-shadow:0 0 0 3px rgba(138,52,159,.09);}
+            .campaign-editor-toolbar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:9px;background:#faf8fb;border-bottom:1px solid #ece6ef;position:sticky;top:0;z-index:2;}
+            .campaign-editor-btn,.campaign-editor-select{height:34px;border:1px solid #ddd6e2;border-radius:8px;background:#fff;color:#4a4050;font:700 .75rem/1 Arial,sans-serif;cursor:pointer;padding:0 9px;}
+            .campaign-editor-btn:hover,.campaign-editor-select:hover{border-color:#b990c2;background:#fff;}
+            .campaign-editor-btn.accent{background:#f1eaf4;color:#6e277d;border-color:#e3d3e8;}
+            .campaign-editor-select{min-width:92px;font-weight:700;}
+            .campaign-editor-color{height:34px;display:inline-flex;align-items:center;gap:5px;border:1px solid #ddd6e2;border-radius:8px;background:#fff;padding:0 7px;color:#4a4050;font-weight:900;cursor:pointer;}
+            .campaign-editor-color input{width:22px!important;height:22px!important;border:0!important;border-radius:5px!important;padding:0!important;background:transparent!important;box-shadow:none!important;cursor:pointer;}
+            .campaign-rich-editor{min-height:330px;max-height:620px;overflow:auto;padding:22px 24px;outline:none;color:#554a59;font:16px/1.6 Arial,Helvetica,sans-serif;background:#fff;}
+            .campaign-rich-editor:empty::before{content:attr(data-placeholder);color:#a59ba9;pointer-events:none;}
+            .campaign-rich-editor h1{font-size:30px;line-height:1.2;color:#3e0d5f;margin:0 0 16px}.campaign-rich-editor h2{font-size:24px;line-height:1.25;color:#3e0d5f;margin:0 0 14px}.campaign-rich-editor h3{font-size:20px;line-height:1.3;color:#3e0d5f;margin:0 0 12px}
+            .campaign-rich-editor p{margin:0 0 14px}.campaign-rich-editor ul,.campaign-rich-editor ol{padding-left:24px;margin:0 0 16px}.campaign-rich-editor a{color:#8a349b;}
+            .campaign-auto-footer-note{margin-top:9px;display:flex;gap:10px;align-items:flex-start;padding:11px 13px;border:1px solid #e4d8e8;border-radius:10px;background:#faf7fb;color:#5a4d60;}
+            .campaign-auto-footer-note>span{width:24px;height:24px;flex:0 0 24px;display:grid;place-items:center;border-radius:50%;background:#3e0d5f;color:#fff;font-size:.72rem;font-weight:900;}
+            .campaign-auto-footer-note strong{display:block;font-size:.76rem;color:#3e0d5f;margin-bottom:2px}.campaign-auto-footer-note small{display:block!important;margin:0!important;color:#776c7c!important;font-size:.69rem!important;}
+            .campaign-insert-dialog{position:relative;width:min(480px,100%);background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 30px 90px rgba(0,0,0,.28);}
+            .campaign-insert-form{padding:20px;display:grid;gap:8px}.campaign-insert-form label{font-size:.68rem;font-weight:900;text-transform:uppercase;letter-spacing:.05em;color:#54475b;margin-top:4px}.campaign-insert-form input{width:100%;box-sizing:border-box;border:1px solid #ddd6e2;border-radius:10px;padding:11px 12px;font:inherit;outline:none}.campaign-insert-form input:focus{border-color:#8a349b;box-shadow:0 0 0 3px rgba(138,52,159,.09)}
+            .campaign-insert-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:10px;}
             @media(max-width:1050px){.campaign-layout{grid-template-columns:1fr}.campaign-metrics-grid{grid-template-columns:1fr 1fr}.contact-inquiry-controls{grid-template-columns:1fr}}
             @media(max-width:850px){.dash-outer-wrap{padding:18px 12px 30px}.admin-page-nav{position:static;width:auto;padding:7px;margin-bottom:18px;border-radius:14px;background:#fff;display:flex;flex-direction:row;overflow-x:auto;box-shadow:none;border:1px solid #eee8f1}.admin-page-nav::before,.admin-page-nav::after{display:none}.admin-page-tab{width:auto;color:#555}.admin-page-tab:hover{background:#f7f4f9;color:#3e0d5f}.admin-page-tab.active{background:#3e0d5f;color:#fff}.dash-header-row{min-height:auto;padding:8px 0 16px}.campaign-two-col{grid-template-columns:1fr}}
             @media(max-width:560px){.campaign-metrics-grid{grid-template-columns:1fr 1fr}.workspace-page-head{flex-direction:column}.workspace-page-head .workspace-btn{width:100%}.campaign-actions .workspace-btn{width:100%}}
@@ -3318,7 +3342,7 @@ function renderDashboardStructure() {
         <div class="admin-card campaign-composer-card">
             <div class="workspace-section-title">
                 <div><h3 id="campaignComposerTitle">Create Campaign</h3><p>Messages are sent individually through Resend and include an unsubscribe link.</p></div>
-                <span id="campaignDraftBadge" class="workspace-badge">Draft</span>
+                <div class="campaign-badge-row"><span class="workspace-badge campaign-limit-badge">1,000 / day</span><span id="campaignDraftBadge" class="workspace-badge">Draft</span></div>
             </div>
             <form id="campaignForm">
                 <div class="campaign-two-col">
@@ -3330,7 +3354,44 @@ function renderDashboardStructure() {
                     <div class="campaign-field"><label for="campaignFromName">From Name</label><input id="campaignFromName" type="text" value="ReNew You Health & Wellness"></div>
                     <div class="campaign-field"><label for="campaignReplyTo">Reply-To</label><input id="campaignReplyTo" type="email" value="info@renewyouhealthwellness.com"></div>
                 </div>
-                <div class="campaign-field"><label for="campaignContent">Email Content</label><textarea id="campaignContent" rows="16" required placeholder="Write the body of your email here..."></textarea><small>Use plain text or simple HTML. The ReNew You branded wrapper and unsubscribe footer are added automatically by the send system.</small></div>
+                <div class="campaign-field campaign-editor-field">
+                    <label>Email Content</label>
+                    <div class="campaign-editor-shell">
+                        <div class="campaign-editor-toolbar" id="campaignEditorToolbar" role="toolbar" aria-label="Email formatting tools">
+                            <select class="campaign-editor-select" data-editor-command="formatBlock" aria-label="Text style">
+                                <option value="p">Paragraph</option><option value="h1">Heading 1</option><option value="h2">Heading 2</option><option value="h3">Heading 3</option>
+                            </select>
+                            <select class="campaign-editor-select" data-editor-command="fontName" aria-label="Font family">
+                                <option value="Arial">Arial</option><option value="Georgia">Georgia</option><option value="Verdana">Verdana</option><option value="Tahoma">Tahoma</option><option value="Trebuchet MS">Trebuchet</option>
+                            </select>
+                            <select class="campaign-editor-select" data-editor-command="fontSize" aria-label="Font size">
+                                <option value="2">Small</option><option value="3" selected>Normal</option><option value="4">Large</option><option value="5">X-Large</option><option value="6">XX-Large</option>
+                            </select>
+                            <button type="button" class="campaign-editor-btn" data-editor-command="bold" title="Bold"><strong>B</strong></button>
+                            <button type="button" class="campaign-editor-btn" data-editor-command="italic" title="Italic"><em>I</em></button>
+                            <button type="button" class="campaign-editor-btn" data-editor-command="underline" title="Underline"><u>U</u></button>
+                            <button type="button" class="campaign-editor-btn" data-editor-command="insertUnorderedList" title="Bulleted list">• List</button>
+                            <button type="button" class="campaign-editor-btn" data-editor-command="insertOrderedList" title="Numbered list">1. List</button>
+                            <button type="button" class="campaign-editor-btn" data-editor-command="justifyLeft" title="Align left">⇤</button>
+                            <button type="button" class="campaign-editor-btn" data-editor-command="justifyCenter" title="Center">↔</button>
+                            <button type="button" class="campaign-editor-btn" data-editor-command="justifyRight" title="Align right">⇥</button>
+                            <select class="campaign-editor-select" id="campaignLineHeight" aria-label="Line spacing">
+                                <option value="1.35">Tight spacing</option><option value="1.6" selected>Normal spacing</option><option value="1.9">Relaxed spacing</option><option value="2.2">Wide spacing</option>
+                            </select>
+                            <label class="campaign-editor-color" title="Text color"><span>A</span><input type="color" id="campaignTextColor" value="#554a59" aria-label="Text color"></label>
+                            <button type="button" class="campaign-editor-btn" id="campaignInsertLinkBtn">🔗 Link</button>
+                            <button type="button" class="campaign-editor-btn accent" id="campaignInsertButtonBtn">+ Button</button>
+                            <button type="button" class="campaign-editor-btn" data-editor-command="insertHorizontalRule" title="Divider">— Divider</button>
+                            <button type="button" class="campaign-editor-btn" id="campaignInsertSpaceBtn" title="Add vertical space">↕ Space</button>
+                            <button type="button" class="campaign-editor-btn" data-editor-command="removeFormat" title="Clear formatting">Clear</button>
+                            <button type="button" class="campaign-editor-btn" data-editor-command="undo" title="Undo">↶</button>
+                            <button type="button" class="campaign-editor-btn" data-editor-command="redo" title="Redo">↷</button>
+                        </div>
+                        <div id="campaignContentEditor" class="campaign-rich-editor" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="Write the body of your email here..."></div>
+                        <textarea id="campaignContent" hidden></textarea>
+                    </div>
+                    <div class="campaign-auto-footer-note"><span>✓</span><div><strong>Unsubscribe protection is automatic.</strong><small>Every recipient gets a unique unsubscribe link and Resend one-click unsubscribe headers. You do not need to add it manually.</small></div></div>
+                </div>
                 <div class="campaign-actions">
                     <button type="submit" id="saveCampaignBtn" class="workspace-btn secondary">Save Draft</button>
                     <button type="button" id="previewCampaignBtn" class="workspace-btn ghost">Preview</button>
@@ -3352,6 +3413,20 @@ function renderDashboardStructure() {
             <button type="button" id="closeCampaignPreview" class="campaign-preview-close" aria-label="Close">×</button>
             <div class="campaign-preview-meta"><span>EMAIL PREVIEW</span><strong id="campaignPreviewSubject">Subject</strong></div>
             <iframe id="campaignPreviewFrame" title="Campaign preview" sandbox></iframe>
+        </div>
+    </div>
+
+    <div id="campaignInsertModal" class="campaign-preview-modal campaign-insert-modal" aria-hidden="true">
+        <div class="campaign-insert-dialog">
+            <button type="button" id="closeCampaignInsertModal" class="campaign-preview-close" aria-label="Close">×</button>
+            <div class="campaign-preview-meta"><span id="campaignInsertKicker">ADD LINK</span><strong id="campaignInsertTitle">Insert link</strong></div>
+            <div class="campaign-insert-form">
+                <label for="campaignInsertText">Text</label>
+                <input id="campaignInsertText" type="text" placeholder="Learn more">
+                <label for="campaignInsertUrl">URL</label>
+                <input id="campaignInsertUrl" type="url" placeholder="https://example.com">
+                <div class="campaign-insert-actions"><button type="button" id="cancelCampaignInsert" class="workspace-btn ghost">Cancel</button><button type="button" id="applyCampaignInsert" class="workspace-btn primary">Insert</button></div>
+            </div>
         </div>
     </div>
 </section>
@@ -5101,6 +5176,7 @@ if (mailingListSearch) {
                     .toLowerCase()
                     .trim();
 
+            mailingListPage = 1;
             populateMailingList();
 
         }
@@ -7210,38 +7286,35 @@ async function fetchMailingList() {
 
         }
 
-        const {
-            data,
-            error
-        } = await supabaseClientInstance
+        // Supabase/PostgREST commonly caps a single response at 1,000 rows.
+        // Fetch in pages so the admin portal always receives the complete list.
+        const databasePageSize = 1000;
+        const allSubscribers = [];
+        let databaseOffset = 0;
 
-            .from('Renew You Health Leads')
+        while (true) {
+            const { data, error } = await supabaseClientInstance
+                .from('Renew You Health Leads')
+                .select(
+                    'id, email, first_name, last_name, phone, created_at, is_subscribed, unsubscribed_at, updated_at, source, unsubscribe_token'
+                )
+                .order('created_at', { ascending: false })
+                .range(databaseOffset, databaseOffset + databasePageSize - 1);
 
-            .select(
-                'id, email, first_name, last_name, phone, created_at, is_subscribed, unsubscribed_at, updated_at, source, unsubscribe_token'
-            )
+            if (error) {
+                console.error('Supabase mailing-list error:', error);
+                throw error;
+            }
 
-            .order(
-                'created_at',
-                {
-                    ascending: false
-                }
-            );
+            const pageRows = Array.isArray(data) ? data : [];
+            allSubscribers.push(...pageRows);
 
-        if (error) {
-
-            console.error(
-                'Supabase mailing-list error:',
-                error
-            );
-
-            throw error;
+            if (pageRows.length < databasePageSize) break;
+            databaseOffset += databasePageSize;
         }
 
-        mailingListData =
-            Array.isArray(data)
-                ? data
-                : [];
+        mailingListData = allSubscribers;
+        mailingListPage = 1;
 
         console.log(
             'Mailing-list subscribers loaded:',
@@ -7497,8 +7570,12 @@ function populateMailingList() {
         return;
     }
 
-    outputContainer.innerHTML =
-        filtered.map(
+    const totalPages = Math.max(1, Math.ceil(filtered.length / MAILING_LIST_PAGE_SIZE));
+    mailingListPage = Math.min(Math.max(1, mailingListPage), totalPages);
+    const pageStart = (mailingListPage - 1) * MAILING_LIST_PAGE_SIZE;
+    const visibleSubscribers = filtered.slice(pageStart, pageStart + MAILING_LIST_PAGE_SIZE);
+
+    const cardsHtml = visibleSubscribers.map(
             subscriber => {
 
                 const email =
@@ -7640,7 +7717,40 @@ function populateMailingList() {
             }
         ).join('');
 
+    const pagerHtml = totalPages > 1 ? `
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 2px 4px;flex-wrap:wrap;">
+            <div style="color:#6f6474;font-size:.84rem;font-weight:700;">
+                Showing ${pageStart + 1}-${Math.min(pageStart + MAILING_LIST_PAGE_SIZE, filtered.length)} of ${filtered.length.toLocaleString()} subscribers
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+                <button type="button" data-mailing-page="prev" ${mailingListPage <= 1 ? 'disabled' : ''} style="border:1px solid #d9cde0;background:#fff;color:var(--purple-primary);border-radius:9px;padding:8px 12px;font-weight:800;cursor:${mailingListPage <= 1 ? 'not-allowed' : 'pointer'};opacity:${mailingListPage <= 1 ? '.45' : '1'};">Previous</button>
+                <span style="color:#5f5264;font-size:.82rem;font-weight:800;min-width:92px;text-align:center;">Page ${mailingListPage} of ${totalPages}</span>
+                <button type="button" data-mailing-page="next" ${mailingListPage >= totalPages ? 'disabled' : ''} style="border:1px solid #d9cde0;background:#fff;color:var(--purple-primary);border-radius:9px;padding:8px 12px;font-weight:800;cursor:${mailingListPage >= totalPages ? 'not-allowed' : 'pointer'};opacity:${mailingListPage >= totalPages ? '.45' : '1'};">Next</button>
+            </div>
+        </div>` : `
+        <div style="padding:12px 2px 2px;color:#6f6474;font-size:.84rem;font-weight:700;">
+            Showing ${filtered.length.toLocaleString()} subscriber${filtered.length === 1 ? '' : 's'}
+        </div>`;
+
+    outputContainer.innerHTML = cardsHtml + pagerHtml;
+
     bindSubscriberRowActions();
+
+    outputContainer.querySelector('[data-mailing-page="prev"]')?.addEventListener('click', () => {
+        if (mailingListPage > 1) {
+            mailingListPage -= 1;
+            populateMailingList();
+            outputContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    });
+
+    outputContainer.querySelector('[data-mailing-page="next"]')?.addEventListener('click', () => {
+        if (mailingListPage < totalPages) {
+            mailingListPage += 1;
+            populateMailingList();
+            outputContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    });
 }
 
 /* =========================================================
@@ -14336,6 +14446,133 @@ async function deleteBlogPost(
         setElementText('campaignSentCount', emailCampaigns.filter(item => item.status === 'sent').length);
     }
 
+    function syncCampaignEditor() {
+        const editor = document.getElementById('campaignContentEditor');
+        const hidden = document.getElementById('campaignContent');
+        if (editor && hidden) hidden.value = editor.innerHTML.trim();
+        return editor?.innerHTML.trim() || '';
+    }
+
+    function restoreCampaignEditorRange() {
+        if (!campaignEditorSavedRange) return;
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(campaignEditorSavedRange);
+    }
+
+    function saveCampaignEditorRange() {
+        const editor = document.getElementById('campaignContentEditor');
+        const selection = window.getSelection();
+        if (!editor || !selection || !selection.rangeCount) return;
+        const range = selection.getRangeAt(0);
+        if (editor.contains(range.commonAncestorContainer)) campaignEditorSavedRange = range.cloneRange();
+    }
+
+    function runCampaignEditorCommand(command, value = null) {
+        const editor = document.getElementById('campaignContentEditor');
+        if (!editor) return;
+        editor.focus();
+        restoreCampaignEditorRange();
+        document.execCommand(command, false, value);
+        saveCampaignEditorRange();
+        syncCampaignEditor();
+    }
+
+    function openCampaignInsertModal(mode) {
+        campaignInsertMode = mode === 'button' ? 'button' : 'link';
+        saveCampaignEditorRange();
+        const selection = window.getSelection();
+        const selectedText = selection?.toString()?.trim() || '';
+        const modal = document.getElementById('campaignInsertModal');
+        const title = document.getElementById('campaignInsertTitle');
+        const kicker = document.getElementById('campaignInsertKicker');
+        const text = document.getElementById('campaignInsertText');
+        const url = document.getElementById('campaignInsertUrl');
+        if (title) title.textContent = campaignInsertMode === 'button' ? 'Insert button' : 'Insert link';
+        if (kicker) kicker.textContent = campaignInsertMode === 'button' ? 'ADD BUTTON' : 'ADD LINK';
+        if (text) text.value = selectedText || (campaignInsertMode === 'button' ? 'Learn More' : 'Learn more');
+        if (url) url.value = '';
+        if (modal) { modal.classList.add('active'); modal.setAttribute('aria-hidden','false'); }
+        setTimeout(() => (url || text)?.focus(), 30);
+    }
+
+    function closeCampaignInsertModal() {
+        const modal = document.getElementById('campaignInsertModal');
+        if (modal) { modal.classList.remove('active'); modal.setAttribute('aria-hidden','true'); }
+    }
+
+    function applyCampaignInsert() {
+        const text = document.getElementById('campaignInsertText')?.value?.trim() || '';
+        let url = document.getElementById('campaignInsertUrl')?.value?.trim() || '';
+        if (!text || !url) { showAdminModal('Enter both the display text and URL.','error','Missing Information'); return; }
+        if (!/^[a-z][a-z0-9+.-]*:/i.test(url)) url = `https://${url}`;
+        try { new URL(url); } catch { showAdminModal('Enter a valid URL, such as https://renewyouhealthwellness.com.','error','Invalid URL'); return; }
+        const editor = document.getElementById('campaignContentEditor');
+        if (!editor) return;
+        editor.focus(); restoreCampaignEditorRange();
+        const safeText = escapeHtml(text);
+        const safeUrl = escapeHtml(url);
+        const html = campaignInsertMode === 'button'
+            ? `<a href="${safeUrl}" target="_blank" rel="noopener" style="display:inline-block;background:#8a349b;color:#ffffff;text-decoration:none;font-weight:700;padding:13px 22px;border-radius:10px;margin:8px 0">${safeText}</a>`
+            : `<a href="${safeUrl}" target="_blank" rel="noopener" style="color:#8a349b;text-decoration:underline">${safeText}</a>`;
+        document.execCommand('insertHTML', false, html);
+        syncCampaignEditor();
+        saveCampaignEditorRange();
+        closeCampaignInsertModal();
+    }
+
+    function applyCampaignLineHeight(value) {
+        const editor = document.getElementById('campaignContentEditor');
+        const selection = window.getSelection();
+        if (!editor || !selection?.rangeCount) return;
+        let node = selection.getRangeAt(0).startContainer;
+        if (node.nodeType === Node.TEXT_NODE) node = node.parentElement;
+        let block = node;
+        while (block && block !== editor && !/^(P|DIV|LI|H1|H2|H3|BLOCKQUOTE)$/.test(block.tagName || '')) block = block.parentElement;
+        if (!block || block === editor) {
+            document.execCommand('formatBlock', false, 'p');
+            node = selection.getRangeAt(0).startContainer;
+            block = node.nodeType === Node.TEXT_NODE ? node.parentElement : node;
+        }
+        if (block && block !== editor) block.style.lineHeight = value;
+        syncCampaignEditor();
+    }
+
+    function bindCampaignEditorEvents() {
+        const editor = document.getElementById('campaignContentEditor');
+        if (editor && !editor.dataset.bound) {
+            editor.dataset.bound='1';
+            editor.addEventListener('input', syncCampaignEditor);
+            editor.addEventListener('keyup', saveCampaignEditorRange);
+            editor.addEventListener('mouseup', saveCampaignEditorRange);
+            editor.addEventListener('focus', saveCampaignEditorRange);
+        }
+        document.querySelectorAll('#campaignEditorToolbar [data-editor-command]').forEach(control => {
+            if (control.dataset.bound) return;
+            control.dataset.bound='1';
+            if (control.tagName === 'SELECT') control.addEventListener('change', () => runCampaignEditorCommand(control.dataset.editorCommand, control.value));
+            else control.addEventListener('mousedown', e => { e.preventDefault(); runCampaignEditorCommand(control.dataset.editorCommand); });
+        });
+        const lineHeight = document.getElementById('campaignLineHeight');
+        if (lineHeight && !lineHeight.dataset.bound) { lineHeight.dataset.bound='1'; lineHeight.addEventListener('change', () => applyCampaignLineHeight(lineHeight.value)); }
+        const color = document.getElementById('campaignTextColor');
+        if (color && !color.dataset.bound) { color.dataset.bound='1'; color.addEventListener('input', () => runCampaignEditorCommand('foreColor', color.value)); }
+        const linkBtn = document.getElementById('campaignInsertLinkBtn');
+        if (linkBtn && !linkBtn.dataset.bound) { linkBtn.dataset.bound='1'; linkBtn.addEventListener('mousedown', e => { e.preventDefault(); openCampaignInsertModal('link'); }); }
+        const buttonBtn = document.getElementById('campaignInsertButtonBtn');
+        if (buttonBtn && !buttonBtn.dataset.bound) { buttonBtn.dataset.bound='1'; buttonBtn.addEventListener('mousedown', e => { e.preventDefault(); openCampaignInsertModal('button'); }); }
+        const spaceBtn = document.getElementById('campaignInsertSpaceBtn');
+        if (spaceBtn && !spaceBtn.dataset.bound) { spaceBtn.dataset.bound='1'; spaceBtn.addEventListener('mousedown', e => { e.preventDefault(); runCampaignEditorCommand('insertHTML','<div style="height:20px;line-height:20px">&nbsp;</div>'); }); }
+        const close = document.getElementById('closeCampaignInsertModal');
+        if (close && !close.dataset.bound) { close.dataset.bound='1'; close.addEventListener('click', closeCampaignInsertModal); }
+        const cancel = document.getElementById('cancelCampaignInsert');
+        if (cancel && !cancel.dataset.bound) { cancel.dataset.bound='1'; cancel.addEventListener('click', closeCampaignInsertModal); }
+        const apply = document.getElementById('applyCampaignInsert');
+        if (apply && !apply.dataset.bound) { apply.dataset.bound='1'; apply.addEventListener('click', applyCampaignInsert); }
+        const insertModal = document.getElementById('campaignInsertModal');
+        if (insertModal && !insertModal.dataset.bound) { insertModal.dataset.bound='1'; insertModal.addEventListener('click', e => { if (e.target === insertModal) closeCampaignInsertModal(); }); }
+    }
+
     function bindCampaignEvents() {
         const form = document.getElementById('campaignForm');
         if (form && !form.dataset.bound) {
@@ -14356,6 +14593,7 @@ async function deleteBlogPost(
         if (modal && !modal.dataset.bound) { modal.dataset.bound='1'; modal.addEventListener('click', e => { if (e.target === modal) closeCampaignPreview(); }); }
         const search = document.getElementById('campaignSearch');
         if (search && !search.dataset.bound) { search.dataset.bound='1'; search.addEventListener('input', () => { campaignSearchQuery = search.value.trim().toLowerCase(); populateEmailCampaigns(); }); }
+        bindCampaignEditorEvents();
     }
 
     function campaignFormValues() {
@@ -14366,14 +14604,14 @@ async function deleteBlogPost(
             from_name: document.getElementById('campaignFromName')?.value?.trim() || 'ReNew You Health & Wellness',
             from_email: 'no-reply@renewyouhealthwellness.com',
             reply_to: document.getElementById('campaignReplyTo')?.value?.trim() || 'info@renewyouhealthwellness.com',
-            html_content: campaignHtmlFromContent(document.getElementById('campaignContent')?.value || '', document.getElementById('campaignPreheader')?.value || '')
+            html_content: campaignHtmlFromContent(syncCampaignEditor(), document.getElementById('campaignPreheader')?.value || '')
         };
     }
 
     async function saveEmailCampaign(event) {
         if (event) event.preventDefault();
         const values = campaignFormValues();
-        const rawContent = document.getElementById('campaignContent')?.value?.trim() || '';
+        const rawContent = syncCampaignEditor();
         if (!values.name || !values.subject || !rawContent) {
             setCampaignMessage('Campaign name, subject, and content are required.', 'error');
             return null;
@@ -14422,6 +14660,8 @@ async function deleteBlogPost(
         const badge = document.getElementById('campaignDraftBadge'); if (badge) badge.textContent='Draft';
         const send = document.getElementById('sendCampaignBtn'); if (send) send.disabled=true;
         const msg = document.getElementById('campaignFormMessage'); if (msg) msg.style.display='none';
+        const editor = document.getElementById('campaignContentEditor'); if (editor) editor.innerHTML='';
+        syncCampaignEditor();
     }
 
     function editEmailCampaign(id) {
@@ -14430,10 +14670,11 @@ async function deleteBlogPost(
         editingCampaignId = campaign.id;
         const set=(id,value)=>{const el=document.getElementById(id);if(el)el.value=value||'';};
         set('campaignName',campaign.name); set('campaignSubject',campaign.subject); set('campaignPreheader',campaign.preheader); set('campaignFromName',campaign.from_name); set('campaignReplyTo',campaign.reply_to);
-        const contentEl=document.getElementById('campaignContent'); if(contentEl){
-            let content=String(campaign.html_content||'');
+        const editor=document.getElementById('campaignContentEditor'); if(editor){
+            const content=String(campaign.html_content||'');
             const match=content.match(/<tr><td style="padding:36px 34px;line-height:1\.7;color:#554a59">([\s\S]*?)<\/td><\/tr>/i);
-            contentEl.value=match?match[1].replace(/<br\s*\/?\s*>/gi,'\n').replace(/<[^>]*>/g,'').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&'):content;
+            editor.innerHTML=match?match[1]:content;
+            syncCampaignEditor();
         }
         document.getElementById('campaignComposerTitle').textContent='Edit Campaign';
         document.getElementById('campaignDraftBadge').textContent=String(campaign.status||'draft').toUpperCase();
@@ -14474,7 +14715,7 @@ async function deleteBlogPost(
         if (!campaign) return;
         const activeCount = mailingListData.filter(item=>item.is_subscribed!==false).length;
         if (!activeCount) { setCampaignMessage('There are no active subscribers.', 'error'); return; }
-        const confirmed = await showAdminConfirmModal(`Send this campaign to ${activeCount} active subscriber${activeCount===1?'':'s'}?\n\nThis action sends real email and cannot be undone.`, 'Send Email Campaign?', 'Send Campaign', 'Cancel', 'warning');
+        const confirmed = await showAdminConfirmModal(`This campaign will send to as many eligible subscribers as today's 1,000-email daily limit allows. If the campaign has more recipients, you can continue it on a later day.\n\nEvery email automatically includes the unique unsubscribe link.`, 'Send Email Campaign?', 'Send Campaign', 'Cancel', 'warning');
         if (!confirmed) return;
         const btn=document.getElementById('sendCampaignBtn'); if(btn){btn.disabled=true;btn.textContent='Sending...';}
         try{
@@ -14482,8 +14723,15 @@ async function deleteBlogPost(
             const response=await fetch(`${SUPABASE_PROJECT_URL}/functions/v1/send-email-campaign`,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${session?.access_token||''}`,'apikey':SUPABASE_ANON_KEY},body:JSON.stringify({campaign_id:campaign.id})});
             const result=await response.json().catch(()=>({}));
             if(!response.ok) throw new Error(result.error||'Campaign send failed.');
-            setCampaignMessage(`Campaign sent: ${result.sent_count||0} delivered to Resend${result.failed_count?`, ${result.failed_count} failed`:''}.`,'success');
-            showAdminModal(`Campaign sent to ${result.sent_count||0} subscriber${Number(result.sent_count||0)===1?'':'s'}.`,'success','Campaign Sent');
+            const sentNow=Number(result.sent_count||0);
+            const remaining=Number(result.remaining_campaign_count||0);
+            const quotaRemaining=Number(result.daily_remaining_after||0);
+            const complete=Boolean(result.complete);
+            const message=complete
+                ? `Campaign complete: ${sentNow} email${sentNow===1?'':'s'} sent in this run.`
+                : `${sentNow} email${sentNow===1?'':'s'} sent in this run. ${remaining.toLocaleString()} campaign recipient${remaining===1?'':'s'} remain. Daily allowance remaining: ${quotaRemaining.toLocaleString()}.`;
+            setCampaignMessage(message,'success');
+            showAdminModal(message,'success', complete ? 'Campaign Complete' : 'Daily Send Complete');
             await Promise.all([fetchEmailCampaigns(),fetchMailingList()]);
         }catch(error){console.error(error);setCampaignMessage(error?.message||'Unable to send campaign.','error');showAdminModal(error?.message||'Unable to send campaign.','error','Campaign Failed');}
         finally{if(btn){btn.disabled=false;btn.textContent='Send to Active Subscribers';}}
