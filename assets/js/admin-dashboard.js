@@ -7852,18 +7852,20 @@ function parsePastedSubscriberEmails(text) {
         .map(email => ({ email, is_subscribed:true, source:'manual_paste' }));
 }
 
-async function importSubscriberBatch(subscribers) {
+async function importSubscriberBatch(subscribers, onProgress = null) {
     if (!Array.isArray(subscribers) || !subscribers.length) throw new Error('No valid subscriber email addresses were found.');
     let inserted = 0, updated = 0, skipped = 0;
-    for (let i = 0; i < subscribers.length; i += 250) {
+    const totalBatches = Math.ceil(subscribers.length / 250);
+    for (let i = 0, batch = 1; i < subscribers.length; i += 250, batch++) {
+        if (typeof onProgress === 'function') onProgress(batch, totalBatches, Math.min(i + 250, subscribers.length), subscribers.length);
         const result = await callManageSubscribers({ action:'import', subscribers:subscribers.slice(i, i + 250) });
         inserted += Number(result.inserted || 0);
         updated += Number(result.updated || 0);
         skipped += Number(result.skipped || 0);
     }
-    showAdminModal(`Import complete. ${inserted} added, ${updated} updated, ${skipped} skipped.`, 'success', 'Subscribers Imported');
     await fetchMailingList();
     await updateCampaignMetrics();
+    return { inserted, updated, skipped };
 }
 
 function openSubscriberImportModal() {
@@ -7873,36 +7875,93 @@ function openSubscriberImportModal() {
     overlay.id = 'subscriberImportModal';
     overlay.style.cssText = 'position:fixed;inset:0;background:rgba(24,8,34,.55);z-index:100000;display:flex;align-items:center;justify-content:center;padding:24px;';
     overlay.innerHTML = `
-        <div style="width:min(680px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:18px;box-shadow:0 24px 80px rgba(0,0,0,.25);padding:24px;">
+        <div style="width:min(680px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:18px;box-shadow:0 24px 80px rgba(0,0,0,.25);padding:24px;position:relative;">
+            <style>
+                @keyframes renewYouSubscriberSpin { to { transform: rotate(360deg); } }
+                #subscriberImportModal .subscriber-import-spinner { width:34px;height:34px;border:4px solid #eadff0;border-top-color:var(--purple-primary);border-radius:50%;animation:renewYouSubscriberSpin .8s linear infinite; }
+            </style>
             <div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:18px;">
                 <div><h3 style="margin:0 0 6px;color:var(--purple-primary);">Import Subscribers</h3><p style="margin:0;color:#666;font-size:.9rem;">Email is the only required field. First name, last name, and phone are optional.</p></div>
                 <button type="button" data-close-import style="border:0;background:#f4eef7;width:36px;height:36px;border-radius:50%;font-size:20px;cursor:pointer;">×</button>
             </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
-                <button type="button" data-import-tab="csv" style="padding:12px;border-radius:10px;border:1px solid var(--purple-primary);background:var(--purple-primary);color:#fff;font-weight:700;cursor:pointer;">Upload CSV</button>
-                <button type="button" data-import-tab="paste" style="padding:12px;border-radius:10px;border:1px solid #d8c5df;background:#fff;color:var(--purple-primary);font-weight:700;cursor:pointer;">Paste Emails</button>
-            </div>
-            <div data-import-panel="csv">
-                <div style="border:1px dashed #cdb5d6;border-radius:14px;padding:24px;text-align:center;background:#fcf9fd;">
-                    <p style="margin:0 0 8px;font-weight:700;">Choose a CSV file</p>
-                    <p style="margin:0 0 14px;color:#666;font-size:.85rem;">Required column: <strong>email</strong><br>Optional: first_name, last_name, phone</p>
-                    <input type="file" data-import-file accept=".csv,text/csv" style="max-width:100%;">
+            <div data-import-content>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+                    <button type="button" data-import-tab="csv" style="padding:12px;border-radius:10px;border:1px solid var(--purple-primary);background:var(--purple-primary);color:#fff;font-weight:700;cursor:pointer;">Upload CSV</button>
+                    <button type="button" data-import-tab="paste" style="padding:12px;border-radius:10px;border:1px solid #d8c5df;background:#fff;color:var(--purple-primary);font-weight:700;cursor:pointer;">Paste Emails</button>
                 </div>
-                <button type="button" data-upload-csv style="margin-top:16px;width:100%;padding:13px;border:0;border-radius:10px;background:var(--green-primary);color:#fff;font-weight:800;cursor:pointer;">Upload Subscribers</button>
+                <div data-import-panel="csv">
+                    <div style="border:1px dashed #cdb5d6;border-radius:14px;padding:24px;text-align:center;background:#fcf9fd;">
+                        <p style="margin:0 0 8px;font-weight:700;">Choose a CSV file</p>
+                        <p style="margin:0 0 14px;color:#666;font-size:.85rem;">Required column: <strong>email</strong><br>Optional: first_name, last_name, phone</p>
+                        <input type="file" data-import-file accept=".csv,text/csv" style="max-width:100%;">
+                    </div>
+                    <button type="button" data-upload-csv style="margin-top:16px;width:100%;padding:13px;border:0;border-radius:10px;background:var(--green-primary);color:#fff;font-weight:800;cursor:pointer;">Upload Subscribers</button>
+                </div>
+                <div data-import-panel="paste" hidden>
+                    <label style="display:block;font-weight:700;margin-bottom:8px;">Paste email addresses</label>
+                    <textarea data-paste-emails rows="12" placeholder="jane@example.com&#10;john@example.com&#10;customer@example.com" style="width:100%;box-sizing:border-box;padding:14px;border:1px solid #d9d1dd;border-radius:12px;resize:vertical;font:inherit;"></textarea>
+                    <p style="margin:8px 0 0;color:#777;font-size:.82rem;">Enter one email address per line. Duplicate and invalid addresses are ignored.</p>
+                    <button type="button" data-upload-paste style="margin-top:16px;width:100%;padding:13px;border:0;border-radius:10px;background:var(--green-primary);color:#fff;font-weight:800;cursor:pointer;">Upload Emails</button>
+                </div>
             </div>
-            <div data-import-panel="paste" hidden>
-                <label style="display:block;font-weight:700;margin-bottom:8px;">Paste email addresses</label>
-                <textarea data-paste-emails rows="12" placeholder="jane@example.com&#10;john@example.com&#10;customer@example.com" style="width:100%;box-sizing:border-box;padding:14px;border:1px solid #d9d1dd;border-radius:12px;resize:vertical;font:inherit;"></textarea>
-                <p style="margin:8px 0 0;color:#777;font-size:.82rem;">Enter one email address per line. Duplicate and invalid addresses are ignored.</p>
-                <button type="button" data-upload-paste style="margin-top:16px;width:100%;padding:13px;border:0;border-radius:10px;background:var(--green-primary);color:#fff;font-weight:800;cursor:pointer;">Upload Emails</button>
+            <div data-import-loading hidden style="padding:34px 12px 20px;text-align:center;">
+                <div class="subscriber-import-spinner" style="margin:0 auto 16px;"></div>
+                <h4 style="margin:0 0 8px;color:var(--purple-primary);font-size:1.08rem;">Uploading subscribers…</h4>
+                <p data-import-loading-text style="margin:0;color:#666;font-size:.9rem;">Please keep this page open while your email list is being imported.</p>
             </div>
         </div>`;
     document.body.appendChild(overlay);
-    const close = () => overlay.remove();
+
+    let importing = false;
+    const beforeUnloadHandler = (event) => {
+        if (!importing) return;
+        event.preventDefault();
+        event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', beforeUnloadHandler);
+
+    const cleanup = () => window.removeEventListener('beforeunload', beforeUnloadHandler);
+    const close = () => {
+        if (importing) return;
+        cleanup();
+        overlay.remove();
+    };
+    const setLoading = (active, text = '') => {
+        importing = active;
+        const content = overlay.querySelector('[data-import-content]');
+        const loading = overlay.querySelector('[data-import-loading]');
+        const closeBtn = overlay.querySelector('[data-close-import]');
+        if (content) content.hidden = active;
+        if (loading) loading.hidden = !active;
+        if (closeBtn) {
+            closeBtn.disabled = active;
+            closeBtn.style.opacity = active ? '.45' : '1';
+            closeBtn.style.cursor = active ? 'not-allowed' : 'pointer';
+        }
+        if (text) overlay.querySelector('[data-import-loading-text]').textContent = text;
+    };
+    const runImport = async (subscribers) => {
+        setLoading(true, `Preparing ${subscribers.length} subscriber${subscribers.length === 1 ? '' : 's'} for upload…`);
+        try {
+            const result = await importSubscriberBatch(subscribers, (batch, totalBatches, processed, total) => {
+                const batchCopy = totalBatches > 1 ? ` Batch ${batch} of ${totalBatches}.` : '';
+                overlay.querySelector('[data-import-loading-text]').textContent = `Uploading ${processed} of ${total} subscriber${total === 1 ? '' : 's'}.${batchCopy} Please keep this page open.`;
+            });
+            importing = false;
+            cleanup();
+            overlay.remove();
+            showAdminModal(`Import complete. ${result.inserted} added, ${result.updated} updated, ${result.skipped} skipped.`, 'success', 'Subscribers Imported');
+        } catch (error) {
+            setLoading(false);
+            showAdminModal(error?.message || 'Unable to import subscribers.', 'error', 'Import Failed');
+        }
+    };
+
     overlay.querySelector('[data-close-import]').addEventListener('click', close);
     overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
     const tabs = overlay.querySelectorAll('[data-import-tab]');
     tabs.forEach(button => button.addEventListener('click', () => {
+        if (importing) return;
         const name = button.dataset.importTab;
         overlay.querySelectorAll('[data-import-panel]').forEach(panel => panel.hidden = panel.dataset.importPanel !== name);
         tabs.forEach(tab => {
@@ -7917,8 +7976,7 @@ function openSubscriberImportModal() {
             if (!file) throw new Error('Choose a CSV file first.');
             const subscribers = parseSubscriberCsv(await file.text());
             if (!subscribers.length) throw new Error('No valid subscriber email addresses were found in the CSV.');
-            close();
-            await importSubscriberBatch(subscribers);
+            await runImport(subscribers);
         } catch (error) {
             showAdminModal(error?.message || 'Unable to import subscribers.', 'error', 'Import Failed');
         }
@@ -7927,8 +7985,7 @@ function openSubscriberImportModal() {
         try {
             const subscribers = parsePastedSubscriberEmails(overlay.querySelector('[data-paste-emails]').value);
             if (!subscribers.length) throw new Error('Enter at least one valid email address, one per line.');
-            close();
-            await importSubscriberBatch(subscribers);
+            await runImport(subscribers);
         } catch (error) {
             showAdminModal(error?.message || 'Unable to import subscribers.', 'error', 'Import Failed');
         }
