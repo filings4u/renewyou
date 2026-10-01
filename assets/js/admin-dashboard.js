@@ -3306,7 +3306,7 @@ function renderDashboardStructure() {
     <div class="campaign-layout">
         <div class="admin-card campaign-composer-card">
             <div class="workspace-section-title">
-                <div><h3 id="campaignComposerTitle">Create Campaign</h3><p>Messages are sent individually and include an unsubscribe link.</p></div>
+                <div><h3 id="campaignComposerTitle">Create Campaign</h3><p>Messages are sent individually through Resend and include an unsubscribe link.</p></div>
                 <div class="campaign-badge-row"><span class="workspace-badge campaign-limit-badge">1,000 / day</span><span id="campaignDraftBadge" class="workspace-badge">Draft</span></div>
             </div>
             <form id="campaignForm">
@@ -3355,7 +3355,7 @@ function renderDashboardStructure() {
                         <div id="campaignContentEditor" class="campaign-rich-editor" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="Write the body of your email here..."></div>
                         <textarea id="campaignContent" hidden></textarea>
                     </div>
-                    <div class="campaign-auto-footer-note"><span>✓</span><div><strong>Unsubscribe protection is automatic.</strong><small>Every recipient gets a unique unsubscribe link and a one-click unsubscribe header. You do not need to add it manually.</small></div></div>
+                    <div class="campaign-auto-footer-note"><span>✓</span><div><strong>Unsubscribe protection is automatic.</strong><small>Every recipient gets a unique unsubscribe link and Resend one-click unsubscribe headers. You do not need to add it manually.</small></div></div>
                 </div>
                 <div class="campaign-send-options">
                     <div class="campaign-field">
