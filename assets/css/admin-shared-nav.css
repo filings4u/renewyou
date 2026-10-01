@@ -1,0 +1,38 @@
+:root{--admin-nav-w:272px;--admin-nav-purple:#3e0d5f;--admin-nav-purple-dark:#2b0b40;--admin-nav-line:#eadff0}
+body.admin-shared-nav-ready{padding-left:var(--admin-nav-w)!important;transition:padding-left .22s ease}
+body.admin-shared-nav-ready.admin-nav-collapsed{padding-left:0!important}
+.admin-shared-nav{position:fixed;inset:0 auto 0 0;width:var(--admin-nav-w);z-index:9998;background:linear-gradient(180deg,#2c0b43 0%,#3e0d5f 52%,#271035 100%);color:#fff;box-shadow:10px 0 30px rgba(35,12,48,.14);transform:translateX(0);transition:transform .22s ease;display:flex;flex-direction:column;overflow:hidden}
+.admin-shared-nav::-webkit-scrollbar,.admin-shared-nav-groups::-webkit-scrollbar{display:none}
+.admin-shared-nav.is-collapsed{transform:translateX(-102%)}
+.admin-shared-nav-head{position:sticky;top:0;z-index:2;padding:18px 14px 14px;background:linear-gradient(180deg,#2c0b43 72%,rgba(44,11,67,.92));border-bottom:1px solid rgba(255,255,255,.09)}
+.admin-shared-brand{display:flex;align-items:center;gap:12px}
+.admin-shared-brand-copy strong{display:block;font-size:1rem;line-height:1.1;color:#fff}.admin-shared-brand-copy span{display:block;margin-top:4px;font-size:.58rem;font-weight:900;letter-spacing:.13em;text-transform:uppercase;color:#cbb8d4}
+.admin-nav-hide-btn,.admin-nav-show-btn,.admin-nav-mobile-btn{appearance:none!important;-webkit-appearance:none!important;border:1px solid rgba(255,255,255,.18)!important;background:rgba(255,255,255,.08)!important;color:#fff!important;box-shadow:none!important;transform:none!important;cursor:pointer!important;font:800 .68rem/1 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif!important}
+.admin-nav-hide-btn{width:100%!important;padding:10px 12px!important;border-radius:9px!important;white-space:nowrap;text-align:center!important}
+.admin-nav-hide-btn:hover{background:rgba(255,255,255,.14)!important}
+.admin-shared-nav-groups{flex:1 1 auto;min-height:0;overflow-y:auto;padding:12px 10px 14px;scrollbar-width:none;-ms-overflow-style:none}
+.admin-shared-nav-footer{flex:0 0 auto;padding:10px 12px 12px;background:#271035;border-top:1px solid rgba(255,255,255,.09)}
+.admin-shared-nav-group{margin:0 0 13px}.admin-shared-nav-group-title{padding:8px 10px 5px;color:#bca5c7;font-size:.62rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
+.admin-shared-nav .admin-page-tab{display:flex!important;align-items:center!important;gap:9px!important;width:100%!important;min-height:40px!important;padding:10px 11px!important;margin:0 0 3px!important;border:0!important;border-radius:9px!important;background:transparent!important;color:#e9deed!important;text-align:left!important;text-decoration:none!important;font:750 .78rem/1.25 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif!important;box-shadow:none!important;transform:none!important;white-space:normal!important;cursor:pointer!important}
+.admin-shared-nav .admin-page-tab:hover{background:rgba(255,255,255,.08)!important;color:#fff!important}.admin-shared-nav .admin-page-tab.active{background:#fff!important;color:#3e0d5f!important}
+.admin-nav-show-btn{position:fixed;left:14px;bottom:16px;z-index:9997;padding:10px 12px!important;border-radius:10px!important;background:#3e0d5f!important;border-color:#3e0d5f!important;box-shadow:0 8px 22px rgba(62,13,95,.2)!important;display:none!important}
+body.admin-nav-collapsed .admin-nav-show-btn{display:inline-flex!important;align-items:center!important;gap:7px!important}
+.admin-nav-mobile-btn,.admin-shared-nav-overlay{display:none!important}
+.admin-mobile-topbar{display:none!important}
+@media(max-width:850px){
+ body.admin-shared-nav-ready,body.admin-shared-nav-ready.admin-nav-collapsed{padding-left:0!important;padding-top:76px!important}
+ .admin-mobile-topbar{position:fixed;top:0;left:0;right:0;z-index:10003;height:64px;display:flex!important;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;background:#fff;border-bottom:1px solid #eadff0;box-shadow:0 6px 20px rgba(35,12,48,.08)!important}
+ .admin-mobile-brand{display:inline-flex!important;align-items:center!important;min-width:0;text-decoration:none!important}
+ .admin-mobile-brand img{display:block;max-width:min(180px,60vw);height:34px;width:auto}
+ .admin-shared-nav{width:min(84vw,300px);height:calc(100vh - 64px);inset:64px auto 0 0;transform:translateX(-105%);z-index:10001;box-shadow:14px 0 36px rgba(35,12,48,.24)}
+ .admin-shared-nav.mobile-open{transform:translateX(0)}
+ .admin-shared-nav.is-collapsed{transform:translateX(-105%)}
+ .admin-shared-nav-head{display:none!important}
+ .admin-nav-hide-btn{display:none!important}
+ .admin-nav-show-btn{display:none!important}
+ .admin-nav-mobile-btn{position:static!important;top:auto!important;left:auto!important;z-index:auto!important;width:44px!important;height:44px!important;min-width:44px!important;padding:0!important;border-radius:12px!important;background:#fff!important;color:#3e0d5f!important;border:1px solid #e7dfea!important;box-shadow:0 8px 24px rgba(35,12,48,.12)!important;display:inline-flex!important;align-items:center!important;justify-content:center!important}
+ .admin-nav-mobile-btn .bars{position:relative;display:block;width:21px;height:16px}.admin-nav-mobile-btn .bars span{position:absolute;left:0;width:100%;height:2px;border-radius:2px;background:currentColor;transition:top .2s ease,transform .2s ease,opacity .2s ease}.admin-nav-mobile-btn .bars span:nth-child(1){top:0}.admin-nav-mobile-btn .bars span:nth-child(2){top:7px}.admin-nav-mobile-btn .bars span:nth-child(3){top:14px}.admin-nav-mobile-btn[aria-expanded="true"] .bars span:nth-child(1){top:7px;transform:rotate(45deg)}.admin-nav-mobile-btn[aria-expanded="true"] .bars span:nth-child(2){opacity:0}.admin-nav-mobile-btn[aria-expanded="true"] .bars span:nth-child(3){top:7px;transform:rotate(-45deg)}
+ .admin-shared-nav-overlay{position:fixed!important;inset:64px 0 0 0!important;z-index:10000!important;background:rgba(27,8,38,.46)!important;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);opacity:0;visibility:hidden;transition:opacity .2s ease,visibility .2s ease}
+ .admin-shared-nav-overlay.active{display:block!important;opacity:1;visibility:visible}
+ body.admin-mobile-nav-open{overflow:hidden!important}
+}

@@ -2726,7 +2726,7 @@ function renderDashboardStructure() {
                2026 MANAGEMENT WORKSPACE UPGRADE
             ===================================================== */
             body { background:#f5f6fa; }
-            .dash-outer-wrap { max-width:none; margin:0; padding:0 28px 40px 308px; min-height:100vh; }
+            .dash-outer-wrap { max-width:none; margin:0; padding:0 28px 40px 28px; min-height:100vh; }
             .dash-header-row { min-height:96px; margin:0 0 24px; padding:0; border-bottom:1px solid #e8e5eb; }
             .dash-title-block h1 { font-size:clamp(1.65rem,3vw,2.25rem); letter-spacing:-.03em; }
             .admin-page-nav { position:fixed; inset:0 auto 0 0; width:272px; z-index:100; margin:0; padding:112px 16px 24px; border:0; border-radius:0; background:linear-gradient(180deg,#2c0b43 0%,#3e0d5f 52%,#271035 100%); box-shadow:12px 0 34px rgba(35,12,48,.08); display:flex; flex-direction:column; gap:6px; overflow-y:auto; }
@@ -2824,7 +2824,43 @@ function renderDashboardStructure() {
             .campaign-insert-form{padding:20px;display:grid;gap:8px}.campaign-insert-form label{font-size:.68rem;font-weight:900;text-transform:uppercase;letter-spacing:.05em;color:#54475b;margin-top:4px}.campaign-insert-form input{width:100%;box-sizing:border-box;border:1px solid #ddd6e2;border-radius:10px;padding:11px 12px;font:inherit;outline:none}.campaign-insert-form input:focus{border-color:#8a349b;box-shadow:0 0 0 3px rgba(138,52,159,.09)}
             .campaign-insert-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:10px;}
             @media(max-width:1050px){.campaign-layout{grid-template-columns:1fr}.campaign-metrics-grid{grid-template-columns:1fr 1fr}.contact-inquiry-controls{grid-template-columns:1fr}}
-            @media(max-width:850px){.dash-outer-wrap{padding:18px 12px 30px}.admin-page-nav{position:static;width:auto;padding:7px;margin-bottom:18px;border-radius:14px;background:#fff;display:flex;flex-direction:row;overflow-x:auto;box-shadow:none;border:1px solid #eee8f1}.admin-page-nav::before,.admin-page-nav::after{display:none}.admin-nav-group{display:contents}.admin-nav-group-title{display:none}.admin-page-tab{width:auto;color:#555;white-space:nowrap}.admin-page-tab:hover{background:#f7f4f9;color:#3e0d5f}.admin-page-tab.active{background:#3e0d5f;color:#fff}.dash-header-row{min-height:auto;padding:8px 0 16px}.campaign-two-col{grid-template-columns:1fr}}
+            .admin-mobile-nav-toggle,.admin-mobile-nav-overlay{display:none;}
+            @media(max-width:850px){
+                .dash-outer-wrap{padding:74px 12px 30px;}
+                .dash-header-row{min-height:auto;padding:8px 0 16px;}
+                .campaign-two-col{grid-template-columns:1fr;}
+                .admin-mobile-nav-toggle{
+                    position:fixed;top:14px;left:14px;z-index:1002;
+                    width:46px;height:46px;padding:0!important;margin:0!important;
+                    display:inline-flex;align-items:center;justify-content:center;
+                    border:1px solid #e7dfea;border-radius:12px;background:#fff;color:#3e0d5f;
+                    box-shadow:0 8px 24px rgba(35,12,48,.12);cursor:pointer;
+                }
+                .admin-mobile-nav-toggle .bars{width:21px;height:16px;position:relative;display:block;}
+                .admin-mobile-nav-toggle .bars span{position:absolute;left:0;width:100%;height:2px;border-radius:3px;background:currentColor;transition:transform .2s ease,top .2s ease,opacity .2s ease;}
+                .admin-mobile-nav-toggle .bars span:nth-child(1){top:0}.admin-mobile-nav-toggle .bars span:nth-child(2){top:7px}.admin-mobile-nav-toggle .bars span:nth-child(3){top:14px}
+                .admin-mobile-nav-toggle[aria-expanded="true"] .bars span:nth-child(1){top:7px;transform:rotate(45deg)}
+                .admin-mobile-nav-toggle[aria-expanded="true"] .bars span:nth-child(2){opacity:0}
+                .admin-mobile-nav-toggle[aria-expanded="true"] .bars span:nth-child(3){top:7px;transform:rotate(-45deg)}
+                .admin-mobile-nav-overlay{position:fixed;inset:0;z-index:999;background:rgba(27,8,38,.46);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);opacity:0;visibility:hidden;display:block;transition:opacity .2s ease,visibility .2s ease;}
+                .admin-mobile-nav-overlay.active{opacity:1;visibility:visible;}
+                .admin-page-nav{
+                    position:fixed;top:0;bottom:0;left:0;z-index:1001;width:min(82vw,300px);height:100vh;
+                    margin:0;padding:94px 16px 28px;border:0;border-radius:0;
+                    background:linear-gradient(180deg,#2c0b43 0%,#3e0d5f 52%,#271035 100%);
+                    box-shadow:12px 0 34px rgba(35,12,48,.22);display:flex;flex-direction:column;gap:6px;
+                    overflow-y:auto;transform:translateX(-105%);transition:transform .24s ease;
+                }
+                .admin-page-nav.mobile-open{transform:translateX(0);}
+                .admin-page-nav::before{display:block;content:'ReNew You';top:24px;left:76px;right:18px;font-size:1.1rem;}
+                .admin-page-nav::after{display:block;content:'MANAGEMENT WORKSPACE';top:51px;left:76px;font-size:.55rem;}
+                .admin-nav-group{display:flex;flex-direction:column;gap:4px;margin:0 0 10px;}
+                .admin-nav-group-title{display:block;padding:10px 14px 5px;color:#bca5c7;font-size:.64rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase;}
+                .admin-page-tab{width:100%;color:#e9deed;white-space:normal;text-align:left;}
+                .admin-page-tab:hover{background:rgba(255,255,255,.08);color:#fff;}
+                .admin-page-tab.active{background:#fff;color:#3e0d5f;}
+                body.admin-mobile-nav-open{overflow:hidden;}
+            }
             @media(max-width:560px){.campaign-metrics-grid{grid-template-columns:1fr 1fr}.campaign-send-options{grid-template-columns:1fr}.workspace-page-head{flex-direction:column}.workspace-page-head .workspace-btn{width:100%}.campaign-actions .workspace-btn{width:100%}}
 
         </style>
@@ -2894,44 +2930,7 @@ function renderDashboardStructure() {
             <!-- =================================================
                  PAGE NAVIGATION
             ================================================= -->
-
- <nav class="admin-page-nav">
-
-    <div class="admin-nav-group">
-        <div class="admin-nav-group-title">Overview</div>
-        <button class="admin-page-tab active" data-page="dashboardPage">📊 Dashboard</button>
-    </div>
-
-    <div class="admin-nav-group">
-        <div class="admin-nav-group-title">Patient Operations</div>
-        <button class="admin-page-tab" data-page="contactInboxPage">💬 Contact Inbox</button>
-        <button class="admin-page-tab" data-page="appointmentsPage">📋 Appointments</button>
-        <button class="admin-page-tab" data-page="schedulePage">📅 Schedule</button>
-    </div>
-
-    <div class="admin-nav-group">
-        <div class="admin-nav-group-title">Marketing &amp; Communications</div>
-        <a class="admin-page-tab admin-page-link" href="admin-subscribers.html">👥 Subscribers</a>
-        <a class="admin-page-tab admin-page-link" href="admin-campaign-editor.html">✉️ Campaign Editor</a>
-        <a class="admin-page-tab admin-page-link" href="admin-campaigns.html">🗂️ Recent Campaigns</a>
-        <a class="admin-page-tab admin-page-link" href="admin-email-status.html">📈 Email Status</a>
-        <button class="admin-page-tab" data-page="wellnessOffersPage">🎟️ Wellness Offers</button>
-        <button class="admin-page-tab" data-page="blogPage">📝 Blog</button>
-    </div>
-
-    <div class="admin-nav-group">
-        <div class="admin-nav-group-title">DOT Operations</div>
-        <button class="admin-page-tab" data-page="randomPoolPage">🎲 Random Pool</button>
-    </div>
-
-    <div class="admin-nav-group">
-        <div class="admin-nav-group-title">Administration</div>
-        <button class="admin-page-tab" data-page="settingsPage">⚙️ Settings</button>
-    </div>
-
-</nav>
-
-            <!-- =================================================
+<!-- =================================================
                  DASHBOARD PAGE
             ================================================= -->
 
@@ -4742,6 +4741,37 @@ function renderDashboardStructure() {
 
 function bindAdminPageNavigation() {
 
+    const mobileToggle = document.getElementById('adminMobileNavToggle');
+    const mobileNav = document.getElementById('adminPageNav');
+    const mobileOverlay = document.getElementById('adminMobileNavOverlay');
+
+    const closeMobileNav = () => {
+        if (!mobileNav || !mobileToggle) return;
+        mobileNav.classList.remove('mobile-open');
+        mobileToggle.setAttribute('aria-expanded', 'false');
+        mobileToggle.setAttribute('aria-label', 'Open admin navigation');
+        mobileOverlay?.classList.remove('active');
+        mobileOverlay?.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('admin-mobile-nav-open');
+    };
+
+    const openMobileNav = () => {
+        if (!mobileNav || !mobileToggle) return;
+        mobileNav.classList.add('mobile-open');
+        mobileToggle.setAttribute('aria-expanded', 'true');
+        mobileToggle.setAttribute('aria-label', 'Close admin navigation');
+        mobileOverlay?.classList.add('active');
+        mobileOverlay?.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('admin-mobile-nav-open');
+    };
+
+    mobileToggle?.addEventListener('click', () => {
+        mobileNav?.classList.contains('mobile-open') ? closeMobileNav() : openMobileNav();
+    });
+    mobileOverlay?.addEventListener('click', closeMobileNav);
+    document.addEventListener('keydown', event => { if (event.key === 'Escape') closeMobileNav(); });
+    window.addEventListener('resize', () => { if (window.innerWidth > 850) closeMobileNav(); });
+
     const pageTabs =
         document.querySelectorAll(
             '.admin-page-tab'
@@ -4757,6 +4787,8 @@ function bindAdminPageNavigation() {
         tab.addEventListener(
             'click',
             () => {
+
+                if (window.innerWidth <= 850) closeMobileNav();
 
                 const targetPage =
                     tab.getAttribute(
