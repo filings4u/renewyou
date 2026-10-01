@@ -1,0 +1,242 @@
+/* ReNew You admin control system */
+:root{
+  --admin-purple:#3e0d5f;
+  --admin-purple-hover:#53147a;
+  --admin-accent:#8a349b;
+  --admin-line:#ded6e3;
+  --admin-line-strong:#cfc4d6;
+  --admin-soft:#f8f5f9;
+  --admin-text:#2c2230;
+  --admin-muted:#746a79;
+  --admin-danger:#9f2f35;
+  --admin-danger-soft:#fff4f4;
+}
+
+/* Stop public-site button styles from leaking into admin screens. */
+.admin-page .btn,
+.admin-page a.btn,
+.admin-page button.btn,
+.admin-page .mini,
+.admin-page button.mini{
+  -webkit-appearance:none !important;
+  appearance:none !important;
+  box-sizing:border-box !important;
+  min-width:0 !important;
+  min-height:40px !important;
+  height:auto !important;
+  margin:0 !important;
+  padding:0 15px !important;
+  border:1px solid var(--admin-line) !important;
+  border-radius:8px !important;
+  background:#fff !important;
+  color:var(--admin-purple) !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:7px !important;
+  font-family:inherit !important;
+  font-size:14px !important;
+  font-style:normal !important;
+  font-weight:750 !important;
+  line-height:1 !important;
+  letter-spacing:0 !important;
+  text-transform:none !important;
+  text-decoration:none !important;
+  text-shadow:none !important;
+  white-space:nowrap !important;
+  box-shadow:0 2px 7px rgba(62,13,95,.06) !important;
+  cursor:pointer !important;
+  transform:none !important;
+  transition:border-color .16s ease,background .16s ease,color .16s ease,box-shadow .16s ease !important;
+}
+.admin-page .btn::before,.admin-page .btn::after,
+.admin-page .mini::before,.admin-page .mini::after{content:none !important;display:none !important}
+
+.admin-page .btn:hover,
+.admin-page .mini:hover{
+  background:var(--admin-soft) !important;
+  border-color:var(--admin-line-strong) !important;
+  color:var(--admin-purple) !important;
+  box-shadow:0 3px 9px rgba(62,13,95,.09) !important;
+}
+.admin-page .btn.primary,
+.admin-page .mini.primary{
+  background:var(--admin-purple) !important;
+  border-color:var(--admin-purple) !important;
+  color:#fff !important;
+  box-shadow:0 4px 10px rgba(62,13,95,.16) !important;
+}
+.admin-page .btn.primary:hover,
+.admin-page .mini.primary:hover{
+  background:var(--admin-purple-hover) !important;
+  border-color:var(--admin-purple-hover) !important;
+  color:#fff !important;
+}
+.admin-page .btn.secondary{
+  background:#fff !important;
+  border-color:var(--admin-line) !important;
+  color:var(--admin-purple) !important;
+}
+.admin-page .btn.danger,
+.admin-page .mini.danger{
+  background:#fff !important;
+  border-color:#e7c9cc !important;
+  color:var(--admin-danger) !important;
+}
+.admin-page .btn.danger:hover,
+.admin-page .mini.danger:hover{
+  background:var(--admin-danger-soft) !important;
+  border-color:#dcaeb3 !important;
+  color:#86232a !important;
+}
+.admin-page .btn:disabled,
+.admin-page .mini:disabled{
+  opacity:.48 !important;
+  cursor:not-allowed !important;
+  box-shadow:none !important;
+  transform:none !important;
+}
+.admin-page .btn:focus-visible,
+.admin-page .mini:focus-visible,
+.admin-page .admin-modal-close:focus-visible,
+.admin-page .campaign-preview-close:focus-visible,
+.admin-page .toolbar button:focus-visible{
+  outline:3px solid rgba(138,52,155,.18) !important;
+  outline-offset:2px !important;
+}
+
+/* Table actions are intentionally smaller than page-level actions. */
+.admin-page .mini{
+  min-height:34px !important;
+  padding:0 11px !important;
+  border-radius:7px !important;
+  font-size:13px !important;
+  box-shadow:none !important;
+}
+.admin-page .row-actions{display:flex !important;align-items:center !important;gap:7px !important}
+.admin-page .actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+
+/* Normal round close controls — not oversized floating circles. */
+.admin-page .admin-modal-close,
+.admin-page .campaign-preview-close,
+.admin-page [data-prompt-close],
+.admin-page [data-edit-close],
+.admin-page [data-close-import]{
+  -webkit-appearance:none !important;
+  appearance:none !important;
+  box-sizing:border-box !important;
+  width:30px !important;
+  height:30px !important;
+  min-width:30px !important;
+  min-height:30px !important;
+  max-width:30px !important;
+  max-height:30px !important;
+  margin:0 !important;
+  padding:0 !important;
+  border:1px solid var(--admin-line) !important;
+  border-radius:50% !important;
+  background:#fff !important;
+  color:var(--admin-purple) !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  flex:0 0 30px !important;
+  font-family:Arial,sans-serif !important;
+  font-size:17px !important;
+  font-weight:700 !important;
+  line-height:1 !important;
+  letter-spacing:0 !important;
+  text-indent:0 !important;
+  box-shadow:0 2px 6px rgba(62,13,95,.08) !important;
+  cursor:pointer !important;
+  transform:none !important;
+}
+.admin-page .admin-modal-close:hover,
+.admin-page .campaign-preview-close:hover,
+.admin-page [data-prompt-close]:hover,
+.admin-page [data-edit-close]:hover,
+.admin-page [data-close-import]:hover{
+  background:var(--admin-soft) !important;
+  border-color:var(--admin-line-strong) !important;
+}
+
+/* Editor toolbar has its own compact button size. */
+.admin-page .toolbar button,
+.admin-page .preview-switch button{
+  -webkit-appearance:none !important;
+  appearance:none !important;
+  min-width:34px !important;
+  min-height:34px !important;
+  height:34px !important;
+  padding:0 10px !important;
+  border:1px solid var(--admin-line) !important;
+  border-radius:7px !important;
+  background:#fff !important;
+  color:var(--admin-text) !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  font:700 13px/1 inherit !important;
+  letter-spacing:0 !important;
+  text-transform:none !important;
+  box-shadow:none !important;
+  cursor:pointer !important;
+}
+.admin-page .toolbar button:hover,
+.admin-page .preview-switch button:hover{background:var(--admin-soft) !important;border-color:var(--admin-line-strong) !important}
+.admin-page .preview-switch button.active{background:var(--admin-purple) !important;border-color:var(--admin-purple) !important;color:#fff !important}
+
+/* Form controls */
+.admin-page input:not([type="checkbox"]):not([type="radio"]):not([type="color"]),
+.admin-page select,
+.admin-page textarea{
+  box-sizing:border-box !important;
+  min-height:42px !important;
+  border:1px solid var(--admin-line) !important;
+  border-radius:8px !important;
+  background:#fff !important;
+  color:var(--admin-text) !important;
+  box-shadow:none !important;
+  outline:none !important;
+  font-family:inherit !important;
+  font-size:14px !important;
+}
+.admin-page input:not([type="checkbox"]):not([type="radio"]):not([type="color"]):focus,
+.admin-page select:focus,
+.admin-page textarea:focus{
+  border-color:var(--admin-accent) !important;
+  box-shadow:0 0 0 3px rgba(138,52,155,.10) !important;
+}
+.admin-page input[type="checkbox"],
+.admin-page input[type="radio"]{
+  -webkit-appearance:auto !important;
+  appearance:auto !important;
+  width:16px !important;
+  height:16px !important;
+  min-width:16px !important;
+  min-height:16px !important;
+  margin:0 !important;
+  padding:0 !important;
+  box-shadow:none !important;
+  accent-color:var(--admin-purple) !important;
+}
+
+/* Modals */
+.admin-page .modal-card{
+  border:1px solid var(--admin-line) !important;
+  border-radius:14px !important;
+  box-shadow:0 24px 70px rgba(32,12,40,.22) !important;
+}
+.admin-page .modal-head{
+  min-height:36px !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+  gap:16px !important;
+}
+.admin-page .modal-head h2{margin:0 !important;font-size:23px !important;line-height:1.2 !important;color:var(--admin-purple) !important}
+
+@media (max-width:700px){
+  .admin-page .btn{min-height:38px !important;padding:0 12px !important;font-size:13px !important}
+  .admin-page .actions{gap:7px}
+}

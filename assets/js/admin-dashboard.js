@@ -2735,6 +2735,9 @@ function renderDashboardStructure() {
             .admin-page-tab { width:100%; text-align:left; color:#e9deed; padding:12px 14px; border-radius:10px; font-size:.86rem; }
             .admin-page-tab:hover { background:rgba(255,255,255,.08); color:#fff; }
             .admin-page-tab.active { background:#fff; color:#3e0d5f; box-shadow:0 8px 18px rgba(15,3,21,.14); }
+            .admin-nav-group { display:flex; flex-direction:column; gap:4px; margin:0 0 10px; }
+            .admin-nav-group-title { padding:10px 14px 5px; color:#bca5c7; font-size:.64rem; font-weight:900; letter-spacing:.12em; text-transform:uppercase; }
+            .admin-page-link { display:block; text-decoration:none; box-sizing:border-box; }
             .admin-card,.setting-inner-card,.dash-control-card { border-color:#ebe7ee; box-shadow:0 10px 30px rgba(35,12,48,.04); }
             .workspace-page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:20px;}
             .workspace-page-head h2{margin:3px 0 6px;color:#2f103f;font-size:1.55rem;}
@@ -2821,7 +2824,7 @@ function renderDashboardStructure() {
             .campaign-insert-form{padding:20px;display:grid;gap:8px}.campaign-insert-form label{font-size:.68rem;font-weight:900;text-transform:uppercase;letter-spacing:.05em;color:#54475b;margin-top:4px}.campaign-insert-form input{width:100%;box-sizing:border-box;border:1px solid #ddd6e2;border-radius:10px;padding:11px 12px;font:inherit;outline:none}.campaign-insert-form input:focus{border-color:#8a349b;box-shadow:0 0 0 3px rgba(138,52,159,.09)}
             .campaign-insert-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:10px;}
             @media(max-width:1050px){.campaign-layout{grid-template-columns:1fr}.campaign-metrics-grid{grid-template-columns:1fr 1fr}.contact-inquiry-controls{grid-template-columns:1fr}}
-            @media(max-width:850px){.dash-outer-wrap{padding:18px 12px 30px}.admin-page-nav{position:static;width:auto;padding:7px;margin-bottom:18px;border-radius:14px;background:#fff;display:flex;flex-direction:row;overflow-x:auto;box-shadow:none;border:1px solid #eee8f1}.admin-page-nav::before,.admin-page-nav::after{display:none}.admin-page-tab{width:auto;color:#555}.admin-page-tab:hover{background:#f7f4f9;color:#3e0d5f}.admin-page-tab.active{background:#3e0d5f;color:#fff}.dash-header-row{min-height:auto;padding:8px 0 16px}.campaign-two-col{grid-template-columns:1fr}}
+            @media(max-width:850px){.dash-outer-wrap{padding:18px 12px 30px}.admin-page-nav{position:static;width:auto;padding:7px;margin-bottom:18px;border-radius:14px;background:#fff;display:flex;flex-direction:row;overflow-x:auto;box-shadow:none;border:1px solid #eee8f1}.admin-page-nav::before,.admin-page-nav::after{display:none}.admin-nav-group{display:contents}.admin-nav-group-title{display:none}.admin-page-tab{width:auto;color:#555;white-space:nowrap}.admin-page-tab:hover{background:#f7f4f9;color:#3e0d5f}.admin-page-tab.active{background:#3e0d5f;color:#fff}.dash-header-row{min-height:auto;padding:8px 0 16px}.campaign-two-col{grid-template-columns:1fr}}
             @media(max-width:560px){.campaign-metrics-grid{grid-template-columns:1fr 1fr}.campaign-send-options{grid-template-columns:1fr}.workspace-page-head{flex-direction:column}.workspace-page-head .workspace-btn{width:100%}.campaign-actions .workspace-btn{width:100%}}
 
         </style>
@@ -2894,82 +2897,37 @@ function renderDashboardStructure() {
 
  <nav class="admin-page-nav">
 
-    <button
-        class="admin-page-tab active"
-        data-page="dashboardPage"
-    >
-        📊 Dashboard
-    </button>
+    <div class="admin-nav-group">
+        <div class="admin-nav-group-title">Overview</div>
+        <button class="admin-page-tab active" data-page="dashboardPage">📊 Dashboard</button>
+    </div>
 
-    <button
-        class="admin-page-tab"
-        data-page="contactInboxPage"
-    >
-        💬 Contact Inbox
-    </button>
+    <div class="admin-nav-group">
+        <div class="admin-nav-group-title">Patient Operations</div>
+        <button class="admin-page-tab" data-page="contactInboxPage">💬 Contact Inbox</button>
+        <button class="admin-page-tab" data-page="appointmentsPage">📋 Appointments</button>
+        <button class="admin-page-tab" data-page="schedulePage">📅 Schedule</button>
+    </div>
 
+    <div class="admin-nav-group">
+        <div class="admin-nav-group-title">Marketing &amp; Communications</div>
+        <a class="admin-page-tab admin-page-link" href="admin-subscribers.html">👥 Subscribers</a>
+        <a class="admin-page-tab admin-page-link" href="admin-campaign-editor.html">✉️ Campaign Editor</a>
+        <a class="admin-page-tab admin-page-link" href="admin-campaigns.html">🗂️ Recent Campaigns</a>
+        <a class="admin-page-tab admin-page-link" href="admin-email-status.html">📈 Email Status</a>
+        <button class="admin-page-tab" data-page="wellnessOffersPage">🎟️ Wellness Offers</button>
+        <button class="admin-page-tab" data-page="blogPage">📝 Blog</button>
+    </div>
 
-    <button
-        class="admin-page-tab"
-        data-page="appointmentsPage"
-    >
-        📋 Appointments
-    </button>
+    <div class="admin-nav-group">
+        <div class="admin-nav-group-title">DOT Operations</div>
+        <button class="admin-page-tab" data-page="randomPoolPage">🎲 Random Pool</button>
+    </div>
 
-
-    <button
-        class="admin-page-tab"
-        data-page="mailingListPage"
-    >
-        👥 Subscribers
-    </button>
-
-    <button
-        class="admin-page-tab"
-        data-page="campaignsPage"
-    >
-        ✉️ Email Campaigns
-    </button>
-
-
-    <button
-        class="admin-page-tab"
-        data-page="wellnessOffersPage"
-    >
-        🎟️ Wellness Offers
-    </button>
-
-
-    <button
-        class="admin-page-tab"
-        data-page="blogPage"
-    >
-        📝 Blog
-    </button>
-
-
-    <button
-        class="admin-page-tab"
-        data-page="randomPoolPage"
-    >
-        🎲 Random Pool
-    </button>
-
-
-    <button
-        class="admin-page-tab"
-        data-page="schedulePage"
-    >
-        📅 Schedule
-    </button>
-
-
-    <button
-        class="admin-page-tab"
-        data-page="settingsPage"
-    >
-        ⚙️ Settings
-    </button>
+    <div class="admin-nav-group">
+        <div class="admin-nav-group-title">Administration</div>
+        <button class="admin-page-tab" data-page="settingsPage">⚙️ Settings</button>
+    </div>
 
 </nav>
 
@@ -3348,7 +3306,7 @@ function renderDashboardStructure() {
     <div class="campaign-layout">
         <div class="admin-card campaign-composer-card">
             <div class="workspace-section-title">
-                <div><h3 id="campaignComposerTitle">Create Campaign</h3><p>Messages are sent individually through Resend and include an unsubscribe link.</p></div>
+                <div><h3 id="campaignComposerTitle">Create Campaign</h3><p>Messages are sent individually and include an unsubscribe link.</p></div>
                 <div class="campaign-badge-row"><span class="workspace-badge campaign-limit-badge">1,000 / day</span><span id="campaignDraftBadge" class="workspace-badge">Draft</span></div>
             </div>
             <form id="campaignForm">
@@ -3397,7 +3355,7 @@ function renderDashboardStructure() {
                         <div id="campaignContentEditor" class="campaign-rich-editor" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="Write the body of your email here..."></div>
                         <textarea id="campaignContent" hidden></textarea>
                     </div>
-                    <div class="campaign-auto-footer-note"><span>✓</span><div><strong>Unsubscribe protection is automatic.</strong><small>Every recipient gets a unique unsubscribe link and Resend one-click unsubscribe headers. You do not need to add it manually.</small></div></div>
+                    <div class="campaign-auto-footer-note"><span>✓</span><div><strong>Unsubscribe protection is automatic.</strong><small>Every recipient gets a unique unsubscribe link and a one-click unsubscribe header. You do not need to add it manually.</small></div></div>
                 </div>
                 <div class="campaign-send-options">
                     <div class="campaign-field">
@@ -14833,3 +14791,17 @@ async function deleteBlogPost(
     }
 
 });
+
+/* Hide management sidebar scrollbar while preserving wheel/touch scrolling. */
+(function(){
+  const id='renewyou-hide-admin-scrollbar';
+  if(document.getElementById(id)) return;
+  const style=document.createElement('style');
+  style.id=id;
+  style.textContent=`
+    .admin-page-nav{scrollbar-width:none!important;-ms-overflow-style:none!important;}
+    .admin-page-nav::-webkit-scrollbar{width:0!important;height:0!important;display:none!important;background:transparent!important;}
+    .admin-page-nav::-webkit-scrollbar-track,.admin-page-nav::-webkit-scrollbar-thumb{background:transparent!important;border:0!important;}
+  `;
+  document.head.appendChild(style);
+})();
