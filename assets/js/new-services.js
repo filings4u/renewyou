@@ -16,6 +16,22 @@ function renderMedicalCatalog() {
 // Catalog source array capturing all items directly from the provided print brochure
 const catalogData = [ 
   { 
+    id: "glp-1-weight-loss", 
+    badge: "Medical Weight Loss", 
+    title: "GLP-1 Weight Loss", 
+    accentColor: "var(--green-secondary)", 
+    learnMoreLink: "glp-1.html", 
+    summary: "Provider-guided GLP-1 weight management with clinical evaluation, personalized treatment planning, and ongoing monitoring when medically appropriate.", 
+    items: [ 
+      "GLP-1 Eligibility Evaluation", 
+      "Personalized Weight-Loss Treatment Plan", 
+      "Medication Management <span style='font-size: 0.82rem; color: #777; font-style: italic; font-weight: 500;'>(when clinically appropriate)</span>", 
+      "Progress & Side-Effect Monitoring", 
+      "Nutrition & Lifestyle Support", 
+      "Ongoing Provider Follow-Ups" 
+    ] 
+  }, 
+  { 
     id: "weight-management", 
     badge: "Lifestyle Architecture", 
     title: "Weight Management", 
@@ -24,27 +40,12 @@ const catalogData = [
     summary: "Comprehensive, provider-supervised structures to rebuild metabolic performance and establish sustainable wellness results.", 
     items: [ 
       "Medical Weight Loss Programs", 
+      "GLP-1 Medication Management <span style='font-size: 0.82rem; color: #777; font-style: italic; font-weight: 500;'>(when clinically appropriate)</span>", 
       "Personalized Nutrition Guidance", 
       "Metabolic Health Assessments", 
       "Lifestyle Coaching", 
       "Monthly Follow-Ups" 
     ] 
-  },
-  {
-    id: "glp-1",
-    badge: "Medication Management",
-    title: "GLP-1 Care",
-    accentColor: "var(--green-secondary)",
-    learnMoreLink: "glp-1.html",
-    summary: "Dedicated clinician-guided GLP-1 medication evaluation, eligibility screening, follow-up monitoring, and treatment support for appropriate patients.",
-    items: [
-      "GLP-1 Medication Consultation",
-      "Medical Eligibility Screening",
-      "Medication Education",
-      "Follow-Up Monitoring",
-      "Dose & Tolerance Review",
-      "Ongoing Provider Support"
-    ]
   }, 
   { 
     id: "iv-therapy", 

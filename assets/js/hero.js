@@ -58,16 +58,6 @@ function renderDynamicHero() {
       alt: "Medical and wellness services at ReNew You Health & Wellness in Chicago Heights",
       showButtons: false
     },
-
-    "glp-1": {
-      badge: "Clinician-Guided Medication Care",
-      headline: "GLP-1 Medication Management<br>in Chicago Heights",
-      subheadline: "Explore provider-guided GLP-1 medication care with individualized screening, treatment planning, follow-up monitoring, and ongoing support for eligible patients.",
-      image: "images/weight loss.png",
-      alt: "Provider-guided GLP-1 medication consultation at ReNew You Health & Wellness",
-      showButtons: true,
-      customCta: "glp"
-    },
     "weight-management": {
       badge: "Lifestyle Architecture",
       headline: "Medical Weight Management<br>in Chicago Heights",
@@ -157,11 +147,7 @@ if (page === 'index') {
     let isScrollAnchor = false; 
 
     // All medical page routes are unified to point directly to the bottom booking block anchor 
-    if (activeData.customCta === 'glp') {
-        targetCtaRoute = "#consultation";
-        targetCtaLabel = "Schedule GLP-1 Consultation";
-        isScrollAnchor = true;
-    } else if (activeData.customCta === 'weight') { 
+    if (activeData.customCta === 'weight') { 
         targetCtaRoute = "#consultation"; 
         targetCtaLabel = "Schedule Initial Visit"; 
         isScrollAnchor = true; 
