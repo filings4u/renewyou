@@ -16,7 +16,27 @@ async function save(){if(!$('campaignName').value.trim()||!$('subject').value.tr
 async function goSend(){const c=await save();if(c)location.href=`send-campaign.html?id=${encodeURIComponent(c.id)}`}
 async function goPreview(){const c=await save();if(c)location.href=`campaign-preview.html?id=${encodeURIComponent(c.id)}`}
 $('campaignForm')?.addEventListener('submit',e=>{e.preventDefault();save()});$('sendBtn')?.addEventListener('click',goSend);$('previewBtn')?.addEventListener('click',e=>{e.preventDefault();goPreview()});
-$('editor').addEventListener('keyup',saveRange);$('editor').addEventListener('mouseup',saveRange);$('editor').addEventListener('focus',saveRange);$('editor').addEventListener('paste',()=>setTimeout(normalizeEditorWidth,0));document.querySelectorAll('[data-cmd]').forEach(b=>b.addEventListener('mousedown',e=>{e.preventDefault();command(b.dataset.cmd,b.dataset.value||null)}));$('format').addEventListener('change',()=>command('formatBlock',$('format').value));$('font').addEventListener('change',()=>command('fontName',$('font').value));$('colorBtn').addEventListener('click',()=>{saveRange();$('colorPicker').click()});$('colorPicker').addEventListener('input',()=>{$('colorSwatch').style.background=$('colorPicker').value;command('foreColor',$('colorPicker').value)});
+$('editor').addEventListener('keyup',saveRange);$('editor').addEventListener('mouseup',saveRange);$('editor').addEventListener('focus',saveRange);$('editor').addEventListener('paste',()=>setTimeout(normalizeEditorWidth,0));
+// Keep the editor selection even when a toolbar control receives focus.
+document.addEventListener('selectionchange',()=>{const s=getSelection();if(s&&s.rangeCount&&$('editor').contains(s.anchorNode))savedRange=s.getRangeAt(0).cloneRange()});
+
+document.querySelectorAll('[data-cmd]').forEach(b=>b.addEventListener('mousedown',e=>{
+  e.preventDefault();
+  const cmd=b.dataset.cmd;
+  if(cmd==='removeFormat'){
+    restore();
+    document.execCommand('removeFormat',false,null);
+    document.execCommand('unlink',false,null);
+    $('editor').focus();
+    saveRange();
+    return;
+  }
+  command(cmd,b.dataset.value||null);
+}));
+$('format').addEventListener('change',()=>command('formatBlock',$('format').value));$('font').addEventListener('change',()=>command('fontName',$('font').value));
+// Open the native color picker without allowing the button click to destroy the text selection.
+$('colorBtn').addEventListener('mousedown',e=>{e.preventDefault();saveRange();$('colorPicker').click()});
+$('colorPicker').addEventListener('input',()=>{const color=$('colorPicker').value;$('colorSwatch').style.background=color;restore();document.execCommand('styleWithCSS',false,true);document.execCommand('foreColor',false,color);document.execCommand('styleWithCSS',false,false);$('editor').focus();saveRange()});
 $('linkBtn').addEventListener('click',async()=>{saveRange();const u=await window.AdminPopup.prompt({title:'Add Link',message:'Enter the web address for the selected text.',label:'Link URL',placeholder:'https://'});if(u)command('createLink',u)});
 $('buttonBtn').addEventListener('click',async()=>{saveRange();const text=await window.AdminPopup.prompt({title:'Add Email Button',message:'Choose the text recipients will see on the button.',label:'Button text',value:'Learn More'});if(!text)return;const u=await window.AdminPopup.prompt({title:'Button Destination',message:'Enter the page the button should open.',label:'Button URL',value:'https://'});if(!u)return;command('insertHTML',`<p style="text-align:center;margin:26px 0;width:100%"><a href="${esc(u)}" style="display:inline-block;background:#3E0D5F;color:#fff;text-decoration:none;padding:13px 22px;border-radius:10px;font-weight:700">${esc(text)}</a></p>`)});
 auth().then(loadExisting).catch(e=>note(e.message,'error'));
