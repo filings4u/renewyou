@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Email Status | ReNew You Health & Wellness</title>
+<meta name="robots" content="noindex,nofollow,noarchive">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="icon" type="image/png" href="images/fav.png">
+
+<link rel="stylesheet" href="css/admin-shared-nav.css">
+<link rel="stylesheet" href="css/admin-base.css">
+<link rel="stylesheet" href="css/email-status.css">
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><div><div style="font-size:11px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#8a349b">Communications</div><h1>Email Status</h1><p>Track every campaign email sent through Resend, including opens and bounces.</p></div><div class="actions"><a class="btn secondary" href="index.html">← Admin Dashboard</a><button id="syncBtn" class="btn primary">Sync Resend Status</button></div></div>
+  
+  <div class="metrics"><div class="metric"><span>Sent</span><strong id="mSent">0</strong></div><div class="metric"><span>Delivered</span><strong id="mDelivered">0</strong></div><div class="metric"><span>Opened</span><strong id="mOpened">0</strong></div><div class="metric"><span>Bounced</span><strong id="mBounced">0</strong></div><div class="metric"><span>Failed</span><strong id="mFailed">0</strong></div></div>
+  <div class="card"><div class="filters"><input id="search" type="search" placeholder="Search email or campaign"><select id="campaignFilter"><option value="">All campaigns</option></select><select id="statusFilter"><option value="">All statuses</option><option value="sent">Sent</option><option value="delivered">Delivered</option><option value="opened">Opened</option><option value="bounced">Bounced</option><option value="failed">Failed</option><option value="complained">Complained</option></select><button id="refreshBtn" class="btn secondary">Refresh</button></div><div class="tablewrap"><table><thead><tr><th>Email</th><th>Campaign</th><th>Status</th><th>Sent</th><th>Delivered</th><th>Opened</th><th>Bounced</th><th>Provider</th></tr></thead><tbody id="rows"><tr><td colspan="8" class="empty">Loading email activity...</td></tr></tbody></table></div><div class="pager"><span id="rowCount">0 records</span><div class="actions"><button id="prevBtn" class="btn secondary">Previous</button><button id="nextBtn" class="btn secondary">Next</button></div></div></div>
+</div>
+<script src="js/admin-popups.js"></script><script src="js/admin-email-status.js"></script>
+<script src="js/admin-shared-nav.js"></script>
+</body></html>

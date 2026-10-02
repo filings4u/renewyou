@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Subscribers | ReNew You Health & Wellness</title>
+<meta name="robots" content="noindex,nofollow,noarchive">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><link rel="stylesheet" href="css/admin-ui-polish.css">
+<link rel="icon" type="image/png" href="images/fav.png">
+
+<link rel="stylesheet" href="css/admin-shared-nav.css">
+<link rel="stylesheet" href="css/admin-base.css">
+<link rel="stylesheet" href="css/subscribers.css">
+</head>
+<body class="admin-page">
+<div class="wrap">
+  <div class="top"><div><div style="font-size:11px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#8a349b">Marketing & Communications</div><h1>Subscribers</h1><p>View, edit, unsubscribe, suppress, and remove mailing-list contacts.</p></div><div class="actions"><a class="btn secondary" href="index.html">← Admin Dashboard</a><a class="btn secondary" href="email-status.html">Email Status</a><button id="deleteBouncedBtn" class="btn danger">Delete Bounced</button></div></div>
+  
+  <div class="metrics"><div class="metric"><span>Total</span><strong id="mTotal">0</strong></div><div class="metric"><span>Active</span><strong id="mActive">0</strong></div><div class="metric"><span>Unsubscribed</span><strong id="mUnsub">0</strong></div><div class="metric"><span>Bounced</span><strong id="mBounced">0</strong></div><div class="metric"><span>Complaints</span><strong id="mComplained">0</strong></div></div>
+  <div class="card">
+    <div class="filters"><input id="search" type="search" placeholder="Search name, email, or phone"><select id="filter"><option value="all">All subscribers</option><option value="active">Active</option><option value="unsubscribed">Unsubscribed</option><option value="bounced">Bounced</option><option value="complained">Complaints</option><option value="suppressed">Suppressed</option></select><button id="refreshBtn" class="btn secondary">Refresh</button><button id="deleteSelectedBtn" class="btn danger" disabled>Delete Selected</button></div>
+    <div id="bulkbar" class="bulkbar"><strong id="selectedCount">0 selected</strong><span>Deleting subscribers keeps their email suppressed so they are not re-added to campaigns automatically.</span></div>
+    <div class="tablewrap"><table><thead><tr><th><input id="selectPage" class="check" type="checkbox" aria-label="Select page"></th><th>Subscriber</th><th>Phone</th><th>Subscription</th><th>Email status</th><th>Source</th><th>Added</th><th>Actions</th></tr></thead><tbody id="rows"><tr><td colspan="8" class="empty">Loading subscribers...</td></tr></tbody></table></div>
+    <div class="pager"><span id="rowCount">0 subscribers</span><div class="actions"><button id="prevBtn" class="btn secondary">Previous</button><span id="pageLabel" style="padding:11px 4px;color:#6f6474"></span><button id="nextBtn" class="btn secondary">Next</button></div></div>
+  </div>
+</div>
+<div id="editModal" class="modal"><div class="modal-card"><div class="modal-head"><h2>Edit Subscriber</h2><button class="admin-modal-close" data-close aria-label="Close">&times;</button></div><form id="editForm"><input type="hidden" name="id"><div class="form-grid"><label>First name<input name="first_name"></label><label>Last name<input name="last_name"></label><label class="full">Email<input name="email" type="email" required></label><label class="full">Phone<input name="phone"></label><label class="full">Subscription<select name="is_subscribed"><option value="true">Subscribed</option><option value="false">Unsubscribed / Suppressed</option></select></label></div><div class="actions" style="justify-content:flex-end;margin-top:16px"><button type="button" class="btn secondary" data-close>Cancel</button><button class="btn primary" type="submit">Save Changes</button></div></form></div></div>
+<div id="deleteModal" class="modal"><div class="modal-card"><div class="modal-head"><h2>Delete Subscriber</h2><button class="admin-modal-close" data-delete-close aria-label="Close">&times;</button></div><div class="confirm">Delete <strong id="deleteName"></strong>?<div class="danger-note">The subscriber record will be removed, but the email address will remain suppressed so it is not accidentally mailed again.</div></div><div class="actions" style="justify-content:flex-end;margin-top:16px"><button class="btn secondary" data-delete-close>Cancel</button><button id="confirmDelete" class="btn danger">Delete Subscriber</button></div></div></div>
+<script src="js/admin-popups.js"></script><script src="js/admin-subscribers.js"></script>
+<script src="js/admin-shared-nav.js"></script>
+</body></html>
