@@ -20,7 +20,7 @@
     if(document.getElementById('sharedAdminNav')) return;
     document.body.classList.add('admin-shared-nav-ready');
     const nav=document.createElement('aside'); nav.id='sharedAdminNav'; nav.className='admin-shared-nav'; nav.setAttribute('aria-label','Admin navigation');
-    nav.innerHTML=`<div class="admin-shared-nav-head"><div class="admin-shared-brand"><div class="admin-shared-brand-copy"><strong>ReNew You</strong><span>Management Workspace</span></div></div></div><div class="admin-shared-nav-groups">${navItems.map(([group,items])=>`<div class="admin-shared-nav-group"><div class="admin-shared-nav-group-title">${group}</div>${items.map(([icon,label,href,dataPage])=>`<a class="admin-page-tab${isActive(href,dataPage,label)?' active':''}" href="${href}"${dataPage?` data-page="${dataPage}"`:''}>${icon} <span>${label}</span></a>`).join('')}</div>`).join('')}</div><div class="admin-shared-nav-footer"><button class="admin-nav-hide-btn" id="adminNavHide" type="button">Hide navigation</button></div>`;
+    nav.innerHTML=`<div class="admin-shared-nav-head"><div class="admin-shared-brand"><div class="admin-shared-brand-copy"><strong>ReNew You</strong><span>Management Workspace</span></div></div></div><div class="admin-shared-nav-groups">${navItems.map(([group,items])=>`<div class="admin-shared-nav-group"><div class="admin-shared-nav-group-title">${group}</div>${items.map(([icon,label,href,dataPage])=>`<a class="admin-page-tab${isActive(href,dataPage,label)?' active':''}" href="${href}"${dataPage?` data-page="${dataPage}"`:''}>${icon} <span>${label}</span></a>`).join('')}</div>`).join('')}</div><div class="admin-shared-nav-footer"><button class="admin-nav-signout" id="adminNavSignOut" type="button">Sign Out</button><button class="admin-nav-hide-btn" id="adminNavHide" type="button">Hide navigation</button></div>`;
     const show=document.createElement('button'); show.id='adminNavShow'; show.className='admin-nav-show-btn'; show.type='button'; show.innerHTML='☰ <span>Show navigation</span>';
     const mobile=document.createElement('button'); mobile.id='sharedAdminMobileToggle'; mobile.className='admin-nav-mobile-btn'; mobile.type='button'; mobile.setAttribute('aria-label','Open admin navigation'); mobile.setAttribute('aria-expanded','false'); mobile.innerHTML='<span class="bars" aria-hidden="true"><span></span><span></span><span></span></span>';
     const mobileBar=document.createElement('div'); mobileBar.className='admin-mobile-topbar'; mobileBar.innerHTML='<a class="admin-mobile-brand" href="admin-dashboard.html"><img src="images/logof.png" alt="ReNew You Health & Wellness"></a>';
@@ -35,6 +35,18 @@
     function openMobile(){nav.classList.remove('is-collapsed');nav.classList.add('mobile-open');mobile.setAttribute('aria-expanded','true');mobile.setAttribute('aria-label','Close admin navigation');overlay.classList.add('active');overlay.setAttribute('aria-hidden','false');document.body.classList.add('admin-mobile-nav-open')}
     setCollapsed(collapsed && innerWidth>850);
     document.getElementById('adminNavHide')?.addEventListener('click',()=>setCollapsed(true));
+    document.getElementById('adminNavSignOut')?.addEventListener('click',()=>{
+      const logout=document.getElementById('logoutBtn');
+      if(logout){ closeMobile(); logout.click(); return; }
+      location.href='admin-dashboard.html';
+    });
+    const syncAuthScreen=()=>{
+      const auth=document.body.classList.contains('admin-auth-screen');
+      if(auth) closeMobile();
+      nav.setAttribute('aria-hidden',auth?'true':'false');
+    };
+    new MutationObserver(syncAuthScreen).observe(document.body,{attributes:true,attributeFilter:['class']});
+    syncAuthScreen();
     show.addEventListener('click',()=>setCollapsed(false));
     mobile.addEventListener('click',()=>nav.classList.contains('mobile-open')?closeMobile():openMobile());
     overlay.addEventListener('click',closeMobile); document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMobile()});

@@ -1188,206 +1188,189 @@ async function checkAuthenticationGuard() {
 
     function renderSecureLoginForm() {
 
-        target.innerHTML = `
-            <div style="
-                display:flex;
-                align-items:center;
-                justify-content:center;
-                min-height:100vh;
-                padding:15px;
-                box-sizing:border-box;
-                background:#fafafa;
-            ">
+        document.body.classList.add('admin-auth-screen');
 
-                <div style="
+        target.innerHTML = `
+            <style>
+                .admin-auth-shell{
+                    min-height:100svh;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    padding:20px 16px;
+                    box-sizing:border-box;
+                    background:#fafafa;
+                }
+                .admin-auth-card{
+                    width:100%;
+                    max-width:420px;
                     background:#ffffff;
                     border:1px solid rgba(138,52,159,0.1);
                     border-radius:20px;
                     padding:clamp(20px,5vw,40px);
-                    width:100%;
-                    max-width:420px;
                     box-shadow:0 15px 40px rgba(62,13,95,0.04);
                     box-sizing:border-box;
-                ">
-
-                    <div style="
-                        text-align:center;
-                        margin-bottom:25px;
-                    ">
-
-                        <div style="
-                            display:inline-block;
-                            margin-bottom:15px;
-                        ">
-
+                }
+                .admin-auth-header{
+                    text-align:center;
+                    margin-bottom:25px;
+                }
+                .admin-auth-logo-wrap{
+                    display:inline-block;
+                    margin-bottom:15px;
+                }
+                .admin-auth-title{
+                    color:var(--purple-primary);
+                    margin:0 0 8px 0;
+                    font-weight:800;
+                    font-size:clamp(1.3rem,4vw,1.6rem);
+                }
+                .admin-auth-subtitle{
+                    color:#666;
+                    font-size:0.9rem;
+                    margin:0;
+                }
+                .admin-auth-label{
+                    display:block;
+                    font-size:0.8rem;
+                    font-weight:700;
+                    text-transform:uppercase;
+                    margin-bottom:6px;
+                    color:#444;
+                }
+                .admin-auth-field{
+                    width:100%;
+                    padding:12px 16px;
+                    border:1px solid #ddd;
+                    border-radius:10px;
+                    font-size:1rem;
+                    box-sizing:border-box;
+                }
+                .admin-auth-field-wrap{position:relative;}
+                .admin-password-toggle{
+                    position:absolute;
+                    right:8px;
+                    top:50%;
+                    transform:translateY(-50%);
+                    width:32px;
+                    height:32px;
+                    border:0;
+                    background:#f6f3f8;
+                    color:#6a5673;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    cursor:pointer;
+                    padding:0;
+                    border-radius:8px;
+                }
+                .admin-password-toggle:hover{background:#efe9f4;}
+                .admin-password-toggle svg{width:17px;height:17px;}
+                .admin-auth-actions{
+                    display:flex;
+                    align-items:stretch;
+                    gap:10px;
+                    margin-top:4px;
+                }
+                .admin-auth-primary,
+                .admin-auth-secondary{
+                    min-height:46px;
+                    border-radius:12px;
+                    font-weight:700;
+                    font-size:0.95rem;
+                    cursor:pointer;
+                }
+                .admin-auth-primary{
+                    flex:1.3;
+                    background:var(--purple-primary);
+                    color:#fff;
+                    padding:14px 16px;
+                    border:none;
+                }
+                .admin-auth-secondary{
+                    flex:1;
+                    background:#fff;
+                    border:1px solid rgba(138,52,159,0.18);
+                    color:var(--purple-accent);
+                    padding:12px 14px;
+                    box-shadow:0 8px 20px rgba(62,13,95,0.06);
+                }
+                .admin-auth-error{
+                    color:#d90429;
+                    font-size:0.85rem;
+                    font-weight:600;
+                    text-align:center;
+                    margin:15px 0 0 0;
+                    display:none;
+                }
+                @media (max-width:700px){
+                    .admin-auth-shell{
+                        align-items:flex-start;
+                        justify-content:flex-start;
+                        padding:14px 14px 10px;
+                    }
+                    .admin-auth-card{
+                        margin:0 auto;
+                        border-radius:18px;
+                        padding:18px 16px 20px;
+                    }
+                    .admin-auth-header{margin-bottom:18px;}
+                    .admin-auth-logo-wrap{margin-bottom:10px;}
+                    .admin-auth-title{font-size:clamp(1.15rem, 6vw, 1.45rem);}
+                    .admin-auth-subtitle{font-size:0.88rem;}
+                    .admin-auth-actions{gap:8px;}
+                    .admin-auth-primary,
+                    .admin-auth-secondary{
+                        min-height:44px;
+                        font-size:0.9rem;
+                    }
+                    .admin-auth-secondary{padding:10px 12px;}
+                }
+            </style>
+            <div class="admin-auth-shell">
+                <div class="admin-auth-card">
+                    <div class="admin-auth-header">
+                        <div class="admin-auth-logo-wrap">
                             <img
                                 src="images/logo2.png"
                                 alt="ReNew You Health & Wellness Logo"
-                                style="
-                                    max-width:160px;
-                                    height:auto;
-                                    display:block;
-                                    object-fit:contain;
-                                    margin:0 auto;
-                                "
-                                onerror="
-                                    this.style.display='none';
-                                    this.nextElementSibling.style.display='flex';
-                                "
+                                style="max-width:160px;height:auto;display:block;object-fit:contain;margin:0 auto;"
+                                onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
                             />
-
-                            <div style="
-                                display:none;
-                                width:54px;
-                                height:54px;
-                                background:rgba(138,52,159,0.04);
-                                color:var(--purple-primary);
-                                border-radius:14px;
-                                align-items:center;
-                                justify-content:center;
-                                font-size:1.6rem;
-                                margin:0 auto;
-                            ">
-                                🏥
-                            </div>
-
+                            <div style="display:none;width:54px;height:54px;background:rgba(138,52,159,0.04);color:var(--purple-primary);border-radius:14px;align-items:center;justify-content:center;font-size:1.6rem;margin:0 auto;">🏥</div>
                         </div>
-
-                        <h2 style="
-                            color:var(--purple-primary);
-                            margin:0 0 8px 0;
-                            font-weight:800;
-                            font-size:clamp(1.3rem,4vw,1.6rem);
-                        ">
-                            Staff Console Sign-In
-                        </h2>
-
-                        <p style="
-                            color:#666;
-                            font-size:0.9rem;
-                            margin:0;
-                        ">
-                            Authorized clinic personnel authentication gateway.
-                        </p>
-
+                        <h2 class="admin-auth-title">Staff Console Sign-In</h2>
+                        <p class="admin-auth-subtitle">Authorized clinic personnel authentication gateway.</p>
                     </div>
-
                     <form id="clinicLoginForm">
-
                         <div style="margin-bottom:16px;">
-
-                            <label style="
-                                display:block;
-                                font-size:0.8rem;
-                                font-weight:700;
-                                text-transform:uppercase;
-                                margin-bottom:6px;
-                                color:#444;
-                            ">
-                                Clinic Email
-                            </label>
-
-                            <input
-                                type="email"
-                                id="loginEmail"
-                                required
-                                style="
-                                    width:100%;
-                                    padding:12px 16px;
-                                    border:1px solid #ddd;
-                                    border-radius:10px;
-                                    font-size:1rem;
-                                    box-sizing:border-box;
-                                "
-                                placeholder="admin@renewyou.com"
-                            />
-
+                            <label class="admin-auth-label">Clinic Email</label>
+                            <input type="email" id="loginEmail" required class="admin-auth-field" placeholder="admin@renewyou.com" />
                         </div>
-
-                        <div style="margin-bottom:20px;">
-
-                            <label style="
-                                display:block;
-                                font-size:0.8rem;
-                                font-weight:700;
-                                text-transform:uppercase;
-                                margin-bottom:6px;
-                                color:#444;
-                            ">
-                                Account Password
-                            </label>
-
-                            <input
-                                type="password"
-                                id="loginPassword"
-                                required
-                                style="
-                                    width:100%;
-                                    padding:12px 16px;
-                                    border:1px solid #ddd;
-                                    border-radius:10px;
-                                    font-size:1rem;
-                                    box-sizing:border-box;
-                                "
-                                placeholder="••••••••"
-                            />
-
+                        <div style="margin-bottom:18px;">
+                            <label class="admin-auth-label">Account Password</label>
+                            <div class="admin-auth-field-wrap">
+                                <input type="password" id="loginPassword" required class="admin-auth-field" style="padding-right:48px;" placeholder="••••••••" />
+                                <button
+                                    type="button"
+                                    class="admin-password-toggle"
+                                    data-password-target="loginPassword"
+                                    aria-label="Show password"
+                                    title="Show password"
+                                >
+                                    <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                </button>
+                            </div>
                         </div>
-
-                        <button
-                            type="submit"
-                            id="loginSubmitBtn"
-                            style="
-                                width:100%;
-                                background:var(--purple-primary);
-                                color:#fff;
-                                padding:14px;
-                                border:none;
-                                border-radius:10px;
-                                font-weight:700;
-                                font-size:0.95rem;
-                                cursor:pointer;
-                            "
-                        >
-                            Sign In to Registry
-                        </button>
-
-                        <div style="text-align:center;margin-top:14px;">
-                            <button
-                                type="button"
-                                id="forgotPasswordBtn"
-                                style="
-                                    background:none;
-                                    border:none;
-                                    color:var(--purple-accent);
-                                    font-weight:700;
-                                    cursor:pointer;
-                                    padding:6px 10px;
-                                "
-                            >
-                                Forgot password?
-                            </button>
+                        <div class="admin-auth-actions">
+                            <button type="submit" id="loginSubmitBtn" class="admin-auth-primary">Sign In</button>
+                            <button type="button" id="forgotPasswordBtn" class="admin-auth-secondary">Forgot Password</button>
                         </div>
-
-                        <p
-                            id="loginErrorMsg"
-                            style="
-                                color:#d90429;
-                                font-size:0.85rem;
-                                font-weight:600;
-                                text-align:center;
-                                margin:15px 0 0 0;
-                                display:none;
-                            "
-                        ></p>
-
+                        <p id="loginErrorMsg" class="admin-auth-error"></p>
                     </form>
-
                 </div>
-
             </div>
         `;
-
         const loginForm =
             document.getElementById('clinicLoginForm');
 
@@ -1399,6 +1382,18 @@ async function checkAuthenticationGuard() {
 
         const forgotPasswordBtn =
             document.getElementById('forgotPasswordBtn');
+
+        document.querySelectorAll('.admin-password-toggle[data-password-target]').forEach((button) => {
+            button.addEventListener('click', () => {
+                const input = document.getElementById(button.dataset.passwordTarget);
+                if (!input) return;
+                const showing = input.type === 'text';
+                input.type = showing ? 'password' : 'text';
+                button.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+                button.setAttribute('title', showing ? 'Show password' : 'Hide password');
+                button.classList.toggle('is-visible', !showing);
+            });
+        });
 
         if (forgotPasswordBtn) {
             forgotPasswordBtn.addEventListener('click', async () => {
@@ -1473,6 +1468,8 @@ async function checkAuthenticationGuard() {
    ========================================================= */
 
 function renderDashboardStructure() {
+
+    document.body.classList.remove('admin-auth-screen');
 
     target.innerHTML = `
 
@@ -2826,9 +2823,10 @@ function renderDashboardStructure() {
             @media(max-width:1050px){.campaign-layout{grid-template-columns:1fr}.campaign-metrics-grid{grid-template-columns:1fr 1fr}.contact-inquiry-controls{grid-template-columns:1fr}}
             .admin-mobile-nav-toggle,.admin-mobile-nav-overlay{display:none;}
             @media(max-width:850px){
-                .dash-outer-wrap{padding:74px 12px 30px;}
-                .dash-header-row{min-height:auto;padding:8px 0 16px;}
+                .dash-outer-wrap{padding:10px 12px 20px;}
+                .dash-header-row{min-height:auto;padding:4px 0 10px;margin-bottom:12px;}
                 .campaign-two-col{grid-template-columns:1fr;}
+                #logoutBtn{display:none!important;}
                 .admin-mobile-nav-toggle{
                     position:fixed;top:14px;left:14px;z-index:1002;
                     width:46px;height:46px;padding:0!important;margin:0!important;
