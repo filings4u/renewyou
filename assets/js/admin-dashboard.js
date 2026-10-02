@@ -2863,7 +2863,7 @@ function renderDashboardStructure() {
             }
             @media(max-width:560px){.campaign-metrics-grid{grid-template-columns:1fr 1fr}.campaign-send-options{grid-template-columns:1fr}.workspace-page-head{flex-direction:column}.workspace-page-head .workspace-btn{width:100%}.campaign-actions .workspace-btn{width:100%}}
             @media(max-width:850px){
-                .dash-outer-wrap{padding:14px 12px 24px!important;}
+                .dash-outer-wrap{padding:14px 12px 24px!important;min-height:calc(100svh - 76px)!important;}
                 .dash-header-row{margin-bottom:14px!important;padding:0 0 12px!important;}
                 .dash-header-actions #logoutBtn{display:none!important;}
                 .dash-metrics-grid{margin-bottom:16px!important;}

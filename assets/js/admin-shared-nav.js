@@ -11,7 +11,7 @@
     ['DOT Operations', [['🎲','Random Pool','index.html?page=randomPoolPage','randomPoolPage']]],
     ['Administration', [['⚙️','Settings','index.html?page=settingsPage','settingsPage']]]
   ];
-  const isDashboard=page==='index.html'||page==='admin-dashboard.html';
+  const isDashboard=page==='index.html'||page==='index.html';
   const isActive=(href,dataPage,label)=>{
     if(isDashboard && dataPage) return dashPage===dataPage;
     if(page==='campaign-preview.html'||page==='send-campaign.html') return label==='Recent Campaigns';

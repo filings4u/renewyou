@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded',()=>{
 const URL='https://eybsgwzpisgswmxcwjel.supabase.co',KEY='sb_publishable_R_kVcbPeNKKDIVQM8l2gZQ_6fUa4weF',db=window.supabase.createClient(URL,KEY);let page=1,rows=[],count=0,stats={},selected=new Set(),deleteId=null,searchTimer=null;const PAGE=50;
 const el=id=>document.getElementById(id),esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c])),fmt=v=>v?new Date(v).toLocaleDateString():'—';
-async function session(){const {data:{session}}=await db.auth.getSession();if(!session){location.href='admin-dashboard.html';throw new Error('Sign in required');}return session}
+async function session(){const {data:{session}}=await db.auth.getSession();if(!session){location.href='index.html';throw new Error('Sign in required');}return session}
 async function api(body){const s=await session(),r=await fetch(`${URL}/functions/v1/manage-subscribers`,{method:'POST',headers:{Authorization:`Bearer ${s.access_token}`,apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify(body)}),z=await r.json().catch(()=>({}));if(!r.ok)throw new Error(z.error||'Subscriber request failed');return z}
 function notice(msg,type='info'){window.AdminPopup?.toast(msg,type)}
 async function load(){el('rows').innerHTML='<tr><td colspan="8" class="empty">Loading subscribers...</td></tr>';const z=await api({action:'list',page,page_size:PAGE,search:el('search').value.trim(),filter:el('filter').value});rows=z.subscribers||[];count=Number(z.count||0);stats=z.stats||{};selected.clear();render()}

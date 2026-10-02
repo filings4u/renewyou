@@ -1,6 +1,7 @@
 :root{--admin-nav-w:272px;--admin-nav-purple:#3e0d5f;--admin-nav-purple-dark:#2b0b40;--admin-nav-line:#eadff0}
 body.admin-shared-nav-ready{padding-left:var(--admin-nav-w)!important;transition:padding-left .22s ease}
 body.admin-shared-nav-ready.admin-nav-collapsed{padding-left:0!important}
+body.admin-page.admin-shared-nav-ready:not(.admin-nav-collapsed){padding-left:var(--admin-nav-w)!important}
 .admin-shared-nav{position:fixed;inset:0 auto 0 0;width:var(--admin-nav-w);z-index:9998;background:linear-gradient(180deg,#2c0b43 0%,#3e0d5f 52%,#271035 100%);color:#fff;box-shadow:10px 0 30px rgba(35,12,48,.14);transform:translateX(0);transition:transform .22s ease;display:flex;flex-direction:column;overflow:hidden}
 .admin-shared-nav::-webkit-scrollbar,.admin-shared-nav-groups::-webkit-scrollbar{display:none}
 .admin-shared-nav.is-collapsed{transform:translateX(-102%)}
@@ -20,7 +21,8 @@ body.admin-nav-collapsed .admin-nav-show-btn{display:inline-flex!important;align
 .admin-nav-mobile-btn,.admin-shared-nav-overlay{display:none!important}
 .admin-mobile-topbar{display:none!important}
 @media(max-width:850px){
- body.admin-shared-nav-ready,body.admin-shared-nav-ready.admin-nav-collapsed{padding-left:0!important;padding-top:76px!important}
+ body.admin-shared-nav-ready,body.admin-shared-nav-ready.admin-nav-collapsed,body.admin-page.admin-shared-nav-ready:not(.admin-nav-collapsed){padding-left:0!important}
+ body.admin-shared-nav-ready:not(.admin-login-view),body.admin-shared-nav-ready.admin-nav-collapsed:not(.admin-login-view){padding-top:64px!important}
  .admin-mobile-topbar{position:fixed;top:0;left:0;right:0;z-index:10003;height:64px;display:flex!important;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;background:#fff;border-bottom:1px solid #eadff0;box-shadow:0 6px 20px rgba(35,12,48,.08)!important}
  .admin-mobile-brand{display:inline-flex!important;align-items:center!important;min-width:0;text-decoration:none!important}
  .admin-mobile-brand img{display:block;max-width:min(180px,60vw);height:34px;width:auto}

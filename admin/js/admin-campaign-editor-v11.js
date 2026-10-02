@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded',()=>{
+console.info('[ReNew You] Campaign Editor v11 loaded');
 const URL='https://eybsgwzpisgswmxcwjel.supabase.co',KEY='sb_publishable_R_kVcbPeNKKDIVQM8l2gZQ_6fUa4weF',db=window.supabase.createClient(URL,KEY);
 const LOGO='https://renewyouhealthwellness.com/images/logof.png';
 const $=id=>document.getElementById(id),esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
@@ -95,7 +96,7 @@ $('campaignForm')?.addEventListener('submit',e=>{e.preventDefault();save()});
 $('sendBtn')?.addEventListener('click',goSend);
 $('previewBtn')?.addEventListener('click',e=>{e.preventDefault();goPreview()});
 
-['keyup','mouseup','touchend','focus','input'].forEach(type=>editor.addEventListener(type,()=>{saveRange();syncToolbarState()}));
+['keyup','mouseup','pointerup','touchend','focus','input'].forEach(type=>editor.addEventListener(type,()=>{saveRange();syncToolbarState()}));
 editor.addEventListener('paste',()=>setTimeout(()=>{normalizeEditorWidth();saveRange()},0));
 document.addEventListener('selectionchange',()=>{
   if(toolbarInteracting)return;
@@ -126,12 +127,27 @@ $('format').addEventListener('focus',saveRange);$('format').addEventListener('mo
 $('font').addEventListener('focus',saveRange);$('font').addEventListener('mousedown',saveRange);$('font').addEventListener('change',()=>runCommand('fontName',$('font').value));
 
 const colorBtn=$('colorBtn'),colorMenu=$('colorMenu'),colorHex=$('colorHex'),applyHexColor=$('applyHexColor');
+let colorSelectionRange=null;
 function validHex(v){v=String(v||'').trim();if(!v.startsWith('#'))v='#'+v;return /^#[0-9a-fA-F]{6}$/.test(v)?v.toUpperCase():null}
+function captureColorSelection(){
+  const sel=window.getSelection();
+  if(sel&&sel.rangeCount){
+    const r=sel.getRangeAt(0);
+    if(rangeIsInsideEditor(r)&&!r.collapsed){
+      colorSelectionRange=r.cloneRange();
+      savedTextRange=r.cloneRange();
+      savedRange=r.cloneRange();
+      return true;
+    }
+  }
+  if(savedTextRange&&rangeIsInsideEditor(savedTextRange)&&!savedTextRange.collapsed){
+    colorSelectionRange=savedTextRange.cloneRange();
+    return true;
+  }
+  return false;
+}
 function openColorMenu(){
-  // Capture the actual editor selection BEFORE the color UI takes focus.
-  saveRange();
-  const r=selectedRange();
-  if(!r){note('Select text in the email first.','info');return}
+  if(!captureColorSelection()){note('Highlight the text you want to color first.','info');return}
   toolbarInteracting=true;
   colorMenu.hidden=false;
   colorBtn.setAttribute('aria-expanded','true');
@@ -139,22 +155,52 @@ function openColorMenu(){
 function closeColorMenu(){colorMenu.hidden=true;colorBtn.setAttribute('aria-expanded','false');toolbarInteracting=false}
 function chooseTextColor(color){
   const c=validHex(color);if(!c)return;
-  const r=savedTextRange&&savedTextRange.cloneRange();
-  if(!r||!rangeIsInsideEditor(r)||r.collapsed){note('Select text in the email first.','info');closeColorMenu();return}
-  editor.focus({preventScroll:true});
-  const sel=window.getSelection();sel.removeAllRanges();sel.addRange(r);
-  try{document.execCommand('styleWithCSS',false,true);document.execCommand('foreColor',false,c)}finally{try{document.execCommand('styleWithCSS',false,false)}catch{}}
-  $('colorSwatch').style.background=c;colorHex.value=c;
-  saveRange();syncToolbarState();closeColorMenu();
+  const r=colorSelectionRange&&colorSelectionRange.cloneRange();
+  if(!r||!rangeIsInsideEditor(r)||r.collapsed){note('Highlight the text you want to color first.','info');closeColorMenu();return}
+  try{
+    // Do not rely on the browser's live selection after the toolbar is clicked.
+    // Apply directly to the Range captured while the text was still highlighted.
+    const span=document.createElement('span');
+    span.style.setProperty('color',c,'important');
+    try{
+      r.surroundContents(span);
+    }catch(_){
+      const frag=r.extractContents();
+      span.appendChild(frag);
+      r.insertNode(span);
+    }
+
+    const applied=document.createRange();
+    applied.selectNodeContents(span);
+    const sel=window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(applied);
+    savedRange=applied.cloneRange();
+    savedTextRange=applied.cloneRange();
+    colorSelectionRange=applied.cloneRange();
+    $('colorSwatch').style.background=c;
+    colorHex.value=c;
+    editor.focus({preventScroll:true});
+  }catch(err){
+    console.error('Text color failed',err);
+    note('Unable to apply that color to the selected text.','error');
+  }
+  syncToolbarState();
+  closeColorMenu();
 }
-// Critical: prevent the color UI itself from stealing/collapsing the selected text.
-colorBtn.addEventListener('mousedown',e=>{e.preventDefault();saveRange()});
+// Save the selection BEFORE the Color button can receive focus.
+['pointerdown','mousedown'].forEach(type=>colorBtn.addEventListener(type,e=>{
+  captureColorSelection();
+  e.preventDefault();
+}));
 colorBtn.addEventListener('click',e=>{e.preventDefault();if(colorMenu.hidden)openColorMenu();else closeColorMenu()});
-colorMenu.addEventListener('mousedown',e=>{e.preventDefault();toolbarInteracting=true},true);
+// Palette buttons never take focus from the editor.
+colorMenu.addEventListener('pointerdown',e=>{if(e.target.closest('button'))e.preventDefault();toolbarInteracting=true},true);
+colorMenu.addEventListener('mousedown',e=>{if(e.target.closest('button'))e.preventDefault();toolbarInteracting=true},true);
 colorMenu.querySelectorAll('.color-choice').forEach(btn=>btn.addEventListener('click',e=>{e.preventDefault();chooseTextColor(btn.dataset.color)}));
-colorHex.addEventListener('mousedown',e=>{e.stopPropagation();toolbarInteracting=true});
-colorHex.addEventListener('click',e=>e.stopPropagation());
-colorHex.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();chooseTextColor(colorHex.value)}if(e.key==='Escape'){e.preventDefault();closeColorMenu()}});
+colorHex.addEventListener('focus',()=>{toolbarInteracting=true});
+colorHex.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();chooseTextColor(colorHex.value)}else if(e.key==='Escape'){e.preventDefault();closeColorMenu()}});
+applyHexColor.addEventListener('pointerdown',e=>e.preventDefault());
 applyHexColor.addEventListener('mousedown',e=>e.preventDefault());
 applyHexColor.addEventListener('click',e=>{e.preventDefault();const c=validHex(colorHex.value);if(!c){note('Enter a 6-digit hex color such as #8A349B.','error');return}chooseTextColor(c)});
 document.addEventListener('mousedown',e=>{if(!colorMenu.hidden&&!e.target.closest('.text-color-control'))closeColorMenu()});

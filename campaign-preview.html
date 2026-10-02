@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" type="image/png" href="images/fav.png">
+<title>Campaign Preview | ReNew You</title>
+<meta name="robots" content="noindex,nofollow">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<link rel="stylesheet" href="css/admin-shared-nav.css">
+<link rel="stylesheet" href="css/admin-base.css">
+<link rel="stylesheet" href="css/campaign-preview.css">
+</head>
+<body>
+<div class="preview-page">
+  <header class="preview-head">
+    <div class="preview-title">
+      <div class="kicker">Email Preview</div>
+      <h1 id="previewTitle">Campaign Preview</h1>
+    </div>
+    <div class="preview-actions">
+      <a id="backToEditor" href="campaign-editor.html">← Back to Editor</a>
+      <button id="desktopBtn" class="active" type="button">Desktop</button>
+      <button id="mobileBtn" type="button">Mobile</button>
+    </div>
+  </header>
+  <main id="previewStage" class="preview-stage desktop">
+    <iframe id="previewFrame" title="Campaign email preview"></iframe>
+  </main>
+</div>
+<script src="js/admin-popups.js"></script><script src="js/admin-campaign-preview.js"></script>
+<script src="js/admin-shared-nav.js"></script>
+</body>
+</html>

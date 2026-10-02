@@ -27,11 +27,11 @@ document.addEventListener('DOMContentLoaded',()=>{
 
 async function load(){
     const {data:{session}}=await db.auth.getSession();
-    if(!session){location.href='admin-dashboard.html';return;}
+    if(!session){location.href='index.html';return;}
     if(!campaignId){
       window.AdminPopup?.toast('Campaign id is missing.','error'); $('previewStage').innerHTML=''; return;
     }
-    $('backToEditor').href=`admin-campaign-editor.html?id=${encodeURIComponent(campaignId)}`;
+    $('backToEditor').href=`campaign-editor.html?id=${encodeURIComponent(campaignId)}`;
     const {data,error}=await db.from('email_campaigns').select('id,name,subject,html_content').eq('id',campaignId).single();
     if(error||!data){
       window.AdminPopup?.toast(error?.message||'Campaign not found.','error'); $('previewStage').innerHTML=''; return;
