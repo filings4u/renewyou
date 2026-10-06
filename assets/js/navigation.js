@@ -56,10 +56,10 @@ function renderNavigation() {
 
                     <!-- Resources Dropdown -->
                     <li class="nav-item-dropdown resource-nav-dropdown" style="position: relative; display: inline-block; padding-bottom: 15px; margin-bottom: -15px;">
-                        <a href="resources.html" class="nav-link resources-nav-trigger" data-page="resources" style="color: var(--purple-primary); text-decoration: none; font-weight: 600; font-size: 1rem; transition: color 0.3s ease; display: flex; align-items: center; gap: 4px;">
+                        <button type="button" class="nav-link resources-nav-trigger" aria-haspopup="true" aria-expanded="false" style="color: var(--purple-primary); background: transparent; border: 0; padding: 0; font-family: inherit; font-weight: 600; font-size: 1rem; transition: color 0.3s ease; display: flex; align-items: center; gap: 4px; cursor: pointer;">
                             Resources
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-                        </a>
+                        </button>
                         <div class="dropdown-menu-wrapper resource-dropdown-wrapper" style="position: absolute; top: 100%; left: 0; padding-top: 10px; display: none; z-index: 1000;">
                             <ul class="dropdown-menu-list resource-dropdown-list" style="background: #ffffff; min-width: 250px; box-shadow: 0 10px 30px rgba(62, 13, 95, 0.08); border-radius: 12px; padding: 10px 0; margin: 0; list-style: none; border: 1px solid rgba(138, 52, 159, 0.06);">
                                 <li><a href="about.html" class="resource-link" data-page="about" style="color:#333;padding:12px 20px;text-decoration:none;display:block;font-size:.95rem;font-weight:500;">About ReNew You</a></li>
@@ -190,6 +190,27 @@ function initMobileMenu() {
             navMenu.classList.remove('show-mobile-dropdown');
         }
     });
+
+    const resourceTrigger = document.querySelector('.resources-nav-trigger');
+    const resourceWrapper = document.querySelector('.resource-dropdown-wrapper');
+    if (resourceTrigger && resourceWrapper) {
+        resourceTrigger.addEventListener('click', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            const open = resourceWrapper.style.display === 'block';
+            resourceWrapper.style.display = open ? 'none' : 'block';
+            resourceTrigger.setAttribute('aria-expanded', open ? 'false' : 'true');
+        });
+
+        document.addEventListener('click', (event) => {
+            if (!resourceTrigger.contains(event.target) && !resourceWrapper.contains(event.target)) {
+                if (window.matchMedia('(max-width: 991px)').matches) {
+                    resourceWrapper.style.display = 'none';
+                    resourceTrigger.setAttribute('aria-expanded', 'false');
+                }
+            }
+        });
+    }
 }
 
 /**
@@ -198,7 +219,7 @@ function initMobileMenu() {
 function highlightActiveLink() {
     const path = window.location.pathname;
     const page = path.split("/").pop().replace(".html", "") || "index";
-    const activeLink = document.querySelector(`.nav-link[data-page="${page}"], .resource-link[data-page="${page}"]`);
+    const activeLink = document.querySelector(`a.nav-link[data-page="${page}"], .resource-link[data-page="${page}"]`);
     if (activeLink) {
         activeLink.style.color = "var(--purple-accent)";
     }
