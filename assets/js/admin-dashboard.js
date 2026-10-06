@@ -3736,10 +3736,10 @@ function renderDashboardStructure() {
 
                                 <button
                                     type="button"
+                                    id="previewBlogPostBtn"
                                     class="blog-admin-button secondary"
-                                    onclick="window.open('/blog.html','_blank')"
                                 >
-                                    ↗ View Blog
+                                    👁 Preview Post
                                 </button>
 
                                 <button
@@ -12714,6 +12714,143 @@ function slugifyBlogTitle(
 }
 
 
+
+function escapeBlogPreviewHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, character => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+    })[character]);
+}
+
+function formatBlogPreviewContent(value) {
+    const text = String(value || '').trim();
+    if (!text) {
+        return '<p style="color:#777;font-style:italic;">Start writing the article to preview it here.</p>';
+    }
+
+    return text
+        .split(/\n\s*\n+/)
+        .map(block => {
+            const clean = block.trim();
+            if (!clean) return '';
+            if (/^##\s+/.test(clean)) {
+                return `<h2>${escapeBlogPreviewHtml(clean.replace(/^##\s+/, ''))}</h2>`;
+            }
+            if (/^###\s+/.test(clean)) {
+                return `<h3>${escapeBlogPreviewHtml(clean.replace(/^###\s+/, ''))}</h3>`;
+            }
+            return `<p>${escapeBlogPreviewHtml(clean).replace(/\n/g, '<br>')}</p>`;
+        })
+        .join('');
+}
+
+function getCurrentBlogPreviewImage() {
+    const file = document.getElementById('blogImageFile')?.files?.[0];
+    if (file) {
+        try {
+            if (window.__renewYouBlogPreviewObjectUrl) {
+                URL.revokeObjectURL(window.__renewYouBlogPreviewObjectUrl);
+            }
+            window.__renewYouBlogPreviewObjectUrl = URL.createObjectURL(file);
+            return window.__renewYouBlogPreviewObjectUrl;
+        } catch (_) {}
+    }
+
+    return String(document.getElementById('blogImageUrl')?.value || '').trim();
+}
+
+function ensureBlogPreviewModal() {
+    let modal = document.getElementById('blogPostPreviewModal');
+    if (modal) return modal;
+
+    modal = document.createElement('div');
+    modal.id = 'blogPostPreviewModal';
+    modal.innerHTML = `
+        <div class="blog-post-preview-overlay" data-blog-preview-close></div>
+        <div class="blog-post-preview-dialog" role="dialog" aria-modal="true" aria-label="Blog post preview">
+            <div class="blog-post-preview-toolbar">
+                <div>
+                    <strong>Blog Post Preview</strong>
+                    <span>This is how the article will look before you publish it.</span>
+                </div>
+                <div class="blog-post-preview-actions">
+                    <button type="button" class="blog-admin-button secondary" id="blogPreviewRefreshBtn">Refresh Preview</button>
+                    <button type="button" class="blog-admin-button secondary" data-blog-preview-close>Close</button>
+                </div>
+            </div>
+            <div class="blog-post-preview-stage">
+                <iframe id="blogPostPreviewFrame" title="Blog post preview"></iframe>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    if (!document.getElementById('blogPostPreviewStyles')) {
+        const style = document.createElement('style');
+        style.id = 'blogPostPreviewStyles';
+        style.textContent = `
+            #blogPostPreviewModal{position:fixed;inset:0;z-index:100000;display:flex;align-items:center;justify-content:center;padding:22px}
+            #blogPostPreviewModal[hidden]{display:none!important}
+            .blog-post-preview-overlay{position:absolute;inset:0;background:rgba(24,8,35,.72);backdrop-filter:blur(3px)}
+            .blog-post-preview-dialog{position:relative;z-index:1;width:min(1180px,96vw);height:min(900px,94vh);background:#fff;border-radius:18px;box-shadow:0 28px 80px rgba(24,8,35,.3);overflow:hidden;display:flex;flex-direction:column}
+            .blog-post-preview-toolbar{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px 18px;border-bottom:1px solid #eadff0;background:#fff}
+            .blog-post-preview-toolbar strong{display:block;color:#43005f;font-size:1rem}
+            .blog-post-preview-toolbar span{display:block;color:#777;font-size:.78rem;margin-top:2px}
+            .blog-post-preview-actions{display:flex;gap:8px;flex-wrap:wrap}
+            .blog-post-preview-stage{flex:1;min-height:0;background:#f4f1f6;padding:14px}
+            #blogPostPreviewFrame{width:100%;height:100%;border:0;border-radius:12px;background:#fff}
+            @media(max-width:700px){#blogPostPreviewModal{padding:8px}.blog-post-preview-dialog{width:100%;height:97vh}.blog-post-preview-toolbar{align-items:flex-start;flex-direction:column}.blog-post-preview-stage{padding:6px}}
+        `;
+        document.head.appendChild(style);
+    }
+
+    modal.querySelectorAll('[data-blog-preview-close]').forEach(button => {
+        button.addEventListener('click', () => {
+            modal.hidden = true;
+        });
+    });
+
+    document.getElementById('blogPreviewRefreshBtn')?.addEventListener('click', renderCurrentBlogPreview);
+
+    return modal;
+}
+
+function renderCurrentBlogPreview() {
+    const title = String(document.getElementById('blogTitle')?.value || 'Untitled Blog Post').trim() || 'Untitled Blog Post';
+    const category = String(document.getElementById('blogCategory')?.value || 'ReNew You Health & Wellness').trim() || 'ReNew You Health & Wellness';
+    const author = String(document.getElementById('blogAuthor')?.value || 'ReNew You Health & Wellness').trim() || 'ReNew You Health & Wellness';
+    const excerpt = String(document.getElementById('blogExcerpt')?.value || '').trim();
+    const content = String(document.getElementById('blogContent')?.value || '').trim();
+    const image = getCurrentBlogPreviewImage();
+    const today = new Date().toLocaleDateString(undefined, {year:'numeric',month:'long',day:'numeric'});
+
+    const frame = document.getElementById('blogPostPreviewFrame');
+    if (!frame) return;
+
+    const imageMarkup = image ? `<img class="article-image" src="${escapeBlogPreviewHtml(image)}" alt="${escapeBlogPreviewHtml(title)}">` : '';
+    const excerptMarkup = excerpt ? `<p class="article-excerpt">${escapeBlogPreviewHtml(excerpt)}</p>` : '';
+
+    frame.srcdoc = `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${escapeBlogPreviewHtml(title)}</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#faf9fb;color:#32283a;font-family:Arial,Helvetica,sans-serif}.site-header{background:#fff;border-bottom:1px solid #eadff0;padding:18px 24px;position:sticky;top:0}.header-inner{max-width:1080px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:18px}.brand{font-weight:900;color:#5b1678;font-size:21px}.brand span{color:#6eaa28}.nav{color:#665a6f;font-size:14px}.article-section{padding:46px 20px 70px}.container{max-width:980px;margin:0 auto}.back{display:inline-block;margin-bottom:22px;color:#6c2384;font-weight:700;text-decoration:none}.article{background:#fff;border:1px solid #eadff0;border-radius:22px;overflow:hidden;box-shadow:0 16px 48px rgba(58,13,78,.08)}.article-image{display:block;width:100%;max-height:520px;object-fit:cover}.article-body{padding:42px 50px}.category{display:inline-block;color:#6eaa28;font-size:12px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;margin-bottom:14px}.article h1{font-size:clamp(34px,5vw,58px);line-height:1.05;color:#4a0d64;margin:0 0 17px}.meta{font-size:14px;color:#84788c;margin-bottom:26px}.article-excerpt{font-size:20px;line-height:1.65;color:#5a4c63;border-left:4px solid #87ba3d;padding-left:18px;margin:0 0 32px}.content{font-size:17px;line-height:1.8;color:#443849}.content p{margin:0 0 22px}.content h2{font-size:29px;color:#4a0d64;margin:34px 0 13px}.content h3{font-size:23px;color:#5b1678;margin:28px 0 10px}.preview-note{margin-top:28px;padding:14px 16px;background:#f7f1f9;border-radius:10px;color:#775d80;font-size:13px}@media(max-width:700px){.site-header{padding:14px}.nav{display:none}.article-section{padding:20px 10px 45px}.article-body{padding:25px 20px}.article h1{font-size:36px}.article-excerpt{font-size:18px}}
+</style></head><body>
+<header class="site-header"><div class="header-inner"><div class="brand">ReNew You <span>Health & Wellness</span></div><div class="nav">Home &nbsp; Services &nbsp; Blog &nbsp; Contact</div></div></header>
+<section class="article-section"><div class="container"><span class="back">← Back to Blog</span><article class="article">${imageMarkup}<div class="article-body"><span class="category">${escapeBlogPreviewHtml(category)}</span><h1>${escapeBlogPreviewHtml(title)}</h1><div class="meta">By ${escapeBlogPreviewHtml(author)} · ${escapeBlogPreviewHtml(today)}</div>${excerptMarkup}<div class="content">${formatBlogPreviewContent(content)}</div><div class="preview-note">Preview only — this post has not been published by opening this viewer.</div></div></article></div></section>
+</body></html>`;
+}
+
+function openCurrentBlogPreview() {
+    const modal = ensureBlogPreviewModal();
+    renderCurrentBlogPreview();
+    modal.hidden = false;
+}
+
 function resetBlogPostForm() {
 
     editingBlogPostId = null;
@@ -13659,6 +13796,8 @@ async function uploadBlogFeaturedImage(
 
 
 function bindBlogEvents() {
+
+    document.getElementById('previewBlogPostBtn')?.addEventListener('click', openCurrentBlogPreview);
 
     const form =
         document.getElementById(
