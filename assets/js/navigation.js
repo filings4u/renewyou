@@ -56,7 +56,7 @@ function renderNavigation() {
 
                     <!-- Resources Dropdown -->
                     <li class="nav-item-dropdown resource-nav-dropdown" style="position: relative; display: inline-block; padding-bottom: 15px; margin-bottom: -15px;">
-                        <a class="nav-link resources-nav-trigger" data-page="resources" style="color: var(--purple-primary); text-decoration: none; font-weight: 600; font-size: 1rem; transition: color 0.3s ease; display: flex; align-items: center; gap: 4px;">
+                        <a href="resources.html" class="nav-link resources-nav-trigger" data-page="resources" style="color: var(--purple-primary); text-decoration: none; font-weight: 600; font-size: 1rem; transition: color 0.3s ease; display: flex; align-items: center; gap: 4px;">
                             Resources
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
                         </a>
@@ -169,6 +169,14 @@ function renderNavigation() {
         </style>
     `;
     initMobileMenu();
+
+    const resourcesTrigger = document.querySelector('.resources-nav-trigger');
+    if (resourcesTrigger) {
+        resourcesTrigger.addEventListener('click', (event) => {
+            event.preventDefault();
+        });
+    }
+
     highlightActiveLink();
 }
 
