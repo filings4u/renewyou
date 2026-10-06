@@ -144,7 +144,7 @@
                 <div class="ry-blog-head-actions">
                     <button type="button" class="ry-btn ry-btn-ghost" id="ryNewPostBtn">+ New Post</button>
                     <button type="button" class="ry-btn ry-btn-ghost" id="ryOpenPostsBtn">View All Posts</button>
-                    <button type="button" class="ry-btn ry-btn-ghost" onclick="window.open('blog.html','_blank')">↗ Public Blog</button>
+                    <button type="button" class="ry-btn ry-btn-ghost" onclick="window.open('/blog.html','_blank')">↗ Public Blog</button>
                 </div>
             </div>
 
@@ -811,7 +811,7 @@
         }
         if (action === 'view') {
             if (String(post.status).toLowerCase() === 'published') {
-                window.open(`blog.html?slug=${encodeURIComponent(post.slug)}`, '_blank');
+                window.open(`/blog.html?slug=${encodeURIComponent(post.slug)}`, '_blank');
             } else {
                 openPreview(post);
             }

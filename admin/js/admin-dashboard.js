@@ -3737,7 +3737,7 @@ function renderDashboardStructure() {
                                 <button
                                     type="button"
                                     class="blog-admin-button secondary"
-                                    onclick="window.open('blog.html','_blank')"
+                                    onclick="window.open('/blog.html','_blank')"
                                 >
                                     ↗ View Blog
                                 </button>
