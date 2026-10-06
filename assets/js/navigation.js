@@ -50,13 +50,26 @@ function renderNavigation() {
                 <!-- Navigation Links List Menu -->
                 <ul class="nav-menu" id="navMenu" style="display: flex; align-items: center; gap: 25px; list-style: none; margin: 0; padding: 0; box-sizing: border-box;">
                     <li><a href="index.html" class="nav-link" data-page="index" style="color: var(--purple-primary); text-decoration: none; font-weight: 600; font-size: 1rem; transition: color 0.3s ease;">Home</a></li>
-                    <li><a href="about.html" class="nav-link" data-page="about" style="color: var(--purple-primary); text-decoration: none; font-weight: 600; font-size: 1rem; transition: color 0.3s ease;">About</a></li>
                     <li><a href="services.html" class="nav-link" data-page="services" style="color: var(--purple-primary); text-decoration: none; font-weight: 600; font-size: 1rem; transition: color 0.3s ease;">Services</a></li>
-
                     <li><a href="insurance.html" class="nav-link" data-page="insurance" style="color: var(--purple-primary); text-decoration: none; font-weight: 600; font-size: 1rem; transition: color 0.3s ease;">Insurance</a></li>
                     <li><a href="patients.html" class="nav-link" data-page="patients" style="color: var(--purple-primary); text-decoration: none; font-weight: 600; font-size: 1rem; transition: color 0.3s ease;">Patients</a></li>
-                    <li><a href="payment-plans.html" class="nav-link" data-page="patients" style="color: var(--purple-primary); text-decoration: none; font-weight: 600; font-size: 1rem; transition: color 0.3s ease;">Payment Plans</a></li>
-                    <li><a href="contact.html" class="nav-link" data-page="contact" style="color: var(--purple-primary); text-decoration: none; font-weight: 600; font-size: 1rem; transition: color 0.3s ease;">Contact</a></li>
+
+                    <!-- Resources Dropdown -->
+                    <li class="nav-item-dropdown resource-nav-dropdown" style="position: relative; display: inline-block; padding-bottom: 15px; margin-bottom: -15px;">
+                        <a href="resources.html" class="nav-link resources-nav-trigger" data-page="resources" style="color: var(--purple-primary); text-decoration: none; font-weight: 600; font-size: 1rem; transition: color 0.3s ease; display: flex; align-items: center; gap: 4px;">
+                            Resources
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                        </a>
+                        <div class="dropdown-menu-wrapper resource-dropdown-wrapper" style="position: absolute; top: 100%; left: 0; padding-top: 10px; display: none; z-index: 1000;">
+                            <ul class="dropdown-menu-list resource-dropdown-list" style="background: #ffffff; min-width: 250px; box-shadow: 0 10px 30px rgba(62, 13, 95, 0.08); border-radius: 12px; padding: 10px 0; margin: 0; list-style: none; border: 1px solid rgba(138, 52, 159, 0.06);">
+                                <li><a href="about.html" class="resource-link" data-page="about" style="color:#333;padding:12px 20px;text-decoration:none;display:block;font-size:.95rem;font-weight:500;">About ReNew You</a></li>
+                                <li><a href="blog.html" class="resource-link" data-page="blog" style="color:#333;padding:12px 20px;text-decoration:none;display:block;font-size:.95rem;font-weight:500;">Health & Wellness Blog</a></li>
+                                <li><a href="contact.html" class="resource-link" data-page="contact" style="color:#333;padding:12px 20px;text-decoration:none;display:block;font-size:.95rem;font-weight:500;">Contact Us</a></li>
+                                <li><a href="payment-plans.html" class="resource-link" data-page="payment-plans" style="color:#333;padding:12px 20px;text-decoration:none;display:block;font-size:.95rem;font-weight:500;">Payment Plans</a></li>
+                                <li><a href="medical-records.html" class="resource-link" data-page="medical-records" style="color:#333;padding:12px 20px;text-decoration:none;display:block;font-size:.95rem;font-weight:500;">Medical Records</a></li>
+                            </ul>
+                        </div>
+                    </li>
 
                         <!-- Professional DOT Dropdown Element with Continuous Hover Zone -->
                     <li class="nav-item-dropdown" style="position: relative; display: inline-block; padding-bottom: 15px; margin-bottom: -15px;">
@@ -133,6 +146,7 @@ function renderNavigation() {
                     /* Enhanced hover zones with zero dead structural air space gaps */
                     .nav-item-dropdown:hover .dropdown-menu-wrapper { display: block !important; }
                     .dropdown-menu-list li a:hover { background-color: rgba(138, 52, 159, 0.03); color: var(--purple-primary) !important; }
+                    .resource-dropdown-list li a:hover { padding-left: 24px !important; }
                 </style>
             </div>
         </header>
@@ -184,9 +198,14 @@ function initMobileMenu() {
 function highlightActiveLink() {
     const path = window.location.pathname;
     const page = path.split("/").pop().replace(".html", "") || "index";
-    const activeLink = document.querySelector(`.nav-link[data-page="${page}"]`);
+    const activeLink = document.querySelector(`.nav-link[data-page="${page}"], .resource-link[data-page="${page}"]`);
     if (activeLink) {
         activeLink.style.color = "var(--purple-accent)";
+    }
+    const resourcePages = new Set(["about","blog","contact","payment-plans","medical-records"]);
+    if (resourcePages.has(page)) {
+        const resourcesTrigger = document.querySelector(".resources-nav-trigger");
+        if (resourcesTrigger) resourcesTrigger.style.color = "var(--purple-accent)";
     }
 }
 
