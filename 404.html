@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,follow">
+  <meta name="theme-color" content="#5b247a">
+  <title>Page Not Found | ReNew You Health & Wellness</title>
+  <meta name="description" content="The page you requested could not be found. Return to ReNew You Health & Wellness or explore our services and resources.">
+  <link rel="icon" type="image/png" href="images/fav.png">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <style>
+    .error-page {
+      min-height: 68vh;
+      display: grid;
+      place-items: center;
+      padding: 72px 20px 84px;
+      background:
+        radial-gradient(circle at 12% 20%, rgba(91,36,122,.08), transparent 30%),
+        radial-gradient(circle at 88% 80%, rgba(72,139,15,.08), transparent 32%),
+        #fbfafc;
+    }
+    .error-card {
+      width: min(860px, 100%);
+      text-align: center;
+      background: #fff;
+      border: 1px solid rgba(91,36,122,.12);
+      border-radius: 28px;
+      box-shadow: 0 20px 60px rgba(58,24,79,.08);
+      padding: 64px 42px;
+    }
+    .error-code {
+      margin: 0 0 8px;
+      color: #5b247a;
+      font-size: clamp(5.5rem, 14vw, 9rem);
+      line-height: .85;
+      font-weight: 900;
+      letter-spacing: -.06em;
+    }
+    .error-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 18px;
+      color: #4b890f;
+      font-size: .78rem;
+      font-weight: 800;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+    }
+    .error-kicker::before,
+    .error-kicker::after {
+      content: "";
+      width: 34px;
+      height: 2px;
+      background: #4b890f;
+    }
+    .error-card h1 {
+      margin: 0 auto 16px;
+      max-width: 680px;
+      color: #4c126b;
+      font-size: clamp(2rem, 4vw, 3.45rem);
+      line-height: 1.05;
+    }
+    .error-card p {
+      margin: 0 auto;
+      max-width: 650px;
+      color: #5e5964;
+      font-size: 1.05rem;
+      line-height: 1.75;
+    }
+    .error-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 30px;
+    }
+    .error-actions a {
+      min-width: 160px;
+      padding: 13px 20px;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: 800;
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .error-actions a:hover { transform: translateY(-2px); }
+    .error-home {
+      color: #fff;
+      background: #4b890f;
+      box-shadow: 0 10px 24px rgba(72,139,15,.18);
+    }
+    .error-secondary {
+      color: #5b247a;
+      background: #fff;
+      border: 1px solid rgba(91,36,122,.25);
+    }
+    .error-links {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 34px;
+      padding-top: 28px;
+      border-top: 1px solid #eee7f2;
+    }
+    .error-links a {
+      color: #5b247a;
+      text-decoration: none;
+      font-weight: 700;
+    }
+    .error-links a:hover { text-decoration: underline; }
+    @media (max-width: 680px) {
+      .error-page { padding: 44px 14px 60px; }
+      .error-card { padding: 44px 20px; border-radius: 20px; }
+      .error-actions { flex-direction: column; }
+      .error-actions a { width: 100%; }
+      .error-links { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div id="navigation-target"></div>
+
+  <main class="error-page" id="main">
+    <section class="error-card" aria-labelledby="error-title">
+      <div class="error-kicker">Page not found</div>
+      <div class="error-code" aria-hidden="true">404</div>
+      <h1 id="error-title">We couldn't find the page you're looking for.</h1>
+      <p>
+        The link may be outdated, the page may have moved, or the address may have been entered incorrectly.
+        You can return home or continue exploring ReNew You Health & Wellness.
+      </p>
+
+      <div class="error-actions">
+        <a class="error-home" href="/">Return Home</a>
+        <a class="error-secondary" href="services.html">View Services</a>
+        <a class="error-secondary" href="contact.html">Contact Us</a>
+      </div>
+
+      <div class="error-links" aria-label="Helpful links">
+        <a href="about.html">About ReNew You</a>
+        <a href="blog.html">Health & Wellness Blog</a>
+        <a href="patients.html">Patient Information</a>
+      </div>
+    </section>
+  </main>
+
+  <div id="footer-target"></div>
+
+  <script src="assets/js/navigation.js"></script>
+  <script src="assets/js/footer.js"></script>
+</body>
+</html>

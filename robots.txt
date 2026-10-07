@@ -1,5 +1,16 @@
 User-agent: *
 Allow: /
-Disallow: /admin-dashboard.html
+
+Disallow: /admin/
+Disallow: /admin-
+Disallow: /campaign-editor.html
+Disallow: /campaign-preview.html
+Disallow: /campaigns.html
+Disallow: /email-status.html
+Disallow: /send-campaign.html
+Disallow: /subscribers.html
+Disallow: /forgot-password.html
+Disallow: /reset-password.html
+Disallow: /unsubscribe.html
 
 Sitemap: https://renewyouhealthwellness.com/sitemap.xml
